@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ub3 Pay — Break free from custodial banking</title>
+<meta name="description" content="One wallet for 15 chains. Instant Naira on/off-ramp. Verified once, move freely." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav__brand">
+    <img src="assets/ub3-logo.png" alt="Ub3 Pay" class="nav__logo" />
+  </div>
+  <a href="#waitlist" class="nav__cta">Get early access</a>
+</nav>
+
+<header class="hero">
+  <div class="hero__mesh" aria-hidden="true"></div>
+  <div class="hero__content">
+    <p class="eyebrow">15 chains · one wallet · instant Naira</p>
+    <h1 class="hero__title">
+      Your assets shouldn't need<br />permission to move.
+    </h1>
+    <p class="hero__subtitle">
+      Verify once. Hold Bitcoin, Ethereum, Solana, Tron and eleven more chains
+      in one place, and swap to Naira in seconds — no exchange queue,
+      no custodial lock-in.
+    </p>
+    <div class="hero__actions">
+      <a href="#waitlist" class="btn btn--primary">Get early access</a>
+      <a href="#how" class="btn btn--ghost">See how it works</a>
+    </div>
+  </div>
+</header>
+
+<section class="ticker" aria-label="Supported assets and live indicative rates">
+  <div class="ticker__track" id="tickerTrack"></div>
+</section>
+
+<section class="chainbreak" id="chainbreak" aria-hidden="true">
+  <svg class="chainbreak__svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+    <g id="chainGroup"></g>
+  </svg>
+  <p class="chainbreak__caption">The chain breaks the moment you're verified.</p>
+</section>
+
+<section class="features">
+  <div class="section__head">
+    <p class="eyebrow">What you get</p>
+    <h2>Built for people who hold across chains</h2>
+  </div>
+  <div class="features__grid">
+
+    <article class="card">
+      <div class="card__icon" data-icon="wallet"></div>
+      <h3>One wallet, fifteen chains</h3>
+      <p>Bitcoin, Ethereum, Solana, Tron, TON, Sui, Cardano, XRP and more —
+      tracked and sent from a single balance screen, not fifteen apps.</p>
+    </article>
+
+    <article class="card">
+      <div class="card__icon" data-icon="swap"></div>
+      <h3>Naira in, crypto out. Or back.</h3>
+      <p>Swap any supported asset to Naira or fund straight from your bank —
+      the rate is shown before you confirm, every time.</p>
+    </article>
+
+    <article class="card">
+      <div class="card__icon" data-icon="shield"></div>
+      <h3>Verified once, not every time</h3>
+      <p>BVN and ID check happens once. After that, sending, swapping and
+      withdrawing just work — no re-verification loops.</p>
+    </article>
+
+    <article class="card">
+      <div class="card__icon" data-icon="lock"></div>
+      <h3>Keys secured, not stored in the clear</h3>
+      <p>Signing runs through MPC-backed infrastructure — no single point
+      of failure holds a full private key, including us.</p>
+    </article>
+
+  </div>
+</section>
+
+<section class="how" id="how">
+  <div class="section__head">
+    <p class="eyebrow">Three steps</p>
+    <h2>From download to your first swap</h2>
+  </div>
+  <ol class="how__steps">
+    <li>
+      <span class="how__num">01</span>
+      <div>
+        <h3>Verify</h3>
+        <p>BVN, a government ID, and a quick selfie check. Most people finish in under three minutes.</p>
+      </div>
+    </li>
+    <li>
+      <span class="how__num">02</span>
+      <div>
+        <h3>Fund</h3>
+        <p>Deposit crypto directly, or transfer Naira into your dedicated virtual account.</p>
+      </div>
+    </li>
+    <li>
+      <span class="how__num">03</span>
+      <div>
+        <h3>Move</h3>
+        <p>Swap, send, or withdraw — across any of the fifteen supported chains.</p>
+      </div>
+    </li>
+  </ol>
+</section>
+
+<section class="waitlist" id="waitlist">
+  <div class="waitlist__inner">
+    <h2>Be first in when we open access.</h2>
+    <p>No spam — one email when your invite is ready.</p>
+    <form class="waitlist__form" id="waitlistForm">
+      <input type="email" required placeholder="you@example.com" aria-label="Email address" />
+      <button type="submit" class="btn btn--primary">Join the waitlist</button>
+    </form>
+    <p class="waitlist__note" id="waitlistNote" role="status"></p>
+  </div>
+</section>
+
+<footer class="footer">
+  <img src="assets/ub3-logo.png" alt="Ub3 Pay" class="footer__logo" />
+  <p class="footer__disclaimer">
+    Ub3 Pay is not yet available to the public. Identity verification,
+    Naira account issuance, and crypto custody are provided in partnership
+    with licensed third parties.
+  </p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
