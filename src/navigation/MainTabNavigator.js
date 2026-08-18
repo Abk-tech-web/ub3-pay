@@ -16,7 +16,9 @@ import ProfileScreen from '../screens/profile/ProfileScreen';
 import SecuritySettingsScreen from '../screens/profile/SecuritySettingsScreen';
 import PinSetupScreen from '../screens/profile/PinSetupScreen';
 import ReceiveScreen from '../screens/wallet/ReceiveScreen';
+import ReceiveSelectScreen from '../screens/wallet/ReceiveSelectScreen';
 import SendScreen from '../screens/wallet/SendScreen';
+import SendSelectScreen from '../screens/wallet/SendSelectScreen';
 import TransactionHistoryScreen from '../screens/wallet/TransactionHistoryScreen';
 import AddCustomTokenScreen from '../screens/wallet/AddCustomTokenScreen';
 import BuyCryptoScreen from '../screens/buysell/BuyCryptoScreen';
@@ -37,8 +39,10 @@ function HomeStackScreen() {
     <HomeStack.Navigator screenOptions={{ headerShown: false }}>
       <HomeStack.Screen name="Portfolio" component={PortfolioScreen} />
       <HomeStack.Screen name="AssetDetail" component={AssetDetailScreen} />
-      <HomeStack.Screen name="Receive" component={ReceiveScreen} />
-      <HomeStack.Screen name="Send" component={SendScreen} />
+      <HomeStack.Screen name="Receive" component={ReceiveSelectScreen} />
+      <HomeStack.Screen name="ReceiveAddress" component={ReceiveScreen} />
+      <HomeStack.Screen name="Send" component={SendSelectScreen} />
+      <HomeStack.Screen name="SendAmount" component={SendScreen} />
       <HomeStack.Screen name="TransactionHistory" component={TransactionHistoryScreen} />
       <HomeStack.Screen name="AddCustomToken" component={AddCustomTokenScreen} />
       <HomeStack.Screen name="BuyCrypto" component={BuyCryptoScreen} />

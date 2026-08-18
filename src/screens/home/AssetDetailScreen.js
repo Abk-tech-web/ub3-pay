@@ -18,7 +18,7 @@ export default function AssetDetailScreen({ route, navigation }) {
         <Text style={styles.usd}>{formatUsd(asset?.usdValue)}</Text>
 
         <View style={styles.row}>
-          <Pressable style={styles.actionBtn} onPress={() => navigation.navigate('Receive', { chainId: asset?.chainId, symbol: asset?.symbol })}>
+          <Pressable style={styles.actionBtn} onPress={() => navigation.navigate('ReceiveAddress', { chainId: asset?.chainId, symbol: asset?.symbol })}>
             <Text style={styles.actionLabel}>Receive</Text>
           </Pressable>
           <Pressable style={styles.actionBtn} onPress={() => navigation.navigate('Send', { chainId: asset?.chainId, symbol: asset?.symbol })}>

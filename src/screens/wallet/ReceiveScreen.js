@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Share } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as Clipboard from 'expo-clipboard';
 import QRCode from 'react-native-qrcode-svg';
 import { colors, spacing, radii } from '../../config/theme';
 import { useAuth } from '../../context/AuthContext';
@@ -12,6 +13,7 @@ export default function ReceiveScreen({ route }) {
   const { chainId = 'bitcoin', symbol = 'BTC' } = route.params ?? {};
   const { user } = useAuth();
   const [address, setAddress] = useState(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (user) walletService.getDepositAddress(user.uid, chainId).then((r) => setAddress(r.address));
@@ -29,8 +31,8 @@ export default function ReceiveScreen({ route }) {
 
         <Text style={styles.address}>{address ? truncateAddress(address, 10, 8) : ''}</Text>
 
-        <Pressable style={styles.copyBtn} onPress={() => address && Share.share({ message: address })}>
-          <Text style={styles.copyLabel}>Share address</Text>
+        <Pressable style={styles.copyBtn} onPress={() => { if (address) { Clipboard.setStringAsync(address); setCopied(true); setTimeout(() => setCopied(false), 2000); } }}>
+          <Text style={styles.copyLabel}>{copied ? 'Copied!' : 'Copy address'}</Text>
         </Pressable>
       </View>
     </SafeAreaView>
