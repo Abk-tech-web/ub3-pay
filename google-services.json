@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "24066657981",
+    "project_id": "ub3-pay",
+    "storage_bucket": "ub3-pay.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:24066657981:android:b114382a3968bdb24231d4",
+        "android_client_info": {
+          "package_name": "app.ub3pay.wallet"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAHBl8TtCPdRxiZwsExq58X15Afk72LuQY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

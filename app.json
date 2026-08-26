@@ -13,13 +13,20 @@
     },
     "android": {
       "package": "app.ub3pay.wallet",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0A0A0C"
       }
     },
     "plugins": [
-      "expo-secure-store"
-    ]
+      "expo-secure-store",
+      "expo-font"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "e7471ba5-3706-4f74-96e4-0786d75be1ac"
+      }
+    }
   }
 }

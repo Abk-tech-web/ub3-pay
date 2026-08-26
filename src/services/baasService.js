@@ -14,8 +14,8 @@ export async function getNairaAccount(uid) {
 export async function getDepositHistory(uid) {
   await delay(400);
   return [
-    { id: 'dep_1', amountNgn: 50000, receivedAt: '2026-08-10T09:12:00Z', status: 'confirmed' },
-    { id: 'dep_2', amountNgn: 15000, receivedAt: '2026-08-06T14:03:00Z', status: 'confirmed' },
+    { id: 'dep_1', amountNgn: 50000, receivedAt: '2026-08-10T09:12:00Z', status: 'confirmed', bankName: 'Providus Bank', reference: 'PSK-9021734' },
+    { id: 'dep_2', amountNgn: 15000, receivedAt: '2026-08-06T14:03:00Z', status: 'confirmed', bankName: 'Providus Bank', reference: 'PSK-9017522' },
   ];
 }
 

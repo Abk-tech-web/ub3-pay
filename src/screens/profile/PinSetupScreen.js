@@ -32,7 +32,7 @@ export default function PinSetupScreen({ navigation }) {
           placeholderTextColor={colors.textSecondary}
           secureTextEntry
           keyboardType="number-pad"
-          maxLength={6}
+          maxLength={4}
           value={pin}
           onChangeText={setPin}
         />
@@ -42,7 +42,7 @@ export default function PinSetupScreen({ navigation }) {
           placeholderTextColor={colors.textSecondary}
           secureTextEntry
           keyboardType="number-pad"
-          maxLength={6}
+          maxLength={4}
           value={confirmPin}
           onChangeText={setConfirmPin}
         />

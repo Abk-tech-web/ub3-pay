@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, KeyboardAvoidingView, Platform, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, spacing, radii } from '../../config/theme';
+import Logo from '../../components/Logo';
 import PrimaryButton from '../../components/PrimaryButton';
 import PasswordInput from '../../components/PasswordInput';
 import { useAuth } from '../../context/AuthContext';
@@ -41,7 +42,7 @@ export default function SignUpScreen({ navigation }) {
     <SafeAreaView style={styles.safe}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
         <View style={styles.body}>
-          <Text style={styles.brand}>Ub3 Pay</Text>
+          <Logo size={26} />
           <Text style={styles.title}>Create your account</Text>
           <Text style={styles.subtitle}>Takes about a minute. Identity verification comes next.</Text>
 

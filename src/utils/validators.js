@@ -8,7 +8,7 @@ export function isStrongPassword(password) {
 }
 
 export function isValidPin(pin) {
-  return /^\d{6}$/.test(pin);
+  return /^\d{4}$/.test(pin);
 }
 
 export function isValidBvn(bvn) {

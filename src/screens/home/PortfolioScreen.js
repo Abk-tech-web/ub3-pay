@@ -2,19 +2,23 @@ import React, { useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, Pressable, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
+import ActionButton from '../../components/ActionButton';
+import BillCard from '../../components/BillCard';
 import { colors, spacing, radii } from '../../config/theme';
+import Logo from '../../components/Logo';
 import BalanceCard from '../../components/BalanceCard';
 import AssetListItem from '../../components/AssetListItem';
+import NgnListItem from '../../components/NgnListItem';
 import EmptyState from '../../components/EmptyState';
 import { useAuth } from '../../context/AuthContext';
 import { useWallet } from '../../context/WalletContext';
 
 const ACTIONS = [
-  { key: 'Receive', label: 'Receive', icon: 'arrow-down-left' },
-  { key: 'Send', label: 'Send', icon: 'arrow-up-right' },
-  { key: 'BuyCrypto', label: 'Buy', icon: 'plus-circle' },
-  { key: 'SellCrypto', label: 'Sell', icon: 'minus-circle' },
-  { key: 'Withdraw', label: 'Withdraw', icon: 'log-out' },
+  { key: 'Receive', label: 'Receive', icon: 'arrow-down-left', gradient: ['#34d399', '#059669'] },
+  { key: 'Send', label: 'Send', icon: 'send', gradient: ['#60a5fa', '#2563eb'] },
+  { key: 'BuyCrypto', label: 'Buy', icon: 'trending-up', gradient: ['#a78bfa', '#7c3aed'] },
+  { key: 'SellCrypto', label: 'Sell', icon: 'trending-down', gradient: ['#fb923c', '#ea580c'] },
+  { key: 'Withdraw', label: 'Withdraw', icon: 'arrow-up', gradient: ['#f472b6', '#db2777'] },
 ];
 
 export default function PortfolioScreen({ navigation }) {
@@ -23,6 +27,8 @@ export default function PortfolioScreen({ navigation }) {
 
   useEffect(() => {
     if (user) refreshPortfolio(user.uid);
+    const interval = setInterval(() => { if (user) refreshPortfolio(user.uid); }, 10000);
+    return () => clearInterval(interval);
   }, [user]);
 
   return (
@@ -31,30 +37,19 @@ export default function PortfolioScreen({ navigation }) {
         contentContainerStyle={styles.list}
         ListHeaderComponent={
           <>
-            <Text style={styles.greeting}>Ub3 Pay</Text>
-            <BalanceCard totalUsd={portfolio.totalUsd} totalNgn={portfolio.totalNgn} />
+            <Logo size={20} />
+            <BalanceCard totalUsd={portfolio.totalUsd} totalNgn={portfolio.totalNgn} totalPnl24hUsd={portfolio.totalPnl24hUsd} />
 
-            <View style={styles.actionsRow}>
-              {ACTIONS.map((a) => (
-                <Pressable key={a.key} style={styles.actionBtn} onPress={() => navigation.navigate(a.key)}>
-                  <View style={styles.actionIcon}>
-                    <Feather name={a.icon} size={20} color={colors.violetSoft} />
-                  </View>
-                  <Text style={styles.actionLabel}>{a.label}</Text>
-                </Pressable>
-              ))}
-            </View>
+        <View style={styles.actionsRow}>
+          {ACTIONS.map((a) => (
+            <ActionButton key={a.key} icon={a.icon} label={a.label} gradient={a.gradient} onPress={() => navigation.navigate(a.key)} />
+          ))}
+        </View>
 
-            <View style={styles.billsRow}>
-              <Pressable style={styles.billBtn} onPress={() => navigation.navigate('Airtime')}>
-                <Feather name="phone" size={18} color={colors.violetSoft} />
-                <Text style={styles.billLabel}>Airtime</Text>
-              </Pressable>
-              <Pressable style={styles.billBtn} onPress={() => navigation.navigate('Data')}>
-                <Feather name="wifi" size={18} color={colors.violetSoft} />
-                <Text style={styles.billLabel}>Data</Text>
-              </Pressable>
-            </View>
+        <View style={styles.billsRow}>
+          <BillCard icon="phone" label="Airtime" accent="#34d399" onPress={() => navigation.navigate('Airtime')} />
+          <BillCard icon="wifi" label="Data" accent="#60a5fa" onPress={() => navigation.navigate('Data')} />
+        </View>
 
             <View style={styles.sectionHeaderRow}>
               <Text style={styles.sectionHeader}>Assets</Text>
@@ -64,10 +59,10 @@ export default function PortfolioScreen({ navigation }) {
             </View>
           </>
         }
-        data={portfolio.assets}
+        data={[{ symbol: 'NGN', balance: portfolio.ngnBalance ?? 0 }, ...(portfolio.assets || [])]}
         keyExtractor={(item, i) => `${item.chainId}-${item.symbol}-${i}`}
         renderItem={({ item }) => (
-          <AssetListItem asset={item} onPress={() => navigation.navigate('AssetDetail', { asset: item })} />
+          item.symbol === 'NGN' ? (<NgnListItem balance={item.balance} onPress={() => navigation.navigate('NairaDetail')} />) : (<AssetListItem asset={item} onPress={() => navigation.navigate('AssetDetail', { asset: item })} />)
         )}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         ListEmptyComponent={<EmptyState title="No assets yet" subtitle="Deposit crypto or buy with Naira to get started." />}

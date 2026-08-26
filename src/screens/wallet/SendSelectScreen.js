@@ -2,11 +2,23 @@ import React from 'react';
 import { View, Text, StyleSheet, Pressable, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, spacing } from '../../config/theme';
-import { CHAINS } from '../../config/chains';
+import { getGroupedTransferableAssets } from '../../config/chains';
 import TokenIcon from '../../components/TokenIcon';
 
 export default function SendSelectScreen({ navigation }) {
-  const chains = Object.values(CHAINS);
+  const groups = getGroupedTransferableAssets();
+
+  const handlePress = (group) => {
+    if (group.networks.length === 1) {
+      navigation.navigate('SendAmount', { chainId: group.networks[0].id, symbol: group.symbol });
+    } else {
+      navigation.navigate('NetworkPicker', {
+        symbol: group.symbol,
+        networks: group.networks,
+        targetRoute: 'SendAmount',
+      });
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -16,17 +28,19 @@ export default function SendSelectScreen({ navigation }) {
       </View>
       <FlatList
         contentContainerStyle={{ paddingHorizontal: spacing(6), paddingBottom: spacing(6) }}
-        data={chains}
-        keyExtractor={(c) => c.id}
+        data={groups}
+        keyExtractor={(g) => g.symbol}
         renderItem={({ item }) => (
           <Pressable
             style={styles.row}
-            onPress={() => navigation.navigate('SendAmount', { chainId: item.id, symbol: item.symbol })}
+            onPress={() => handlePress(item)}
           >
             <TokenIcon symbol={item.symbol} size={38} />
             <View style={{ flex: 1, marginLeft: spacing(3) }}>
               <Text style={styles.symbol}>{item.symbol}</Text>
-              <Text style={styles.chainName}>{item.name}</Text>
+              <Text style={styles.chainName}>
+                {item.networks.length === 1 ? item.networks[0].name : `${item.networks.length} networks`}
+              </Text>
             </View>
           </Pressable>
         )}

@@ -4,7 +4,7 @@
 // Balances below are still mock (no real custody yet) but USD values are
 // computed from LIVE prices via rateService — not hardcoded.
 import { CHAINS } from '../config/chains';
-import { getUsdPrice } from './rateService';
+import { getUsdPrice, getAllUsdPrices } from './rateService';
 import { estimateWithdrawalFee } from './feeService';
 
 // Mock per-chain holdings — one entry per supported chain so the whole
@@ -14,6 +14,7 @@ const MOCK_HOLDINGS = [
   { chainId: 'bitcoin', symbol: 'BTC', balance: '0.031' },
   { chainId: 'ethereum', symbol: 'ETH', balance: '0.82' },
   { chainId: 'ethereum', symbol: 'USDT', balance: '150.00' },
+  { chainId: 'ethereum', symbol: 'USDC', balance: '75.00' },
   { chainId: 'bsc', symbol: 'BNB', balance: '1.4' },
   { chainId: 'solana', symbol: 'SOL', balance: '2.4' },
   { chainId: 'tron', symbol: 'TRX', balance: '820' },
@@ -31,25 +32,31 @@ const MOCK_HOLDINGS = [
 
 export async function getPortfolio(uid) {
   await delay(300);
-  const assets = await Promise.all(
-    MOCK_HOLDINGS.map(async (h) => {
-      const price = await getUsdPrice(h.symbol);
-      const usdValue = price * parseFloat(h.balance);
-      return { ...h, usdValue };
-    })
-  );
+  const prices = await getAllUsdPrices();
+  const assets = MOCK_HOLDINGS.map((h) => {
+    const p = prices[h.symbol] || { usd: 0, change24h: 0 };
+    const usdValue = p.usd * parseFloat(h.balance);
+    const change24h = p.change24h;
+    const pnl24hUsd = usdValue * (change24h / (100 + change24h));
+    return { ...h, usdValue, change24h, pnl24hUsd };
+  });
   const totalUsd = assets.reduce((sum, a) => sum + a.usdValue, 0);
-  return { totalUsd, assets };
+  const totalPnl24hUsd = assets.reduce((sum, a) => sum + a.pnl24hUsd, 0);
+  return { totalUsd, totalPnl24hUsd, assets };
 }
 
 const API_URL = 'https://ub3-pay-backend.onrender.com';
 
+const depositAddressCache = {};
 export async function getDepositAddress(uid, chainId) {
+  const cacheKey = `${uid}_${chainId}`;
+  if (depositAddressCache[cacheKey]) return depositAddressCache[cacheKey];
   const response = await fetch(`${API_URL}/wallet/deposit-address/${chainId}/${uid}`);
   const data = await response.json();
   if (response.ok === false) {
     throw new Error(data.error || 'Failed to get deposit address');
   }
+  depositAddressCache[cacheKey] = data;
   return data;
 }
 
@@ -72,8 +79,8 @@ export async function sendCrypto(uid, chainId, symbol, toAddress, amount) {
 export async function getTransactionHistory(uid) {
   await delay(400);
   return [
-    { id: 'tx_1', type: 'deposit_crypto', symbol: 'BTC', amount: '0.01', status: 'completed', at: '2026-08-09T11:00:00Z' },
-    { id: 'tx_2', type: 'swap_crypto_to_ngn', symbol: 'USDT', amount: '50', status: 'completed', at: '2026-08-05T08:30:00Z' },
+    { id: 'tx_1', type: 'deposit_crypto', symbol: 'BTC', chainId: 'bitcoin', txHash: '3a7f...9e21', amount: '0.01', direction: 'in', status: 'completed', at: '2026-08-09T11:00:00Z' },
+    { id: 'tx_2', type: 'swap_crypto_to_ngn', symbol: 'USDT', chainId: 'ethereum', txHash: '0x8c2b...f471', amount: '50', direction: 'out', status: 'completed', at: '2026-08-05T08:30:00Z' },
   ];
 }
 

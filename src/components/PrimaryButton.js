@@ -31,6 +31,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing(6),
+    marginBottom: 90,
   },
   primary: { backgroundColor: colors.violet },
   ghost: { backgroundColor: 'transparent', borderWidth: 1.5, borderColor: colors.violet },

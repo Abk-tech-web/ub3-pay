@@ -7,16 +7,31 @@ import TokenIcon from './TokenIcon';
 
 export default function AssetListItem({ asset, onPress }) {
   const chain = getChain(asset.chainId);
+  const change = asset.change24h ?? 0;
+  const isUp = change >= 0;
+  const price = asset.price ?? (asset.balance ? asset.usdValue / asset.balance : 0);
+
   return (
     <Pressable onPress={onPress} style={({ pressed }) => [styles.row, pressed && styles.pressed]}>
       <TokenIcon symbol={asset.symbol} size={40} />
       <View style={styles.info}>
         <Text style={styles.symbol}>{asset.symbol}</Text>
         <Text style={styles.chainName}>{chain?.name ?? asset.chainId}</Text>
+            <Text style={styles.price}>{formatUsd(price)}</Text>
       </View>
       <View style={styles.amounts}>
         <Text style={styles.balance}>{formatCrypto(asset.balance, '')}</Text>
-        <Text style={styles.usd}>{formatUsd(asset.usdValue)}</Text>
+        <View style={styles.usdRow}>
+          <Text style={styles.usd}>{formatUsd(asset.usdValue)}</Text>
+          <Text style={[styles.change, { color: isUp ? '#34d399' : '#f87171' }]}>
+            {isUp ? '+' : ''}{change.toFixed(2)}%
+          </Text>
+        </View>
+        {asset.pnl24hUsd != null && asset.pnl24hUsd !== 0 && (
+          <Text style={[styles.pnl, { color: isUp ? '#34d399' : '#f87171' }]}>
+            {isUp ? '+' : ''}{formatUsd(asset.pnl24hUsd)} today
+          </Text>
+        )}
       </View>
     </Pressable>
   );
@@ -28,7 +43,11 @@ const styles = StyleSheet.create({
   info: { flex: 1, marginLeft: spacing(3) },
   symbol: { color: colors.textPrimary, fontWeight: '700', fontSize: 15 },
   chainName: { color: colors.textSecondary, fontSize: 12, marginTop: 2 },
+  price: { color: colors.textSecondary, fontSize: 12, marginTop: 1, fontWeight: '600' },
   amounts: { alignItems: 'flex-end' },
   balance: { color: colors.textPrimary, fontSize: 14, fontWeight: '600' },
-  usd: { color: colors.textSecondary, fontSize: 12, marginTop: 2 },
+  usdRow: { flexDirection: 'row', alignItems: 'center', gap: spacing(1), marginTop: 2 },
+  usd: { color: colors.textSecondary, fontSize: 12 },
+  change: { fontSize: 11, fontWeight: '700' },
+  pnl: { fontSize: 11, fontWeight: '600', marginTop: 2 },
 });

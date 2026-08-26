@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, spacing, radii } from '../../config/theme';
 import { useWallet } from '../../context/WalletContext';
@@ -18,6 +18,8 @@ export default function SellCryptoScreen({ navigation }) {
         <Text style={styles.title}>Sell crypto</Text>
         <Text style={styles.subtitle}>Choose an asset to sell for Naira.</Text>
 
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+
         {portfolio.assets.length === 0 ? (
           <EmptyState title="Nothing to sell yet" subtitle="Deposit or buy crypto first." />
         ) : (
@@ -25,7 +27,7 @@ export default function SellCryptoScreen({ navigation }) {
             <Pressable
               key={`${a.symbol}-${i}`}
               style={styles.row}
-              onPress={() => navigation.navigate('SwapTab', { screen: 'SwapCryptoToNaira', params: { symbol: a.symbol } })}
+              onPress={() => navigation.navigate('SwapTab', { screen: 'Swap', params: { symbol: a.symbol } })}
             >
               <TokenIcon symbol={a.symbol} size={36} />
               <View style={{ flex: 1, marginLeft: spacing(3) }}>
@@ -35,6 +37,7 @@ export default function SellCryptoScreen({ navigation }) {
             </Pressable>
           ))
         )}
+        </ScrollView>
       </View>
     </SafeAreaView>
   );
@@ -43,6 +46,7 @@ export default function SellCryptoScreen({ navigation }) {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   body: { flex: 1, padding: spacing(6), paddingTop: spacing(10) },
+  scrollContent: { paddingBottom: spacing(6) },
   title: { color: colors.textPrimary, fontSize: 22, fontWeight: '800' },
   subtitle: { color: colors.textSecondary, fontSize: 14, marginTop: spacing(2), marginBottom: spacing(6) },
   row: { flexDirection: 'row', alignItems: 'center', paddingVertical: spacing(3), borderBottomWidth: 1, borderBottomColor: colors.border },

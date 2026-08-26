@@ -5,11 +5,13 @@ import { colors, spacing, radii } from '../../config/theme';
 import PrimaryButton from '../../components/PrimaryButton';
 import * as swapService from '../../services/swapService';
 import { useAuth } from '../../context/AuthContext';
+import { useWallet } from '../../context/WalletContext';
 import { formatNgn, formatCrypto } from '../../utils/formatters';
 
 export default function SwapConfirmationScreen({ route, navigation }) {
   const { direction, symbol, amount, quote } = route.params ?? {};
   const { user } = useAuth();
+  const { adjustNgnBalance, adjustCryptoBalance, addActivity } = useWallet();
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
 
@@ -18,8 +20,14 @@ export default function SwapConfirmationScreen({ route, navigation }) {
     try {
       if (direction === 'crypto_to_ngn') {
         await swapService.executeCryptoToNgn(user.uid, symbol, null, parseFloat(amount), quote);
+          adjustNgnBalance(quote.amountNgn);
+          adjustCryptoBalance(symbol, -parseFloat(amount));
+          addActivity({ id: 'act_' + Date.now(), label: 'swap crypto to ngn', at: new Date().toISOString(), status: 'success', amount: parseFloat(amount), symbol, direction: 'out', kind: 'swap', fromSymbol: symbol, fromAmount: parseFloat(amount), toSymbol: 'NGN', toAmount: quote.amountNgn });
       } else {
         await swapService.executeNgnToCrypto(user.uid, symbol, null, parseFloat(amount), quote);
+          adjustNgnBalance(-parseFloat(amount));
+          adjustCryptoBalance(symbol, quote.amountCrypto);
+          addActivity({ id: 'act_' + Date.now(), label: 'swap ngn to crypto', at: new Date().toISOString(), status: 'success', amount: quote.amountCrypto, symbol, direction: 'in', kind: 'swap', fromSymbol: 'NGN', fromAmount: parseFloat(amount), toSymbol: symbol, toAmount: quote.amountCrypto });
       }
       setDone(true);
     } finally {
@@ -34,7 +42,25 @@ export default function SwapConfirmationScreen({ route, navigation }) {
           <Text style={styles.title}>Swap complete</Text>
           <Text style={styles.subtitle}>Your balance has been updated.</Text>
           <View style={{ flex: 1 }} />
-          <PrimaryButton title="Done" onPress={() => navigation.popToTop()} />
+          <PrimaryButton
+          title="View Receipt"
+          onPress={() => {
+            const isNgnOut = direction === 'crypto_to_ngn';
+            navigation.replace('TransactionReceipt', {
+              amountPrefix: isNgnOut ? '+ NGN ' : '+ ',
+              amount: isNgnOut
+                ? formatNgn(quote?.amountNgn)
+                : formatCrypto(quote?.amountCrypto, symbol),
+              topRightLabel: 'Swap',
+              topRightIcon: 'swap-horizontal-outline',
+              rows: [
+                { label: 'Type', value: 'Crypto Swap' },
+                { label: 'Sold', value: isNgnOut ? formatCrypto(amount, symbol) + ' ' + symbol : formatNgn(amount) + ' NGN' },
+                { label: 'Received', value: isNgnOut ? formatNgn(quote?.amountNgn) + ' NGN' : formatCrypto(quote?.amountCrypto, symbol) + ' ' + symbol },
+              ],
+            });
+          }}
+        />
         </View>
       </SafeAreaView>
     );

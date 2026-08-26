@@ -27,7 +27,7 @@ export default function WithdrawScreen({ navigation }) {
         <View style={{ flex: 1 }} />
         <PrimaryButton
           title={mode === 'crypto' ? 'Choose an asset to send' : 'Withdraw to bank'}
-            onPress={() => (mode === 'crypto' ? navigation.navigate('Send') : Alert.alert('Coming soon', 'Bank withdrawal is not available yet. We are working on it.'))}
+            onPress={() => (mode === 'crypto' ? navigation.navigate('Send') : navigation.navigate('NairaWithdraw'))}
         />
       </View>
     </SafeAreaView>

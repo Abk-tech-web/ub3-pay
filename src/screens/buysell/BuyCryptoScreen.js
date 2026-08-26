@@ -15,7 +15,7 @@ export default function BuyCryptoScreen({ navigation }) {
         <View style={{ flex: 1 }} />
         <PrimaryButton title="Fund Naira account" onPress={() => navigation.navigate('NairaTab', { screen: 'NairaAccount' })} />
         <View style={{ height: spacing(3) }} />
-        <PrimaryButton title="Go to swap" variant="ghost" onPress={() => navigation.navigate('SwapTab', { screen: 'SwapNairaToCrypto' })} />
+        <PrimaryButton title="Go to swap" variant="ghost" onPress={() => navigation.navigate('SwapTab', { screen: 'Swap', params: { symbol: 'NGN' } })} />
       </View>
     </SafeAreaView>
   );

@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Pressable } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Pressable, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, radii } from '../../config/theme';
 import PrimaryButton from '../../components/PrimaryButton';
 import { useAuth } from '../../context/AuthContext';
 import { NETWORKS, buyAirtime } from '../../services/billService';
 import { isPositiveAmount } from '../../utils/validators';
 import { formatNgn } from '../../utils/formatters';
+import NetworkIcon from '../../components/NetworkIcon';
+import NetworkSelectorModal from '../../components/NetworkSelectorModal';
 
-const QUICK_AMOUNTS = [100, 200, 500, 1000, 2000];
+const QUICK_AMOUNTS = [50, 100, 200, 1000, 2000, 10000];
 
 export default function AirtimeScreen({ navigation }) {
   const { user } = useAuth();
@@ -18,18 +21,20 @@ export default function AirtimeScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
 
-  const onBuy = async () => {
+  const selectedNetwork = NETWORKS.find((n) => n.id === network);
+
+  const onBuy = () => {
     setError('');
     if (phone.length < 10) return setError('Enter a valid phone number.');
     if (!isPositiveAmount(amount)) return setError('Enter an amount.');
-    setLoading(true);
-    try {
-      await buyAirtime(user.uid, network, phone, parseFloat(amount));
-      setDone(true);
-    } finally {
-      setLoading(false);
-    }
+    navigation.navigate('ConfirmPurchase', {
+      kind: 'airtime',
+      network,
+      phone,
+      amount: parseFloat(amount),
+    });
   };
 
   if (done) {
@@ -47,66 +52,104 @@ export default function AirtimeScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <View style={styles.body}>
-        <Text style={styles.title}>Buy airtime</Text>
+      <View style={styles.header}>
+        <Pressable onPress={() => navigation.goBack()} hitSlop={12}>
+          <Ionicons name="chevron-back" size={26} color={colors.textPrimary} />
+        </Pressable>
+        <Text style={styles.headerTitle}>Airtime</Text>
+        <Pressable onPress={() => navigation.navigate('ActivityTab', { screen: 'ActivityList' })} hitSlop={12}>
+          <Text style={styles.headerLink}>History</Text>
+        </Pressable>
+      </View>
+
+      <ScrollView contentContainerStyle={styles.scroll}>
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
-        <View style={styles.pillRow}>
-          {NETWORKS.map((n) => (
-            <Pressable key={n.id} onPress={() => setNetwork(n.id)} style={[styles.pill, network === n.id && styles.pillActive]}>
-              <Text style={[styles.pillLabel, network === n.id && styles.pillLabelActive]}>{n.name}</Text>
-            </Pressable>
-          ))}
+        <View style={styles.selectorCard}>
+          <Pressable style={styles.selectorLeft} onPress={() => setModalVisible(true)}>
+            <NetworkIcon network={selectedNetwork} size={32} />
+            <Ionicons name="chevron-down" size={16} color={colors.textSecondary} style={{ marginHorizontal: spacing(1) }} />
+          </Pressable>
+          <View style={styles.divider} />
+          <TextInput
+            style={styles.phoneInput}
+            placeholder="e.g 906******"
+            placeholderTextColor={colors.textSecondary}
+            keyboardType="phone-pad"
+            value={phone}
+            onChangeText={setPhone}
+          />
         </View>
 
-        <Text style={styles.label}>Phone number</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="080..."
-          placeholderTextColor={colors.textSecondary}
-          keyboardType="phone-pad"
-          value={phone}
-          onChangeText={setPhone}
-        />
+        <View style={styles.card}>
+          <Text style={styles.cardLabel}>Select Amount</Text>
+          <View style={styles.amountGrid}>
+            {QUICK_AMOUNTS.map((a) => {
+              const active = amount === String(a);
+              return (
+                <Pressable
+                  key={a}
+                  style={[styles.amountTile, active && styles.amountTileActive]}
+                  onPress={() => setAmount(String(a))}
+                >
+                  <Text style={[styles.amountValue, active && styles.amountValueActive]}>{formatNgn(a)}</Text>
+                  <Text style={[styles.amountPay, active && styles.amountPayActive]}>Pay {formatNgn(a)}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
 
-        <Text style={styles.label}>Amount</Text>
-        <View style={styles.pillRow}>
-          {QUICK_AMOUNTS.map((a) => (
-            <Pressable key={a} onPress={() => setAmount(String(a))} style={[styles.pill, amount === String(a) && styles.pillActive]}>
-              <Text style={[styles.pillLabel, amount === String(a) && styles.pillLabelActive]}>₦{a}</Text>
-            </Pressable>
-          ))}
+          <View style={styles.customRow}>
+            <Text style={styles.nairaSign}>₦</Text>
+            <TextInput
+              style={styles.customInput}
+              placeholder="50-500,000"
+              placeholderTextColor={colors.textSecondary}
+              keyboardType="decimal-pad"
+              value={amount}
+              onChangeText={setAmount}
+            />
+            <PrimaryButton title="Pay" onPress={onBuy} loading={loading} style={styles.payBtn} />
+          </View>
         </View>
-        <TextInput
-          style={styles.input}
-          placeholder="Or enter custom amount"
-          placeholderTextColor={colors.textSecondary}
-          keyboardType="decimal-pad"
-          value={amount}
-          onChangeText={setAmount}
-        />
+      </ScrollView>
 
-        <View style={{ flex: 1 }} />
-        <PrimaryButton title="Buy airtime" onPress={onBuy} loading={loading} />
-      </View>
+      <NetworkSelectorModal
+        visible={modalVisible}
+        networks={NETWORKS}
+        selectedId={network}
+        onSelect={setNetwork}
+        onClose={() => setModalVisible(false)}
+      />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
-  body: { flex: 1, padding: spacing(6), paddingTop: spacing(10) },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing(4), paddingTop: spacing(2), paddingBottom: spacing(3) },
+  headerTitle: { color: colors.textPrimary, fontSize: 18, fontWeight: '700' },
+  headerLink: { color: colors.violet, fontSize: 15, fontWeight: '600' },
+  scroll: { padding: spacing(4), paddingTop: 0 },
+  error: { color: colors.danger, fontSize: 13, marginBottom: spacing(3) },
+  selectorCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.bgCard, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border, paddingHorizontal: spacing(3), height: 60, marginBottom: spacing(4) },
+  selectorLeft: { flexDirection: 'row', alignItems: 'center' },
+  divider: { width: 1, height: 24, backgroundColor: colors.border, marginHorizontal: spacing(3) },
+  phoneInput: { flex: 1, color: colors.textPrimary, fontSize: 15 },
+  card: { backgroundColor: colors.bgCard, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border, padding: spacing(4) },
+  cardLabel: { color: colors.textPrimary, fontSize: 16, fontWeight: '700', marginBottom: spacing(3) },
+  amountGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing(2), marginBottom: spacing(4) },
+  amountTile: { width: '31.5%', backgroundColor: colors.bg, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border, paddingVertical: spacing(3), alignItems: 'center' },
+  amountTileActive: { backgroundColor: colors.violet, borderColor: colors.violet },
+  amountValue: { color: colors.textPrimary, fontSize: 16, fontWeight: '700' },
+  amountValueActive: { color: colors.bg },
+  amountPay: { color: colors.textSecondary, fontSize: 11, marginTop: spacing(1) },
+  amountPayActive: { color: colors.bg },
+  customRow: { flexDirection: 'row', alignItems: 'center', gap: spacing(2) },
+  nairaSign: { color: colors.textSecondary, fontSize: 16 },
+  customInput: { flex: 1, color: colors.textPrimary, fontSize: 15, backgroundColor: colors.bg, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border, height: 48, paddingHorizontal: spacing(3) },
+  payBtn: { paddingHorizontal: spacing(6) },
   title: { color: colors.textPrimary, fontSize: 22, fontWeight: '800', marginBottom: spacing(5) },
   subtitle: { color: colors.textSecondary, fontSize: 14, marginTop: spacing(2) },
-  pillRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing(2), marginBottom: spacing(4) },
-  pill: { paddingVertical: spacing(2), paddingHorizontal: spacing(4), borderRadius: radii.pill, backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border },
-  pillActive: { backgroundColor: colors.violet, borderColor: colors.violet },
-  pillLabel: { color: colors.textSecondary, fontWeight: '600', fontSize: 12 },
-  pillLabelActive: { color: colors.bg },
-  label: { color: colors.textSecondary, fontSize: 13, marginBottom: spacing(1.5) },
-  input: {
-    backgroundColor: colors.bgCard, color: colors.textPrimary, borderRadius: radii.md,
-    paddingHorizontal: spacing(4), height: 52, marginBottom: spacing(4), borderWidth: 1, borderColor: colors.border,
-  },
-  error: { color: colors.danger, fontSize: 13, marginBottom: spacing(3) },
+  body: { flex: 1, padding: spacing(6), paddingTop: spacing(10) },
 });

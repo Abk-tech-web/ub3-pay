@@ -2,6 +2,11 @@ import React, { useState } from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
 import { colors, radii } from '../config/theme';
 
+const SYMBOL_TO_CHAIN_SLUG = {
+  BTC: 'bitcoin', ETH: 'ethereum', BNB: 'smartchain', SOL: 'solana', TRX: 'tron',
+  MATIC: 'polygon', SUI: 'sui', TON: 'ton', AVAX: 'avalanchec', ADA: 'cardano',
+  LTC: 'litecoin', XRP: 'ripple',
+};
 const SYMBOL_TO_ICON_SLUG = {
   BTC: 'btc', ETH: 'eth', BNB: 'bnb', SOL: 'sol', TRX: 'trx',
   MATIC: 'matic', SUI: 'sui', TON: 'ton', AVAX: 'avax', ADA: 'ada',
@@ -9,6 +14,10 @@ const SYMBOL_TO_ICON_SLUG = {
 };
 
 function iconUrl(symbol) {
+  const chainSlug = SYMBOL_TO_CHAIN_SLUG[symbol];
+  if (chainSlug) {
+    return `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/${chainSlug}/info/logo.png`;
+  }
   const slug = SYMBOL_TO_ICON_SLUG[symbol];
   if (!slug) return null;
   return `https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/${slug}.png`;

@@ -85,3 +85,45 @@ export function getMarginPerUsd() {
 }
 
 export { COINGECKO_IDS };
+
+const CHART_TTL_MS = 60_000;
+let chartCache = {};
+
+function daysForTimeframe(tf) {
+  switch (tf) {
+    case '1H': return 1;
+    case '1D': return 1;
+    case '1W': return 7;
+    case '1M': return 30;
+    case '1Y': return 365;
+    case 'ALL': return 'max';
+    default: return 1;
+  }
+}
+
+export async function getMarketChart(symbol, timeframe = '1D') {
+  const id = COINGECKO_IDS[symbol];
+  if (!id) throw new Error(`No CoinGecko id for symbol ${symbol}`);
+
+  const cacheKey = `${symbol}_${timeframe}`;
+  const cached = chartCache[cacheKey];
+  if (cached && Date.now() - cached.at < CHART_TTL_MS) {
+    return cached.data;
+  }
+
+  const days = daysForTimeframe(timeframe);
+  const res = await fetch(
+    `https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=usd&days=${days}`
+  );
+  if (!res.ok) throw new Error(`CoinGecko chart error: ${res.status}`);
+  const json = await res.json();
+  let points = (json.prices || []).map(([timestamp, price]) => ({ timestamp, price }));
+
+  if (timeframe === '1H') {
+    const oneHourAgo = Date.now() - 60 * 60 * 1000;
+    points = points.filter((p) => p.timestamp >= oneHourAgo);
+  }
+
+  chartCache[cacheKey] = { data: points, at: Date.now() };
+  return points;
+}
