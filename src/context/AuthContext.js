@@ -57,6 +57,14 @@ export function AuthProvider({ children }) {
     setUser((prev) => (prev ? { ...prev, kycStatus: profile?.kycStatus ?? prev.kycStatus } : prev));
   }, [user]);
 
+  const refreshBvnStatus = useCallback(async () => {
+    if (!user) return;
+    const profile = await authService.getUserProfile(user.uid);
+    const bvnVerified = profile?.bvnVerified ?? false;
+    setUser((prev) => (prev ? { ...prev, bvnVerified } : prev));
+    return bvnVerified;
+  }, [user]);
+
   const refreshEmailVerified = useCallback(async () => {
     const verified = await authService.refreshEmailVerifiedStatus();
     setUser((prev) => (prev ? { ...prev, emailVerified: verified } : prev));
@@ -65,7 +73,7 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, authChecked, loading, signIn, signUp, signOut, refreshKycStatus, refreshEmailVerified, setUser }}
+      value={{ user, authChecked, loading, signIn, signUp, signOut, refreshKycStatus, refreshEmailVerified, refreshBvnStatus, setUser }}
     >
       {children}
     </AuthContext.Provider>

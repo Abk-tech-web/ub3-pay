@@ -2,7 +2,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Feather } from '@expo/vector-icons';
-import { colors } from '../config/theme';
+import { useTheme } from '../context/ThemeContext';
 import CustomTabBar from '../components/CustomTabBar';
 
 import PortfolioScreen from '../screens/home/PortfolioScreen';
@@ -10,6 +10,7 @@ import AssetDetailScreen from '../screens/home/AssetDetailScreen';
 import NairaDetailScreen from '../screens/wallet/NairaDetailScreen';
 import NairaWithdrawScreen from '../screens/wallet/WithdrawScreen';
 import BankAccountScreen from '../screens/wallet/BankAccountScreen';
+import VerifyBvnScreen from '../screens/wallet/VerifyBvnScreen';
 import WithdrawAmountScreen from '../screens/wallet/WithdrawAmountScreen';
 import ConfirmPinScreen from '../screens/wallet/ConfirmPinScreen';
 import WithdrawSuccessScreen from '../screens/wallet/WithdrawSuccessScreen';
@@ -57,6 +58,7 @@ function HomeStackScreen() {
       <HomeStack.Screen name="NairaDetail" component={NairaDetailScreen} />
       <HomeStack.Screen name="NairaWithdraw" component={NairaWithdrawScreen} />
       <HomeStack.Screen name="BankAccount" component={BankAccountScreen} />
+        <HomeStack.Screen name="VerifyBvn" component={VerifyBvnScreen} />
       <HomeStack.Screen name="WithdrawAmount" component={WithdrawAmountScreen} />
       <HomeStack.Screen name="ConfirmPin" component={ConfirmPinScreen} />
       <HomeStack.Screen name="WithdrawSuccess" component={WithdrawSuccessScreen} />
@@ -123,6 +125,7 @@ function ProfileStackScreen() {
 }
 
 export default function MainTabNavigator() {
+  const { colors } = useTheme();
   return (
     <Tab.Navigator
         tabBar={(props) => <CustomTabBar {...props} />}

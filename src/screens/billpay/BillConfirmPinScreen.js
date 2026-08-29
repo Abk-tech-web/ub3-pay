@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, spacing, radii } from '../../config/theme';
+import { useTheme } from '../../context/ThemeContext';
+import { spacing, radii } from '../../config/theme';
 import PrimaryButton from '../../components/PrimaryButton';
 import { isValidPin } from '../../utils/validators';
 import { useWallet } from '../../context/WalletContext';
@@ -13,11 +14,14 @@ function genSessionId() {
 }
 
 export default function BillConfirmPinScreen({ navigation, route }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const { kind, network, phone, amount, planLabel, planId } = route.params;
   const { user } = useAuth();
   const { adjustNgnBalance, addActivity } = useWallet();
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
+  const [bvnBlocked, setBvnBlocked] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const networkObj = NETWORKS.find((n) => n.id === network);
@@ -66,6 +70,13 @@ export default function BillConfirmPinScreen({ navigation, route }) {
         ],
         date: new Date().toISOString(),
       });
+    } catch (err) {
+      if (err.status === 403 && err.code === 'bvn_verification_required') {
+        setError('Please verify your BVN before making purchases.');
+        setBvnBlocked(true);
+      } else {
+        setError(err.message || 'Purchase failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -83,6 +94,11 @@ export default function BillConfirmPinScreen({ navigation, route }) {
         </View>
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
+      {bvnBlocked ? (
+        <Pressable onPress={() => navigation.navigate('VerifyBvn')}>
+          <Text style={styles.verifyLink}>Verify Now</Text>
+        </Pressable>
+      ) : null}
 
         <TextInput
           style={styles.input}
@@ -108,7 +124,8 @@ export default function BillConfirmPinScreen({ navigation, route }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
+  verifyLink: { color: colors.violet, fontWeight: '600', marginTop: spacing(2) },
   safe: { flex: 1, backgroundColor: colors.bg },
   body: { flex: 1, padding: spacing(6), paddingTop: spacing(10) },
   title: { color: colors.textPrimary, fontSize: 22, fontWeight: '800' },

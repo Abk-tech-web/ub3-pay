@@ -1,26 +1,52 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, spacing, radii } from '../../config/theme';
+import { useTheme } from '../../context/ThemeContext';
+import { spacing, radii } from '../../config/theme';
 import PrimaryButton from '../../components/PrimaryButton';
 import { isValidPin } from '../../utils/validators';
 import { useWallet } from '../../context/WalletContext';
+import { useAuth } from '../../context/AuthContext';
+import { withdrawFunds } from '../../services/walletService';
 
 function genSessionId() {
   return `${Date.now()}${Math.floor(Math.random() * 1000000)}`;
 }
 
 export default function ConfirmPinScreen({ navigation, route }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const { bank, accountNumber, accountName, amount } = route.params;
   const { adjustNgnBalance, addActivity } = useWallet();
+  const { user } = useAuth();
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
+  const [bvnBlocked, setBvnBlocked] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const onConfirm = () => {
+  const onConfirm = async () => {
     setError('');
     if (!isValidPin(pin)) return setError('PIN must be 4 digits.');
-    // TODO (integration): verify PIN against stored hash via expo-secure-store,
-    // then call real payout API. Currently just proceeds to receipt screen.
+    setLoading(true);
+    try {
+      await withdrawFunds({
+        uid: user.uid,
+        amount,
+        account_number: accountNumber,
+        bank_code: bank.code,
+        name: accountName,
+      });
+    } catch (err) {
+      setLoading(false);
+      if (err.status === 403 && err.code === 'bvn_verification_required') {
+        setError('Please verify your BVN before withdrawing.');
+        setBvnBlocked(true);
+      } else {
+        setError(err.message || 'Withdrawal failed. Please try again.');
+      }
+      return;
+    }
+    setLoading(false);
     const sessionId = genSessionId();
     adjustNgnBalance(-amount);
     addActivity({
@@ -68,6 +94,11 @@ export default function ConfirmPinScreen({ navigation, route }) {
         </View>
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
+      {bvnBlocked ? (
+        <Pressable onPress={() => navigation.navigate('VerifyBvn')}>
+          <Text style={styles.verifyLink}>Verify Now</Text>
+        </Pressable>
+      ) : null}
 
         <TextInput
           style={styles.input}
@@ -92,7 +123,8 @@ export default function ConfirmPinScreen({ navigation, route }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
+  verifyLink: { color: colors.violet, fontWeight: '600', marginTop: spacing(2) },
   safe: { flex: 1, backgroundColor: colors.bg },
   body: { flex: 1, padding: spacing(6), paddingTop: spacing(10) },
   title: { color: colors.textPrimary, fontSize: 22, fontWeight: '800' },

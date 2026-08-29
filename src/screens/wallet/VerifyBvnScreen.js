@@ -7,19 +7,31 @@ import { spacing, radii } from '../../config/theme';
 import PrimaryButton from '../../components/PrimaryButton';
 import FloatingInput from '../../components/FloatingInput';
 import { fetchNigerianBanks } from '../../data/nigerianBanksApi';
-import { apiGet } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
+import { apiGet, apiPost } from '../../services/api';
 
-
-
-export default function BankAccountScreen({ navigation }) {
+export default function VerifyBvnScreen({ navigation }) {
   const { colors } = useTheme();
   const styles = getStyles(colors);
+  const { user, refreshBvnStatus } = useAuth();
+
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [bvn, setBvn] = useState('');
+
   const [banks, setBanks] = useState([]);
   const [loadingBanks, setLoadingBanks] = useState(true);
   const [pickerVisible, setPickerVisible] = useState(false);
   const [search, setSearch] = useState('');
   const [selectedBank, setSelectedBank] = useState(null);
   const [accountNumber, setAccountNumber] = useState('');
+
+  const [resolvedName, setResolvedName] = useState(null);
+  const [resolving, setResolving] = useState(false);
+  const [resolveError, setResolveError] = useState('');
+
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   useEffect(() => {
     fetchNigerianBanks().then((list) => {
@@ -33,10 +45,6 @@ export default function BankAccountScreen({ navigation }) {
     const q = search.toLowerCase();
     return banks.filter((b) => b.name.toLowerCase().includes(q));
   }, [search, banks]);
-
-  const [resolvedName, setResolvedName] = useState(null);
-  const [resolving, setResolving] = useState(false);
-  const [resolveError, setResolveError] = useState('');
 
   useEffect(() => {
     if (accountNumber.length === 10 && selectedBank) {
@@ -54,14 +62,34 @@ export default function BankAccountScreen({ navigation }) {
     setResolveError('');
   }, [accountNumber, selectedBank]);
 
-  const canContinue = selectedBank && accountNumber.length === 10 && resolvedName;
+  const canSubmit =
+    firstName.trim() &&
+    lastName.trim() &&
+    bvn.length === 11 &&
+    selectedBank &&
+    accountNumber.length === 10 &&
+    resolvedName &&
+    !submitting;
 
-  const onContinue = () => {
-    navigation.navigate('WithdrawAmount', {
-      bank: selectedBank,
-      accountNumber,
-      accountName: resolvedName,
-    });
+  const onSubmit = async () => {
+    setSubmitError('');
+    setSubmitting(true);
+    try {
+      await apiPost('/verify-bvn', {
+        uid: user.uid,
+        bvn,
+        bank_code: selectedBank.code,
+        account_number: accountNumber,
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
+      });
+      await refreshBvnStatus();
+      navigation.goBack();
+    } catch (err) {
+      setSubmitError(err.message || 'Verification failed. Please check your details and try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -70,33 +98,44 @@ export default function BankAccountScreen({ navigation }) {
         <Pressable onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </Pressable>
-        <Text style={styles.headerTitle}>Bank Account</Text>
+        <Text style={styles.headerTitle}>Verify BVN</Text>
         <View style={{ width: 24 }} />
       </View>
 
       <View style={styles.body}>
-        <Text style={styles.label}>Bank</Text>
-        <Pressable
-          style={styles.selectField}
-          onPress={() => setPickerVisible(true)}
-        >
+        <Text style={styles.subtitle}>
+          We use your Bank Verification Number to confirm your identity before enabling withdrawals, airtime, data, and deposits.
+        </Text>
+
+        {submitError ? <Text style={styles.error}>{submitError}</Text> : null}
+
+        <Text style={styles.label}>First Name</Text>
+        <FloatingInput label="First Name" value={firstName} onChangeText={setFirstName} />
+
+        <Text style={[styles.label, { marginTop: spacing(5) }]}>Last Name</Text>
+        <FloatingInput label="Last Name" value={lastName} onChangeText={setLastName} />
+
+        <Text style={[styles.label, { marginTop: spacing(5) }]}>BVN</Text>
+        <FloatingInput
+          label="11-digit BVN"
+          value={bvn}
+          onChangeText={setBvn}
+          keyboardType="number-pad"
+          maxLength={11}
+        />
+
+        <Text style={[styles.label, { marginTop: spacing(5) }]}>Bank</Text>
+        <Pressable style={styles.selectField} onPress={() => setPickerVisible(true)}>
           {selectedBank?.logo ? (
             <Image source={{ uri: selectedBank.logo }} style={styles.selectedLogo} />
           ) : null}
-          <Text
-            style={[
-              styles.selectFieldText,
-              !selectedBank && { color: colors.textSecondary },
-            ]}
-          >
+          <Text style={[styles.selectFieldText, !selectedBank && { color: colors.textSecondary }]}>
             {selectedBank ? selectedBank.name : 'Select your bank'}
           </Text>
           <Ionicons name="chevron-down" size={18} color={colors.textSecondary} style={{ marginLeft: 'auto' }} />
         </Pressable>
 
-        <Text style={[styles.label, { marginTop: spacing(5) }]}>
-          Account Number
-        </Text>
+        <Text style={[styles.label, { marginTop: spacing(5) }]}>Account Number</Text>
         <FloatingInput
           label="Account Number"
           value={accountNumber}
@@ -124,9 +163,10 @@ export default function BankAccountScreen({ navigation }) {
         <View style={{ flex: 1 }} />
 
         <PrimaryButton
-          title="Continue"
-          onPress={onContinue}
-          disabled={!canContinue}
+          title="Verify"
+          onPress={onSubmit}
+          loading={submitting}
+          disabled={!canSubmit}
         />
       </View>
 
@@ -136,10 +176,7 @@ export default function BankAccountScreen({ navigation }) {
         transparent
         onRequestClose={() => setPickerVisible(false)}
       >
-        <Pressable
-          style={styles.modalBackdrop}
-          onPress={() => setPickerVisible(false)}
-        />
+        <Pressable style={styles.modalBackdrop} onPress={() => setPickerVisible(false)} />
         <View style={styles.modalSheet}>
           <Text style={styles.modalTitle}>Select Bank</Text>
           <TextInput
@@ -188,85 +225,58 @@ const getStyles = (colors) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: spacing(4),
-    paddingVertical: spacing(3),
+    paddingHorizontal: spacing(5),
+    paddingTop: spacing(4),
+    paddingBottom: spacing(3),
   },
-  headerTitle: { fontSize: 17, fontWeight: '600', color: colors.textPrimary },
-  body: { flex: 1, padding: spacing(6), paddingTop: spacing(2) },
-  label: { fontSize: 13, color: colors.textSecondary, marginBottom: spacing(2) },
+  headerTitle: { color: colors.textPrimary, fontSize: 18, fontWeight: '700' },
+  body: { flex: 1, paddingHorizontal: spacing(6), paddingTop: spacing(2), paddingBottom: spacing(6) },
+  subtitle: { color: colors.textSecondary, fontSize: 14, marginBottom: spacing(5) },
+  label: { color: colors.textPrimary, fontSize: 14, fontWeight: '600', marginBottom: spacing(2) },
+  error: { color: '#D32F2F', marginBottom: spacing(4) },
   selectField: {
-    backgroundColor: colors.bgCard,
-    borderRadius: radii.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingHorizontal: spacing(4),
-    height: 52,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing(2),
-  },
-  selectedLogo: { width: 24, height: 24, borderRadius: 12 },
-  selectFieldText: { fontSize: 15, color: colors.textPrimary },
-  input: {
-    backgroundColor: colors.bgCard,
-    color: colors.textPrimary,
-    borderRadius: radii.md,
-    paddingHorizontal: spacing(4),
-    height: 52,
     borderWidth: 1,
     borderColor: colors.border,
-    fontSize: 15,
+    borderRadius: radii.md,
+    paddingHorizontal: spacing(4),
+    paddingVertical: spacing(4),
   },
+  selectedLogo: { width: 24, height: 24, borderRadius: 12, marginRight: spacing(2) },
+  selectFieldText: { color: colors.textPrimary, fontSize: 15 },
   resolvedCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing(2),
-    marginTop: spacing(3),
-    padding: spacing(3),
+    backgroundColor: colors.bgElevated,
     borderRadius: radii.md,
-    backgroundColor: '#e6f4ea',
+    padding: spacing(3),
+    marginTop: spacing(3),
   },
-  resolvedText: { fontSize: 15, fontWeight: '600', color: '#008751' },
+  resolvedText: { color: colors.textPrimary, fontSize: 14 },
   modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' },
   modalSheet: {
     backgroundColor: colors.bg,
     borderTopLeftRadius: radii.lg,
     borderTopRightRadius: radii.lg,
-    height: '70%',
     padding: spacing(5),
+    maxHeight: '75%',
   },
-  modalTitle: {
-    fontSize: 17,
-    fontWeight: '600',
-    color: colors.textPrimary,
-    marginBottom: spacing(3),
-  },
+  modalTitle: { color: colors.textPrimary, fontSize: 16, fontWeight: '700', marginBottom: spacing(3) },
   searchInput: {
-    backgroundColor: colors.bgCard,
-    color: colors.textPrimary,
-    borderRadius: radii.md,
-    paddingHorizontal: spacing(4),
-    height: 44,
-    marginBottom: spacing(3),
     borderWidth: 1,
     borderColor: colors.border,
-  },
-  bankRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing(3),
+    borderRadius: radii.md,
+    paddingHorizontal: spacing(4),
     paddingVertical: spacing(3),
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    color: colors.textPrimary,
+    marginBottom: spacing(3),
   },
-  bankLogo: { width: 32, height: 32, borderRadius: 16 },
+  bankRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: spacing(3) },
+  bankLogo: { width: 28, height: 28, borderRadius: 14, marginRight: spacing(3) },
   bankLogoFallback: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: colors.bgCard,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 28, height: 28, borderRadius: 14, marginRight: spacing(3),
+    backgroundColor: colors.bgElevated, alignItems: 'center', justifyContent: 'center',
   },
-  bankRowText: { fontSize: 15, color: colors.textPrimary, flexShrink: 1 },
+  bankRowText: { color: colors.textPrimary, fontSize: 15 },
 });

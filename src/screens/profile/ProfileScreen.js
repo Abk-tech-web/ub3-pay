@@ -3,18 +3,22 @@ import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
-import { colors, spacing, radii } from '../../config/theme';
+import { useTheme } from '../../context/ThemeContext';
+import { spacing, radii } from '../../config/theme';
 import { useAuth } from '../../context/AuthContext';
 
 const ROWS = [
+  { key: 'VerifyBvn', label: 'Verify BVN', icon: 'shield', color: '#34d399' },
   { key: 'SecuritySettings', label: 'Security', icon: 'lock', color: '#60a5fa' },
   { key: 'PinSetup', label: 'Transaction PIN', icon: 'key', color: '#a78bfa' },
   { key: 'WalletSettings', label: 'Operational wallets', icon: 'briefcase', color: '#34d399' },
 ];
 
 export default function ProfileScreen({ navigation }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const { user, signOut } = useAuth();
-  const verified = user?.kycStatus === 'approved';
+  const verified = user?.bvnVerified === true;
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -73,7 +77,7 @@ export default function ProfileScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   body: { flex: 1, padding: spacing(6), alignItems: 'center' },
   avatarWrap: { marginTop: spacing(4) },
@@ -94,7 +98,7 @@ const styles = StyleSheet.create({
   },
   kycText: { fontSize: 11, fontWeight: '700' },
   card: {
-    width: '100%', backgroundColor: '#1c1c22', borderRadius: radii.md,
+    width: '100%', backgroundColor: colors.bgCard, borderRadius: radii.md,
     borderWidth: 1, borderColor: colors.border, overflow: 'hidden',
   },
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing(3), padding: spacing(4) },
@@ -103,7 +107,7 @@ const styles = StyleSheet.create({
   rowLabel: { flex: 1, color: colors.textPrimary, fontSize: 15, fontWeight: '600' },
   signOutCard: {
     width: '100%', flexDirection: 'row', alignItems: 'center', gap: spacing(3),
-    backgroundColor: '#1c1c22', borderRadius: radii.md, borderWidth: 1, borderColor: '#3a1a1f',
+    backgroundColor: colors.bgCard, borderRadius: radii.md, borderWidth: 1, borderColor: '#3a1a1f',
     padding: spacing(4),
   },
 });
