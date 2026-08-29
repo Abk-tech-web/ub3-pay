@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, FlatList, Pressable, Modal, Image, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TextInput, FlatList, Pressable, Modal, Image, ActivityIndicator, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -93,6 +93,7 @@ export default function VerifyBvnScreen({ navigation }) {
   };
 
   return (
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
         <Pressable onPress={() => navigation.goBack()}>
@@ -102,7 +103,7 @@ export default function VerifyBvnScreen({ navigation }) {
         <View style={{ width: 24 }} />
       </View>
 
-      <View style={styles.body}>
+      <ScrollView style={styles.body} contentContainerStyle={{ paddingBottom: spacing(10) }}>
         <Text style={styles.subtitle}>
           We use your Bank Verification Number to confirm your identity before enabling withdrawals, airtime, data, and deposits.
         </Text>
@@ -168,7 +169,7 @@ export default function VerifyBvnScreen({ navigation }) {
           loading={submitting}
           disabled={!canSubmit}
         />
-      </View>
+      </ScrollView>
 
       <Modal
         visible={pickerVisible}
@@ -216,6 +217,7 @@ export default function VerifyBvnScreen({ navigation }) {
         </View>
       </Modal>
     </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 }
 

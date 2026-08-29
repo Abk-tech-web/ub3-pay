@@ -12,6 +12,7 @@
       "resizeMode": "contain"
     },
     "android": {
+    "softwareKeyboardLayoutMode": "resize",
       "package": "app.ub3pay.wallet",
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
