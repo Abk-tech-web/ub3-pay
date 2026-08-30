@@ -6,7 +6,6 @@ import { radii, spacing } from '../config/theme';
 import { useTheme } from '../context/ThemeContext';
 import { formatUsd, formatNgn } from '../utils/formatters';
 import { useAuth } from '../context/AuthContext';
-import { getNairaAccount } from '../services/baasService';
 import * as Clipboard from 'expo-clipboard';
 
 export default function BalanceCard({ totalUsd, totalNgn, totalPnl24hUsd = 0, stale = false }) {
@@ -14,7 +13,7 @@ export default function BalanceCard({ totalUsd, totalNgn, totalPnl24hUsd = 0, st
   const { user } = useAuth();
   const [hidden, setHidden] = useState(false);
   const [tab, setTab] = useState('account');
-  const [account, setAccount] = useState(null);
+  const account = user && user.accountNumber ? { accountNumber: user.accountNumber, bankName: user.accountBank } : null;
   const [copied, setCopied] = useState(false);
   const fade = useRef(new Animated.Value(0)).current;
   const shimmer = useRef(new Animated.Value(0)).current;
@@ -29,11 +28,6 @@ export default function BalanceCard({ totalUsd, totalNgn, totalPnl24hUsd = 0, st
     ).start();
   }, []);
 
-  useEffect(() => {
-    if (user) {
-      getNairaAccount(user.uid).then(setAccount).catch(() => {});
-    }
-  }, [user]);
 
   const pnlPositive = totalPnl24hUsd >= 0;
   const pnlPct = totalUsd > 0 ? (totalPnl24hUsd / (totalUsd - totalPnl24hUsd)) * 100 : 0;
@@ -98,7 +92,7 @@ export default function BalanceCard({ totalUsd, totalNgn, totalPnl24hUsd = 0, st
             <Pressable style={styles.acctValueRow} onPress={handleCopy} hitSlop={8}>
               <Text style={styles.acctValue} numberOfLines={1}>
                 {tab === 'account'
-                  ? (account ? `${account.accountNumber} \u00b7 ${account.bankName}` : 'Loading...')
+                  ? (account ? `${account.accountNumber} \u00b7 ${account.bankName}` : 'Not verified')
                   : (user?.uid || '\u2014')}
               </Text>
               <Feather name={copied ? 'check' : 'copy'} size={14} color="rgba(255,255,255,0.85)" />

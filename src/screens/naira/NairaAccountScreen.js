@@ -4,7 +4,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { spacing, radii } from '../../config/theme';
 import { useAuth } from '../../context/AuthContext';
-import SkeletonLoader from '../../components/SkeletonLoader';
 
 export default function NairaAccountScreen({ navigation }) {
   const { colors } = useTheme();
@@ -31,7 +30,12 @@ export default function NairaAccountScreen({ navigation }) {
               <Text style={styles.cardValue}>{account.accountName}</Text>
             </>
           ) : (
-            <SkeletonLoader height={100} />
+            <View style={{ alignItems: 'center', paddingVertical: spacing(4) }}>
+                <Text style={{ color: colors.textSecondary, fontSize: 14, textAlign: 'center', marginBottom: spacing(3) }}>Verify your BVN to activate your Naira account.</Text>
+                <Pressable onPress={() => navigation.navigate('VerifyBvn')} style={{ backgroundColor: colors.violet, paddingVertical: spacing(2.5), paddingHorizontal: spacing(5), borderRadius: radii.pill }}>
+                  <Text style={{ color: '#fff', fontWeight: '700' }}>Verify BVN</Text>
+                </Pressable>
+              </View>
           )}
         </View>
 
