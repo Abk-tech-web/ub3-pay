@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { View, TextInput, Text, Animated, StyleSheet } from 'react-native';
-import { colors, spacing, radii } from '../config/theme';
+import { useTheme } from '../context/ThemeContext';
+import { spacing, radii } from '../config/theme';
 
 export default function FloatingInput({
   label,
@@ -12,6 +13,8 @@ export default function FloatingInput({
   rightElement,
   containerStyle,
 }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const [focused, setFocused] = useState(false);
   const anim = useRef(new Animated.Value(value ? 1 : 0)).current;
 
@@ -88,7 +91,7 @@ export default function FloatingInput({
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   card: {
     backgroundColor: colors.bgCard,
     borderRadius: radii.md,

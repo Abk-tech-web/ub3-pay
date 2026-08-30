@@ -1,10 +1,13 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, spacing, radii } from '../../config/theme';
+import { useTheme } from '../../context/ThemeContext';
+import { spacing, radii } from '../../config/theme';
 import TokenIcon from '../../components/TokenIcon';
 
 export default function NetworkPickerScreen({ navigation, route }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const { symbol, networks, targetRoute } = route.params;
 
   return (
@@ -35,7 +38,7 @@ export default function NetworkPickerScreen({ navigation, route }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   header: { paddingHorizontal: spacing(6), paddingTop: spacing(8), paddingBottom: spacing(4) },
   title: { color: colors.textPrimary, fontSize: 22, fontWeight: '800' },

@@ -1,8 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { colors, radii, spacing } from '../config/theme';
+import { useTheme } from '../context/ThemeContext';
+import { radii, spacing } from '../config/theme';
 
 export default function NetworkBadge({ label }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   return (
     <View style={styles.badge}>
       <View style={styles.dot} />
@@ -11,7 +14,7 @@ export default function NetworkBadge({ label }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   badge: {
     flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start',
     backgroundColor: colors.bgElevated, borderRadius: radii.pill,

@@ -1,9 +1,12 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
-import { colors, spacing } from '../config/theme';
+import { useTheme } from '../context/ThemeContext';
+import { spacing } from '../config/theme';
 import { formatNgn } from '../utils/formatters';
 
 export default function NgnListItem({ balance, onPress }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   return (
     <Pressable onPress={onPress} style={({ pressed }) => [styles.row, pressed && styles.pressed]}>
       <View style={styles.flagCircle}><Text style={{ fontSize: 20, color: '#008751', fontWeight: '800' }}>₦</Text></View>
@@ -18,7 +21,7 @@ export default function NgnListItem({ balance, onPress }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', paddingVertical: spacing(3) },
   pressed: { opacity: 0.6 },
   flagCircle: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#e6f4ea', alignItems: 'center', justifyContent: 'center' },

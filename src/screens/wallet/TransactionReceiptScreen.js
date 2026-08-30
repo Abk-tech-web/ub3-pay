@@ -5,7 +5,8 @@ import { Ionicons } from '@expo/vector-icons';
 import ViewShot from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 import * as Clipboard from 'expo-clipboard';
-import { colors, spacing, radii } from '../../config/theme';
+import { useTheme } from '../../context/ThemeContext';
+import { spacing, radii } from '../../config/theme';
 import PrimaryButton from '../../components/PrimaryButton';
 
 const UB3_LOGO = require('../../assets/images/logo.png');
@@ -23,6 +24,8 @@ function genSessionId() {
 }
 
 export default function TransactionReceiptScreen({ navigation, route }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const {
     amountPrefix = '',
     amount,
@@ -146,7 +149,7 @@ export default function TransactionReceiptScreen({ navigation, route }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   body: { flex: 1, padding: spacing(6), paddingTop: spacing(6) },
   scrollContent: { flexGrow: 1, paddingBottom: spacing(2) },

@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, spacing, radii } from '../../config/theme';
+import { useTheme } from '../../context/ThemeContext';
+import { spacing, radii } from '../../config/theme';
 import PrimaryButton from '../../components/PrimaryButton';
 import * as swapService from '../../services/swapService';
 import { formatNgn, formatCrypto } from '../../utils/formatters';
 import { isPositiveAmount } from '../../utils/validators';
 
 export default function SwapCryptoToNairaScreen({ route, navigation }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const { symbol = 'USDT' } = route.params ?? {};
   const [amount, setAmount] = useState('');
   const [quote, setQuote] = useState(null);
@@ -66,7 +69,7 @@ export default function SwapCryptoToNairaScreen({ route, navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   body: { flex: 1, padding: spacing(6) },
   title: { color: colors.textPrimary, fontSize: 22, fontWeight: '800', marginBottom: spacing(6) },

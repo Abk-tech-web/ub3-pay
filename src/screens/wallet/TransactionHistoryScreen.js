@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, spacing } from '../../config/theme';
+import { useTheme } from '../../context/ThemeContext';
+import { spacing } from '../../config/theme';
 import { useAuth } from '../../context/AuthContext';
 import * as walletService from '../../services/walletService';
 import EmptyState from '../../components/EmptyState';
 import { timeAgo } from '../../utils/formatters';
 
 export default function TransactionHistoryScreen() {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const { user } = useAuth();
   const [txs, setTxs] = useState([]);
 
@@ -36,7 +39,7 @@ export default function TransactionHistoryScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   row: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: spacing(3), borderBottomWidth: 1, borderBottomColor: colors.border },
   type: { color: colors.textPrimary, fontWeight: '600', textTransform: 'capitalize' },

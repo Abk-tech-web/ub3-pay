@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, spacing, radii } from '../../config/theme';
+import { useTheme } from '../../context/ThemeContext';
+import { spacing, radii } from '../../config/theme';
 import PrimaryButton from '../../components/PrimaryButton';
 
 const STEPS = [
@@ -11,6 +12,8 @@ const STEPS = [
 ];
 
 export default function KycIntroScreen({ navigation }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.body}>
@@ -39,7 +42,7 @@ export default function KycIntroScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   body: { flex: 1, paddingHorizontal: spacing(6), paddingTop: spacing(10), paddingBottom: spacing(6) },
   title: { color: colors.textPrimary, fontSize: 26, fontWeight: '800' },

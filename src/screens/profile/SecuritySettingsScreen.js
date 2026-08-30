@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Switch, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, spacing } from '../../config/theme';
+import { useTheme } from '../../context/ThemeContext';
+import { spacing } from '../../config/theme';
 
 export default function SecuritySettingsScreen({ navigation }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const [biometric, setBiometric] = useState(false);
 
   return (
@@ -29,7 +32,7 @@ export default function SecuritySettingsScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   body: { flex: 1, padding: spacing(6) },
   title: { color: colors.textPrimary, fontSize: 22, fontWeight: '800', marginBottom: spacing(6) },

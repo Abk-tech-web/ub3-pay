@@ -3,7 +3,8 @@ import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
-import { colors, spacing, radii } from '../../config/theme';
+import { useTheme } from '../../context/ThemeContext';
+import { spacing, radii } from '../../config/theme';
 import { formatUsd, formatCrypto } from '../../utils/formatters';
 import { getChain, getNetworksForSymbol } from '../../config/chains';
 import TokenIcon from '../../components/TokenIcon';
@@ -15,7 +16,7 @@ const ACTIONS_META = {
   'Swap to NGN': { icon: 'repeat', gradient: ['#a78bfa', '#7c3aed'] },
 };
 
-function ActionPill({ label, onPress }) {
+function ActionPill({ label, onPress, styles }) {
   const meta = ACTIONS_META[label];
   return (
     <Pressable style={styles.actionWrap} onPress={onPress}>
@@ -28,6 +29,8 @@ function ActionPill({ label, onPress }) {
 }
 
 export default function AssetDetailScreen({ route, navigation }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const { asset } = route.params ?? {};
   const chain = getChain(asset?.chainId);
 
@@ -53,7 +56,7 @@ export default function AssetDetailScreen({ route, navigation }) {
           <PriceChart symbol={asset?.symbol} />
 
         <View style={styles.actionsRow}>
-          <ActionPill
+          <ActionPill styles={styles}
             label="Receive"
             onPress={() => {
               const nets = getNetworksForSymbol(asset?.symbol);
@@ -64,11 +67,11 @@ export default function AssetDetailScreen({ route, navigation }) {
               }
             }}
           />
-          <ActionPill
+          <ActionPill styles={styles}
             label="Send"
             onPress={() => navigation.navigate('Send', { chainId: asset?.chainId, symbol: asset?.symbol })}
           />
-          <ActionPill
+          <ActionPill styles={styles}
             label="Swap to NGN"
             onPress={() => navigation.navigate('SwapTab', { screen: 'Swap', params: { symbol: asset?.symbol } })}
           />
@@ -78,12 +81,12 @@ export default function AssetDetailScreen({ route, navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   glow: { position: 'absolute', top: 0, left: 0, right: 0, height: 320, opacity: 0.5 },
   body: { flex: 1, padding: spacing(5) },
   backBtn: {
-    width: 38, height: 38, borderRadius: 14, backgroundColor: '#232329',
+    width: 38, height: 38, borderRadius: 14, backgroundColor: colors.bgElevated,
     alignItems: 'center', justifyContent: 'center', marginBottom: spacing(4),
   },
   center: { alignItems: 'center', marginTop: spacing(4) },

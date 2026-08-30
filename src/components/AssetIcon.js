@@ -1,10 +1,12 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../config/theme';
+import { useTheme } from '../context/ThemeContext';
 import TokenIcon from './TokenIcon';
 
 export default function AssetIcon({ kind, symbol, size = 42 }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const wrap = { width: size, height: size, borderRadius: size / 2 };
 
   if (kind === 'bank') {
@@ -25,6 +27,6 @@ export default function AssetIcon({ kind, symbol, size = 42 }) {
   return <TokenIcon symbol={(symbol || '').toUpperCase()} size={size} />;
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   circle: { alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
 });

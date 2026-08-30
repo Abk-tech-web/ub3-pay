@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, Pressable, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, radii } from '../../config/theme';
+import { useTheme } from '../../context/ThemeContext';
+import { spacing, radii } from '../../config/theme';
 import PrimaryButton from '../../components/PrimaryButton';
 import { useAuth } from '../../context/AuthContext';
 import { NETWORKS, buyAirtime } from '../../services/billService';
@@ -14,6 +15,8 @@ import NetworkSelectorModal from '../../components/NetworkSelectorModal';
 const QUICK_AMOUNTS = [50, 100, 200, 1000, 2000, 10000];
 
 export default function AirtimeScreen({ navigation }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const { user } = useAuth();
   const [network, setNetwork] = useState('mtn');
   const [phone, setPhone] = useState('');
@@ -125,7 +128,7 @@ export default function AirtimeScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing(4), paddingTop: spacing(2), paddingBottom: spacing(3) },
   headerTitle: { color: colors.textPrimary, fontSize: 18, fontWeight: '700' },

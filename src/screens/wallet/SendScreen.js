@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, spacing, radii } from '../../config/theme';
+import { useTheme } from '../../context/ThemeContext';
+import { spacing, radii } from '../../config/theme';
 import PrimaryButton from '../../components/PrimaryButton';
 import ConfirmationSheet from '../../components/ConfirmationSheet';
 import FloatingInput from '../../components/FloatingInput';
@@ -13,6 +14,8 @@ import { isPositiveAmount } from '../../utils/validators';
 import { truncateAddress, formatUsd } from '../../utils/formatters';
 
 export default function SendScreen({ route, navigation }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const { chainId = 'bitcoin', symbol = 'BTC' } = route.params ?? {};
   const { user } = useAuth();
   const { adjustCryptoBalance, addActivity } = useWallet();
@@ -127,7 +130,7 @@ export default function SendScreen({ route, navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   body: { flex: 1, padding: spacing(6) },
   title: { color: colors.textPrimary, fontSize: 22, fontWeight: '800', marginBottom: spacing(6) },

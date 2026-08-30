@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, Modal, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, radii, spacing } from '../config/theme';
+import { useTheme } from '../context/ThemeContext';
+import { radii, spacing } from '../config/theme';
 import PrimaryButton from './PrimaryButton';
 
 export default function ConfirmationSheet({
@@ -13,6 +14,8 @@ export default function ConfirmationSheet({
   onCancel,
   loading,
 }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onCancel}>
       <View style={styles.backdrop}>
@@ -46,7 +49,7 @@ export default function ConfirmationSheet({
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.65)', justifyContent: 'flex-end' },
   sheet: {
     backgroundColor: colors.bgCard,

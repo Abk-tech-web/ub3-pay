@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, spacing, radii } from '../../config/theme';
+import { useTheme } from '../../context/ThemeContext';
+import { spacing, radii } from '../../config/theme';
 import PrimaryButton from '../../components/PrimaryButton';
 import * as kycService from '../../services/kycService';
 
 export default function KycLivenessScreen({ navigation }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const [loading, setLoading] = useState(false);
 
   const onCapture = async () => {
@@ -34,7 +37,7 @@ export default function KycLivenessScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   body: { flex: 1, paddingHorizontal: spacing(6), paddingTop: spacing(10), paddingBottom: spacing(6), alignItems: 'center' },
   frame: {

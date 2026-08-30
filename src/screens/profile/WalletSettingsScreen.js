@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, spacing, radii } from '../../config/theme';
+import { useTheme } from '../../context/ThemeContext';
+import { spacing, radii } from '../../config/theme';
 import PrimaryButton from '../../components/PrimaryButton';
 import * as walletConfigService from '../../services/walletConfigService';
 
@@ -11,6 +12,8 @@ import * as walletConfigService from '../../services/walletConfigService';
 // buys/sells actually settling against the liquidity wallet) requires a
 // wallet-infra/custody provider wired into walletService.js first.
 export default function WalletSettingsScreen() {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const [revenueWallet, setRevenueWallet] = useState('');
   const [liquidityWallet, setLiquidityWallet] = useState('');
   const [nairaAccount, setNairaAccount] = useState('');
@@ -88,7 +91,7 @@ export default function WalletSettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   body: { padding: spacing(6), paddingTop: spacing(10) },
   title: { color: colors.textPrimary, fontSize: 22, fontWeight: '800' },

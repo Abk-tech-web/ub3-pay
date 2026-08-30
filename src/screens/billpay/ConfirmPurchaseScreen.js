@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, spacing, radii } from '../../config/theme';
+import { useTheme } from '../../context/ThemeContext';
+import { spacing, radii } from '../../config/theme';
 import PrimaryButton from '../../components/PrimaryButton';
 import { useWallet } from '../../context/WalletContext';
 import { formatNgn } from '../../utils/formatters';
@@ -9,6 +10,8 @@ import { NETWORKS } from '../../services/billService';
 import NetworkIcon from '../../components/NetworkIcon';
 
 export default function ConfirmPurchaseScreen({ navigation, route }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const { kind, network, phone, amount, planLabel, planId } = route.params;
   const networkObj = NETWORKS.find((n) => n.id === network);
   const { portfolio } = useWallet();
@@ -70,7 +73,7 @@ export default function ConfirmPurchaseScreen({ navigation, route }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   body: { flex: 1, padding: spacing(6), paddingTop: spacing(10) },
   amount: { color: colors.textPrimary, fontSize: 36, fontWeight: '800', textAlign: 'center', marginBottom: spacing(6) },

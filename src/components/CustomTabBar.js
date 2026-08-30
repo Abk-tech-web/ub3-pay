@@ -1,73 +1,62 @@
 import React from 'react';
 import { View, Pressable, Text, StyleSheet } from 'react-native';
-import { Feather } from '@expo/vector-icons';
-import { colors, radii, spacing } from '../config/theme';
+import { Feather, Ionicons } from '@expo/vector-icons';
+import { spacing } from '../config/theme';
+import { useTheme } from '../context/ThemeContext';
 
 const META = {
-  HomeTab: { icon: 'credit-card', color: '#60a5fa' },
+  HomeTab: { icon: 'wallet-outline', lib: 'ionicons', color: '#60a5fa' },
   SwapTab: { icon: 'repeat', color: '#a78bfa' },
-  NairaTab: { symbol: '₦', color: '#34d399' },
+  NairaTab: { symbol: '\u20a6', color: '#34d399', alwaysTinted: true },
   ActivityTab: { icon: 'clock', color: '#fb923c' },
   ProfileTab: { icon: 'user', color: '#f472b6' },
 };
 
 export default function CustomTabBar({ state, descriptors, navigation }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
+
   return (
-    <View style={styles.wrap}>
-      <View style={styles.bar}>
-        {state.routes.map((route, index) => {
-          const { options } = descriptors[route.key];
-          const label = options.title ?? route.name;
-          const isFocused = state.index === index;
-          const meta = META[route.name];
+    <View style={styles.bar}>
+      {state.routes.map((route, index) => {
+        const { options } = descriptors[route.key];
+        const label = options.title ?? route.name;
+        const isFocused = state.index === index;
+        const meta = META[route.name];
+        const tint = (isFocused || meta.alwaysTinted) ? meta.color : colors.textSecondary;
 
-          const onPress = () => {
-            const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
-            if (!isFocused && !event.defaultPrevented) navigation.navigate(route.name);
-          };
+        const onPress = () => {
+          const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
+          if (!isFocused && !event.defaultPrevented) navigation.navigate(route.name);
+        };
 
-          const IconEl = meta.symbol ? (
-            <Text style={[styles.nairaSymbol, { color: isFocused ? '#fff' : meta.color }]}>{meta.symbol}</Text>
-          ) : (
-            <Feather name={meta.icon} size={isFocused ? 16 : 18} color={isFocused ? '#fff' : meta.color} />
-          );
-
-          return (
-            <Pressable key={route.key} onPress={onPress} style={styles.item}>
-              {isFocused ? (
-                <View style={[styles.activePill, { backgroundColor: meta.color }]}>
-                  {IconEl}
-                  <Text style={styles.activeLabel}>{label}</Text>
-                </View>
-              ) : (
-                <View style={[styles.inactiveChip, { backgroundColor: meta.color + '1f' }]}>
-                  {IconEl}
-                </View>
-              )}
-            </Pressable>
-          );
-        })}
-      </View>
+        return (
+          <Pressable key={route.key} onPress={onPress} style={styles.item}>
+            {meta.symbol ? (
+              <Text style={[styles.nairaSymbol, { color: tint }]}>{meta.symbol}</Text>
+            ) : meta.lib === 'ionicons' ? (
+              <Ionicons name={meta.icon} size={26} color={tint} />
+            ) : (
+              <Feather name={meta.icon} size={26} color={tint} />
+            )}
+            <Text style={[styles.label, { color: isFocused ? meta.color : colors.textSecondary, fontWeight: isFocused ? '700' : '500' }]}>{label}</Text>
+          </Pressable>
+        );
+      })}
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: { position: 'absolute', left: 0, right: 0, bottom: 0, alignItems: 'center', paddingBottom: 24 },
+const getStyles = (colors) => StyleSheet.create({
   bar: {
-    flexDirection: 'row', alignItems: 'center', gap: spacing(2),
-    backgroundColor: '#1c1c22', borderRadius: 30,
-    paddingVertical: 6, paddingHorizontal: 10,
-    borderWidth: 1, borderColor: colors.border,
-    shadowColor: '#000', shadowOpacity: 0.4, shadowRadius: 12, shadowOffset: { width: 0, height: 6 },
-    elevation: 10,
+    flexDirection: 'row',
+    backgroundColor: colors.bgElevated,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    paddingTop: spacing(2.5),
+    paddingBottom: spacing(6),
   },
-  item: {},
-  inactiveChip: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
-  activePill: {
-    flexDirection: 'row', alignItems: 'center', gap: spacing(1),
-    borderRadius: 22, paddingVertical: 10, paddingHorizontal: 14,
-  },
-  activeLabel: { color: '#fff', fontWeight: '700', fontSize: 12 },
-  nairaSymbol: { fontSize: 16, fontWeight: '800' },
+  item: { flex: 1, alignItems: 'center', gap: 4 },
+  label: { fontSize: 11 },
+  nairaSymbol: { fontSize: 24, fontWeight: '800', lineHeight: 28 },
 });

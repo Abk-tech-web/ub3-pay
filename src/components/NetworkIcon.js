@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
-import { colors, radii } from '../config/theme';
+import { useTheme } from '../context/ThemeContext';
+import { radii } from '../config/theme';
 
 export default function NetworkIcon({ network, size = 36 }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const [failed, setFailed] = useState(false);
   const dim = { width: size, height: size, borderRadius: size / 2 };
 
@@ -28,7 +31,7 @@ export default function NetworkIcon({ network, size = 36 }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   wrap: { overflow: 'hidden', backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border },
   fallback: { backgroundColor: colors.violet, alignItems: 'center', justifyContent: 'center' },
   fallbackText: { color: colors.bg, fontWeight: '800' },

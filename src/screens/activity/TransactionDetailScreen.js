@@ -3,7 +3,8 @@ import { View, Text, StyleSheet, Pressable, Share, Linking } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
-import { colors, spacing, radii } from '../../config/theme';
+import { useTheme } from '../../context/ThemeContext';
+import { spacing, radii } from '../../config/theme';
 import { getChain } from '../../config/chains';
 
 function statusStyle(status) {
@@ -11,7 +12,7 @@ function statusStyle(status) {
   if (s === 'success' || s === 'completed' || s === 'confirmed') return { bg: '#0f2e22', fg: '#34d399', text: 'Success' };
   if (s === 'pending' || s === 'processing') return { bg: '#2e2a0f', fg: '#facc15', text: 'Pending' };
   if (s === 'failed' || s === 'error') return { bg: '#2e0f14', fg: '#f87171', text: 'Failed' };
-  return { bg: '#232329', fg: colors.textSecondary, text: status || '—' };
+  return { bg: colors.bgElevated, fg: colors.textSecondary, text: status || '—' };
 }
 
 function Row({ label, value }) {
@@ -25,6 +26,8 @@ function Row({ label, value }) {
 }
 
 export default function TransactionDetailScreen({ route }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const { item } = route.params ?? {};
   const isCrypto = !!item.txHash;
   const chain = isCrypto ? getChain(item.chainId) : null;
@@ -98,7 +101,7 @@ export default function TransactionDetailScreen({ route }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   glow: { position: 'absolute', top: 0, left: 0, right: 0, height: 300, opacity: 0.5 },
   body: { flex: 1, padding: spacing(6) },
@@ -125,7 +128,7 @@ const styles = StyleSheet.create({
   explorerLabel: { color: '#fff', fontWeight: '700', fontSize: 14 },
   receiptBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing(2),
-    backgroundColor: '#232329', borderRadius: radii.pill, paddingVertical: spacing(4), marginTop: spacing(3),
+    backgroundColor: colors.bgElevated, borderRadius: radii.pill, paddingVertical: spacing(4), marginTop: spacing(3),
     borderWidth: 1, borderColor: colors.border,
   },
   receiptLabel: { color: colors.textPrimary, fontWeight: '700', fontSize: 14 },

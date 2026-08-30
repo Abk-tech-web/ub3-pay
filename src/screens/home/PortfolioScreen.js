@@ -3,14 +3,15 @@ import { View, Text, FlatList, StyleSheet, Pressable, RefreshControl } from 'rea
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import ActionButton from '../../components/ActionButton';
-import BillCard from '../../components/BillCard';
-import { colors, spacing, radii } from '../../config/theme';
+import { spacing } from '../../config/theme';
+import { useTheme } from '../../context/ThemeContext';
 import Logo from '../../components/Logo';
 import BalanceCard from '../../components/BalanceCard';
 import AssetListItem from '../../components/AssetListItem';
 import NgnListItem from '../../components/NgnListItem';
 import EmptyState from '../../components/EmptyState';
 import { useAuth } from '../../context/AuthContext';
+import { groupAssetsBySymbol } from '../../services/walletService';
 import { useWallet } from '../../context/WalletContext';
 
 const ACTIONS = [
@@ -19,9 +20,13 @@ const ACTIONS = [
   { key: 'BuyCrypto', label: 'Buy', icon: 'trending-up', gradient: ['#a78bfa', '#7c3aed'] },
   { key: 'SellCrypto', label: 'Sell', icon: 'trending-down', gradient: ['#fb923c', '#ea580c'] },
   { key: 'Withdraw', label: 'Withdraw', icon: 'arrow-up', gradient: ['#f472b6', '#db2777'] },
+  { key: 'Airtime', label: 'Airtime', icon: 'phone', gradient: ['#2dd4bf', '#0d9488'] },
+  { key: 'Data', label: 'Data', icon: 'wifi', gradient: ['#818cf8', '#4f46e5'] },
 ];
 
 export default function PortfolioScreen({ navigation }) {
+  const { colors, isDark, toggleTheme } = useTheme();
+  const styles = getStyles(colors);
   const { user } = useAuth();
   const { portfolio, refreshing, refreshPortfolio } = useWallet();
 
@@ -37,19 +42,26 @@ export default function PortfolioScreen({ navigation }) {
         contentContainerStyle={styles.list}
         ListHeaderComponent={
           <>
-            <Logo size={20} />
+            <View style={styles.topRow}>
+              <Logo size={20} />
+              <Pressable onPress={toggleTheme} style={styles.themeToggle} hitSlop={10}>
+                <Feather name={isDark ? 'moon' : 'sun'} size={18} color={colors.textPrimary} />
+              </Pressable>
+            </View>
             <BalanceCard totalUsd={portfolio.totalUsd} totalNgn={portfolio.totalNgn} totalPnl24hUsd={portfolio.totalPnl24hUsd} />
 
-        <View style={styles.actionsRow}>
-          {ACTIONS.map((a) => (
-            <ActionButton key={a.key} icon={a.icon} label={a.label} gradient={a.gradient} onPress={() => navigation.navigate(a.key)} />
-          ))}
-        </View>
-
-        <View style={styles.billsRow}>
-          <BillCard icon="phone" label="Airtime" accent="#34d399" onPress={() => navigation.navigate('Airtime')} />
-          <BillCard icon="wifi" label="Data" accent="#60a5fa" onPress={() => navigation.navigate('Data')} />
-        </View>
+            <View style={styles.actionsRow}>
+              {ACTIONS.map((a) => (
+                <ActionButton
+                  key={a.key}
+                  icon={a.icon}
+                  label={a.label}
+                  gradient={a.gradient}
+                  style={styles.actionItem}
+                  onPress={() => navigation.navigate(a.key)}
+                />
+              ))}
+            </View>
 
             <View style={styles.sectionHeaderRow}>
               <Text style={styles.sectionHeader}>Assets</Text>
@@ -59,7 +71,7 @@ export default function PortfolioScreen({ navigation }) {
             </View>
           </>
         }
-        data={[{ symbol: 'NGN', balance: portfolio.ngnBalance ?? 0 }, ...(portfolio.assets || [])]}
+        data={[{ symbol: 'NGN', balance: portfolio.ngnBalance ?? 0 }, ...groupAssetsBySymbol(portfolio.assets || [])]}
         keyExtractor={(item, i) => `${item.chainId}-${item.symbol}-${i}`}
         renderItem={({ item }) => (
           item.symbol === 'NGN' ? (<NgnListItem balance={item.balance} onPress={() => navigation.navigate('NairaDetail')} />) : (<AssetListItem asset={item} onPress={() => navigation.navigate('AssetDetail', { asset: item })} />)
@@ -74,17 +86,26 @@ export default function PortfolioScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   list: { padding: spacing(5) },
-  greeting: { color: colors.textSecondary, fontSize: 13, fontWeight: '700', letterSpacing: 1.5, marginBottom: spacing(3) },
-  actionsRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: spacing(5), marginBottom: spacing(4) },
-  actionBtn: { alignItems: 'center', width: '18%' },
-  actionIcon: { width: 48, height: 48, borderRadius: 24, backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border, marginBottom: spacing(2), alignItems: 'center', justifyContent: 'center' },
-  actionLabel: { color: colors.textPrimary, fontSize: 11, fontWeight: '600' },
-  billsRow: { flexDirection: 'row', gap: spacing(3), marginBottom: spacing(6) },
-  billBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing(2), backgroundColor: colors.bgCard, borderRadius: radii.md, paddingVertical: spacing(3), borderWidth: 1, borderColor: colors.border },
-  billLabel: { color: colors.textPrimary, fontWeight: '600', fontSize: 13 },
+  topRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing(3) },
+  themeToggle: {
+    width: 34, height: 34, borderRadius: 17,
+    alignItems: 'center', justifyContent: 'center',
+    backgroundColor: colors.bgCard,
+    borderWidth: 1, borderColor: colors.border,
+  },
+  actionsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
+    columnGap: spacing(3),
+    rowGap: spacing(4),
+    marginTop: spacing(5),
+    marginBottom: spacing(4),
+  },
+  actionItem: { width: '21%' },
   sectionHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing(2) },
   sectionHeader: { color: colors.textPrimary, fontSize: 16, fontWeight: '700' },
   sectionAction: { color: colors.violetSoft, fontSize: 13, fontWeight: '600' },

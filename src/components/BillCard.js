@@ -2,9 +2,12 @@ import React, { useRef } from 'react';
 import { Pressable, Animated, View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
-import { colors, radii, spacing } from '../config/theme';
+import { useTheme } from '../context/ThemeContext';
+import { radii, spacing } from '../config/theme';
 
 export default function BillCard({ icon, label, onPress, accent }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const scale = useRef(new Animated.Value(1)).current;
   const pressIn = () => Animated.spring(scale, { toValue: 0.96, useNativeDriver: true, speed: 40 }).start();
   const pressOut = () => Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 20 }).start();
@@ -29,7 +32,7 @@ export default function BillCard({ icon, label, onPress, accent }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   wrap: { flex: 1 },
   card: {
     flexDirection: 'row', alignItems: 'center', gap: spacing(2),

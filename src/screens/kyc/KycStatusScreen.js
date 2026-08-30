@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, spacing } from '../../config/theme';
+import { useTheme } from '../../context/ThemeContext';
+import { spacing } from '../../config/theme';
 import PrimaryButton from '../../components/PrimaryButton';
 import { useAuth } from '../../context/AuthContext';
 import * as kycService from '../../services/kycService';
 
 export default function KycStatusScreen() {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const { user, refreshKycStatus } = useAuth();
   const [status, setStatus] = useState('pending');
 
@@ -46,7 +49,7 @@ export default function KycStatusScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   body: { flex: 1, alignItems: 'center', paddingHorizontal: spacing(6), paddingTop: spacing(16), paddingBottom: spacing(6) },
   badge: { width: 72, height: 72, borderRadius: 36, backgroundColor: colors.bgCard, borderWidth: 2, borderColor: colors.warning, marginBottom: spacing(6) },

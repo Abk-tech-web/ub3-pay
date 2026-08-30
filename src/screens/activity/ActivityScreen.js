@@ -5,7 +5,8 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { View, Text, FlatList, StyleSheet, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
-import { colors, spacing, radii } from '../../config/theme';
+import { useTheme } from '../../context/ThemeContext';
+import { spacing, radii } from '../../config/theme';
 import { useAuth } from '../../context/AuthContext';
 import { useWallet } from '../../context/WalletContext';
 import * as walletService from '../../services/walletService';
@@ -35,7 +36,7 @@ function statusStyle(status) {
   if (s === 'success' || s === 'completed' || s === 'confirmed') return { bg: '#0f2e22', fg: '#34d399', text: 'Success' };
   if (s === 'pending' || s === 'processing') return { bg: '#2e2a0f', fg: '#facc15', text: 'Pending' };
   if (s === 'failed' || s === 'error') return { bg: '#2e0f14', fg: '#f87171', text: 'Failed' };
-  return { bg: '#232329', fg: colors.textSecondary, text: status || '—' };
+  return { bg: colors.bgElevated, fg: colors.textSecondary, text: status || '—' };
 }
 
 function dateGroup(dateStr) {
@@ -50,6 +51,8 @@ function dateGroup(dateStr) {
 }
 
 export default function ActivityScreen({ navigation }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const { user } = useAuth();
   const { portfolio } = useWallet();
   const [items, setItems] = useState([]);
@@ -140,13 +143,13 @@ export default function ActivityScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing(5), paddingTop: spacing(5), paddingBottom: spacing(3) },
   header: { color: colors.textPrimary, fontSize: 26, fontWeight: '800' },
-  filterBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: '#232329', alignItems: 'center', justifyContent: 'center' },
+  filterBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: colors.bgCard, alignItems: 'center', justifyContent: 'center' },
   sectionTitle: { color: colors.textSecondary, fontSize: 13, fontWeight: '600', marginBottom: spacing(2) },
-  card: { backgroundColor: '#1c1c22', borderRadius: radii.md, borderWidth: 1, borderColor: colors.border, overflow: 'hidden' },
+  card: { backgroundColor: colors.bgCard, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border, overflow: 'hidden' },
   row: { flexDirection: 'row', alignItems: 'center', padding: spacing(3), gap: spacing(3) },
   rowBorder: { borderBottomWidth: 1, borderBottomColor: colors.border },
   iconCircle: { width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center' },

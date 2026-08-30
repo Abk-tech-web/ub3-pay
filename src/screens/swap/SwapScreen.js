@@ -3,7 +3,8 @@ import { useFocusEffect } from '@react-navigation/native';
 import { View, Text, StyleSheet, Pressable, TextInput, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
-import { colors, spacing, radii } from '../../config/theme';
+import { useTheme } from '../../context/ThemeContext';
+import { spacing, radii } from '../../config/theme';
 import { useAuth } from '../../context/AuthContext';
 import { useWallet } from '../../context/WalletContext';
 import * as swapService from '../../services/swapService';
@@ -14,6 +15,8 @@ import PrimaryButton from '../../components/PrimaryButton';
 import AssetPickerModal from '../../components/AssetPickerModal';
 
 export default function SwapScreen({ navigation, route }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const { user } = useAuth();
   const { portfolio } = useWallet();
   const ngnRate = portfolio.totalUsd > 0 ? portfolio.totalNgn / portfolio.totalUsd : 1600;
@@ -141,7 +144,7 @@ export default function SwapScreen({ navigation, route }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   body: { flex: 1, padding: spacing(6) },
   title: { color: colors.textPrimary, fontSize: 22, fontWeight: '800', marginBottom: spacing(5) },

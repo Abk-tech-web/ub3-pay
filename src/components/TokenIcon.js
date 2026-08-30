@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
-import { colors, radii } from '../config/theme';
+import { useTheme } from '../context/ThemeContext';
+import { radii } from '../config/theme';
 
 const SYMBOL_TO_CHAIN_SLUG = {
   BTC: 'bitcoin', ETH: 'ethereum', BNB: 'smartchain', SOL: 'solana', TRX: 'tron',
@@ -24,6 +25,8 @@ function iconUrl(symbol) {
 }
 
 export default function TokenIcon({ symbol, size = 40 }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const [failed, setFailed] = useState(false);
   const url = iconUrl(symbol);
 
@@ -44,7 +47,7 @@ export default function TokenIcon({ symbol, size = 40 }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   fallback: {
     backgroundColor: colors.bgElevated,
     alignItems: 'center',

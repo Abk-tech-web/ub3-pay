@@ -1,12 +1,15 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, TextInput, StyleSheet, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, spacing, radii } from '../../config/theme';
+import { useTheme } from '../../context/ThemeContext';
+import { spacing, radii } from '../../config/theme';
 import PrimaryButton from '../../components/PrimaryButton';
 import { useAuth } from '../../context/AuthContext';
 import * as authService from '../../services/authService';
 
 export default function OtpVerificationScreen({ route, navigation }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const { email } = route.params ?? {};
   const { setUser } = useAuth();
   const [code, setCode] = useState('');
@@ -56,7 +59,7 @@ export default function OtpVerificationScreen({ route, navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   body: { flex: 1, justifyContent: 'center', paddingHorizontal: spacing(6) },
   title: { color: colors.textPrimary, fontSize: 26, fontWeight: '800' },

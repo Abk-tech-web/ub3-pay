@@ -1,10 +1,13 @@
 import React from 'react';
 import { Modal, View, Text, Pressable, FlatList, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, radii } from '../config/theme';
+import { useTheme } from '../context/ThemeContext';
+import { spacing, radii } from '../config/theme';
 import NetworkIcon from './NetworkIcon';
 
 export default function NetworkSelectorModal({ visible, networks, selectedId, onSelect, onClose }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable style={styles.backdrop} onPress={onClose}>
@@ -35,7 +38,7 @@ export default function NetworkSelectorModal({ visible, networks, selectedId, on
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-start', paddingTop: 220 },
   sheet: { backgroundColor: colors.bgCard, marginHorizontal: spacing(4), borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border, paddingVertical: spacing(2), maxHeight: 420 },
   row: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing(4), paddingVertical: spacing(3), gap: spacing(3) },

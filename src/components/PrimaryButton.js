@@ -1,8 +1,11 @@
 import React from 'react';
 import { Pressable, Text, StyleSheet, ActivityIndicator } from 'react-native';
-import { colors, radii, spacing } from '../config/theme';
+import { useTheme } from '../context/ThemeContext';
+import { radii, spacing } from '../config/theme';
 
 export default function PrimaryButton({ title, onPress, loading, disabled, variant = 'primary' }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const isGhost = variant === 'ghost';
   return (
     <Pressable
@@ -24,7 +27,7 @@ export default function PrimaryButton({ title, onPress, loading, disabled, varia
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   base: {
     height: 52,
     borderRadius: radii.pill,

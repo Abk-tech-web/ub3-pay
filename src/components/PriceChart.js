@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, Pressable, Dimensions, ActivityIndicator } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
-import { colors, spacing } from '../config/theme';
+import { useTheme } from '../context/ThemeContext';
+import { spacing } from '../config/theme';
 import { getMarketChart } from '../services/rateService';
 import { formatUsd } from '../utils/formatters';
 
@@ -9,6 +10,8 @@ const TIMEFRAMES = ['1H', '1D', '1W', '1M', '1Y', 'ALL'];
 const screenWidth = Dimensions.get('window').width;
 
 export default function PriceChart({ symbol }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const [timeframe, setTimeframe] = useState('1D');
   const [points, setPoints] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -87,7 +90,7 @@ export default function PriceChart({ symbol }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   wrap: { marginTop: spacing(6), alignItems: 'center' },
   price: { color: colors.textPrimary, fontSize: 16, fontWeight: '700', marginBottom: spacing(2), alignSelf: 'flex-start', marginLeft: spacing(5) },
   chart: { borderRadius: 16 },

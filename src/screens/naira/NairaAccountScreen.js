@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Share } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, spacing, radii } from '../../config/theme';
+import { useTheme } from '../../context/ThemeContext';
+import { spacing, radii } from '../../config/theme';
 import { useAuth } from '../../context/AuthContext';
 import * as baasService from '../../services/baasService';
 import SkeletonLoader from '../../components/SkeletonLoader';
 
 export default function NairaAccountScreen({ navigation }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const { user } = useAuth();
   const [account, setAccount] = useState(null);
 
@@ -50,7 +53,7 @@ export default function NairaAccountScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   body: { flex: 1, padding: spacing(6), paddingTop: spacing(10) },
   title: { color: colors.textPrimary, fontSize: 22, fontWeight: '800' },

@@ -3,11 +3,14 @@ import { View, Text, StyleSheet, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable } from 'react-native';
-import { colors, spacing, radii } from '../../config/theme';
+import { useTheme } from '../../context/ThemeContext';
+import { spacing, radii } from '../../config/theme';
 import PrimaryButton from '../../components/PrimaryButton';
 import { useWallet } from '../../context/WalletContext';
 
 export default function WithdrawAmountScreen({ navigation, route }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const { bank, accountNumber, accountName } = route.params;
   const { portfolio } = useWallet();
   const ngnBalance = portfolio.ngnBalance;
@@ -78,7 +81,7 @@ export default function WithdrawAmountScreen({ navigation, route }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   header: {
     flexDirection: 'row',

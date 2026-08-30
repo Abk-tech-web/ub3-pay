@@ -2,9 +2,11 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
-import { colors } from '../config/theme';
+import { useTheme } from '../context/ThemeContext';
 
 export default function Logo({ size = 24 }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   return (
     <View style={styles.row}>
       <MaskedView
@@ -22,7 +24,7 @@ export default function Logo({ size = 24 }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center' },
   ub3: { fontWeight: '900', color: '#000', letterSpacing: 0.5 },
   pay: { fontWeight: '700', color: colors.textPrimary, letterSpacing: 0.3 },

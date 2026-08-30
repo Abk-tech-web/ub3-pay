@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, spacing, radii } from '../../config/theme';
+import { useTheme } from '../../context/ThemeContext';
+import { spacing, radii } from '../../config/theme';
 import PrimaryButton from '../../components/PrimaryButton';
 import * as kycService from '../../services/kycService';
 
@@ -12,6 +13,8 @@ const DOC_TYPES = [
 ];
 
 export default function KycDocumentScreen({ navigation }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -49,7 +52,7 @@ export default function KycDocumentScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   body: { flex: 1, paddingHorizontal: spacing(6), paddingTop: spacing(10), paddingBottom: spacing(6) },
   title: { color: colors.textPrimary, fontSize: 26, fontWeight: '800' },

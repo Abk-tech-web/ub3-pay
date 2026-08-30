@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, spacing, radii } from '../../config/theme';
+import { useTheme } from '../../context/ThemeContext';
+import { spacing, radii } from '../../config/theme';
 import PrimaryButton from '../../components/PrimaryButton';
 
 export default function AddCustomTokenScreen({ navigation }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const [contractAddress, setContractAddress] = useState('');
   const [symbol, setSymbol] = useState('');
   const [loading, setLoading] = useState(false);
@@ -52,7 +55,7 @@ export default function AddCustomTokenScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   body: { flex: 1, padding: spacing(6) },
   title: { color: colors.textPrimary, fontSize: 22, fontWeight: '800' },

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, KeyboardAvoidingView, Platform, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, spacing, radii } from '../../config/theme';
+import { useTheme } from '../../context/ThemeContext';
+import { spacing, radii } from '../../config/theme';
 import Logo from '../../components/Logo';
 import PrimaryButton from '../../components/PrimaryButton';
 import PasswordInput from '../../components/PasswordInput';
@@ -21,6 +22,8 @@ function friendlyAuthError(err) {
 }
 
 export default function SignInScreen({ navigation }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const { signIn, loading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -78,7 +81,7 @@ export default function SignInScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   body: { flex: 1, justifyContent: 'center', paddingHorizontal: spacing(6) },
   brand: { color: colors.violetSoft, fontSize: 14, fontWeight: '700', letterSpacing: 2, marginBottom: spacing(10) },

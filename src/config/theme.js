@@ -1,7 +1,7 @@
 // Brand tokens derived from the Ub3 Pay mark: brushed-silver "U" breaking
-// free of a chain, resolving into a violet "B3" still partly chained —
+// free of a chain, resolving into a violet "B3" still partly chained -
 // liberation-from-custodial-banking as the visual thesis.
-export const colors = {
+export const darkColors = {
   bg: '#0A0A0C',
   bgElevated: '#141417',
   bgCard: '#1B1B20',
@@ -18,15 +18,36 @@ export const colors = {
   border: '#26262C',
 };
 
+export const lightColors = {
+  bg: '#F5F5F7',
+  bgElevated: '#FFFFFF',
+  bgCard: '#FFFFFF',
+  chrome: '#3F3F46',
+  chromeDim: '#6B7280',
+  violet: '#7C3AED',
+  violetDeep: '#5B21B6',
+  violetSoft: '#7C3AED',
+  success: '#059669',
+  danger: '#EF4444',
+  warning: '#D97706',
+  textPrimary: '#111114',
+  textSecondary: '#6B7280',
+  border: '#E4E4E7',
+};
+
+// Default export kept for screens not yet migrated to the theme context -
+// defaults to dark so nothing breaks while we roll this out in stages.
+export const colors = darkColors;
+
 export const gradients = {
-  chromeToViolet: [colors.chrome, colors.violet],
-  cardGlow: [colors.bgCard, colors.bgElevated],
+  chromeToViolet: [darkColors.chrome, darkColors.violet],
+  cardGlow: [darkColors.bgCard, darkColors.bgElevated],
 };
 
 export const typography = {
-  display: 'SpaceGrotesk-Bold',     // confident display face — headlines, balances
-  body: 'Inter-Regular',             // workhorse body face
-  mono: 'RobotoMono-Medium',         // addresses, amounts, hashes
+  display: 'SpaceGrotesk-Bold',      // confident display face - headlines, balances
+  body: 'Inter-Regular',              // workhorse body face
+  mono: 'RobotoMono-Medium',          // addresses, amounts, hashes
 };
 
 export const spacing = (n) => n * 4;

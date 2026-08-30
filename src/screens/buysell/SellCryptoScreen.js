@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, spacing, radii } from '../../config/theme';
+import { useTheme } from '../../context/ThemeContext';
+import { spacing, radii } from '../../config/theme';
 import { useWallet } from '../../context/WalletContext';
 import TokenIcon from '../../components/TokenIcon';
 import EmptyState from '../../components/EmptyState';
@@ -10,6 +11,8 @@ import EmptyState from '../../components/EmptyState';
 // "crypto → Naira" screen — this picker just gets the user there fast
 // from an asset they already hold.
 export default function SellCryptoScreen({ navigation }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const { portfolio } = useWallet();
 
   return (
@@ -43,7 +46,7 @@ export default function SellCryptoScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   body: { flex: 1, padding: spacing(6), paddingTop: spacing(10) },
   scrollContent: { paddingBottom: spacing(6) },

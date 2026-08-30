@@ -5,7 +5,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Clipboard from 'expo-clipboard';
 import QRCode from 'react-native-qrcode-svg';
 import { Feather } from '@expo/vector-icons';
-import { colors, spacing, radii } from '../../config/theme';
+import { useTheme } from '../../context/ThemeContext';
+import { spacing, radii } from '../../config/theme';
 import { useAuth } from '../../context/AuthContext';
 import * as walletService from '../../services/walletService';
 import { truncateAddress } from '../../utils/formatters';
@@ -13,6 +14,8 @@ import SkeletonLoader from '../../components/SkeletonLoader';
 import TokenIcon from '../../components/TokenIcon';
 
 export default function ReceiveScreen({ route }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const { chainId = 'bitcoin', symbol = 'BTC' } = route.params ?? {};
   const { user } = useAuth();
   const [address, setAddress] = useState(null);
@@ -103,7 +106,7 @@ export default function ReceiveScreen({ route }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   glow: { position: 'absolute', top: 0, left: 0, right: 0, height: 300, opacity: 0.5 },
   body: { flex: 1, padding: spacing(6), alignItems: 'center' },
@@ -122,7 +125,7 @@ const styles = StyleSheet.create({
   errorBox: { width: 190, height: 190, alignItems: 'center', justifyContent: 'center', gap: spacing(2), padding: spacing(3) },
   errorText: { color: colors.textSecondary, fontSize: 13, textAlign: 'center', fontWeight: '600' },
   addressRow: {
-    marginTop: spacing(6), backgroundColor: '#1c1c22', borderRadius: radii.pill,
+    marginTop: spacing(6), backgroundColor: colors.bgElevated, borderRadius: radii.pill,
     paddingVertical: spacing(2), paddingHorizontal: spacing(4), borderWidth: 1, borderColor: colors.border,
   },
   address: { color: colors.textPrimary, fontSize: 14, fontWeight: '600' },
@@ -133,7 +136,7 @@ const styles = StyleSheet.create({
   },
   copyLabel: { color: '#fff', fontWeight: '700', fontSize: 14 },
   shareBtn: {
-    width: 52, height: 52, borderRadius: 26, backgroundColor: '#232329',
+    width: 52, height: 52, borderRadius: 26, backgroundColor: colors.bgElevated,
     alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border,
   },
 });

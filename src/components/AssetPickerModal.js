@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, Modal, Pressable, FlatList, TextInput } from 'react-native';
-import { colors, spacing, radii } from '../config/theme';
+import { useTheme } from '../context/ThemeContext';
+import { spacing, radii } from '../config/theme';
 import { Feather } from '@expo/vector-icons';
 import TokenIcon from './TokenIcon';
 import { formatUsd, formatCrypto } from '../utils/formatters';
@@ -9,6 +10,8 @@ import { formatUsd, formatCrypto } from '../utils/formatters';
 // pinnedSymbol: a symbol (or 'NGN') that always appears first regardless of balance
 // includeNgn: adds a synthetic NGN row (Nigeria flag) - used on the Buy side
 export default function AssetPickerModal({ visible, onClose, onSelect, assets = [], pinnedSymbol, includeNgn }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const [query, setQuery] = useState('');
 
   const data = useMemo(() => {
@@ -79,7 +82,7 @@ export default function AssetPickerModal({ visible, onClose, onSelect, assets = 
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
   sheet: { backgroundColor: colors.bg, borderTopLeftRadius: radii.lg + 8, borderTopRightRadius: radii.lg + 8, maxHeight: '80%', paddingTop: spacing(2) },
   handle: { width: 40, height: 4, borderRadius: 2, backgroundColor: colors.border, alignSelf: 'center', marginBottom: spacing(3) },

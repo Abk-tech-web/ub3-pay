@@ -1,11 +1,14 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
-import { colors, spacing } from '../config/theme';
+import { useTheme } from '../context/ThemeContext';
+import { spacing } from '../config/theme';
 import { formatUsd, formatCrypto } from '../utils/formatters';
 import { getChain } from '../config/chains';
 import TokenIcon from './TokenIcon';
 
 export default function AssetListItem({ asset, onPress }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const chain = getChain(asset.chainId);
   const change = asset.change24h ?? 0;
   const isUp = change >= 0;
@@ -16,7 +19,7 @@ export default function AssetListItem({ asset, onPress }) {
       <TokenIcon symbol={asset.symbol} size={40} />
       <View style={styles.info}>
         <Text style={styles.symbol}>{asset.symbol}</Text>
-        <Text style={styles.chainName}>{chain?.name ?? asset.chainId}</Text>
+        <Text style={styles.chainName}>{asset.networkCount > 1 ? `${asset.networkCount} Networks` : (chain?.name ?? asset.chainId)}</Text>
             <Text style={styles.price}>{formatUsd(price)}</Text>
       </View>
       <View style={styles.amounts}>
@@ -37,7 +40,7 @@ export default function AssetListItem({ asset, onPress }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', paddingVertical: spacing(3) },
   pressed: { opacity: 0.6 },
   info: { flex: 1, marginLeft: spacing(3) },

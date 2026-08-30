@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, Pressable, SectionList, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, spacing, radii } from '../../config/theme';
+import { useTheme } from '../../context/ThemeContext';
+import { spacing, radii } from '../../config/theme';
 import { useAuth } from '../../context/AuthContext';
 import { useWallet } from '../../context/WalletContext';
 import * as baasService from '../../services/baasService';
@@ -21,7 +22,7 @@ function statusStyle(status) {
   if (s === 'failed' || s === 'error') {
     return { bg: '#2e0f14', fg: '#f87171', text: 'Failed' };
   }
-  return { bg: '#232329', fg: colors.textSecondary, text: status || '-' };
+  return { bg: colors.bgElevated, fg: colors.textSecondary, text: status || '-' };
 }
 
 function dateGroup(dateStr) {
@@ -36,6 +37,8 @@ function dateGroup(dateStr) {
 }
 
 export default function DepositHistoryScreen({ navigation }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const { user } = useAuth();
   const { portfolio } = useWallet();
   const [items, setItems] = useState([]);
@@ -115,7 +118,7 @@ export default function DepositHistoryScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   headerRow: { paddingHorizontal: spacing(5), paddingTop: spacing(4) },
   header: { color: colors.textPrimary, fontSize: 22, fontWeight: '800' },

@@ -1,8 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, StyleSheet } from 'react-native';
-import { colors, radii } from '../config/theme';
+import { useTheme } from '../context/ThemeContext';
+import { radii } from '../config/theme';
 
 export default function SkeletonLoader({ width = '100%', height = 16, style }) {
+  const { colors } = useTheme();
   const opacity = useRef(new Animated.Value(0.4)).current;
   useEffect(() => {
     const loop = Animated.loop(

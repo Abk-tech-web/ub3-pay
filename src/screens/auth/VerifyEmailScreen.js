@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, spacing } from '../../config/theme';
+import { useTheme } from '../../context/ThemeContext';
+import { spacing } from '../../config/theme';
 import PrimaryButton from '../../components/PrimaryButton';
 import { useAuth } from '../../context/AuthContext';
 
@@ -10,6 +11,8 @@ const API_BASE = 'https://ub3-pay-backend.onrender.com';
 // Real OTP verification: we send a 6-digit code to the user's email via our
 // backend/Postmark, they type it in, we verify it against Firestore.
 export default function VerifyEmailScreen({ route }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const { email } = route.params ?? {};
   const { refreshEmailVerified } = useAuth();
   const [otp, setOtp] = useState('');
@@ -101,7 +104,7 @@ export default function VerifyEmailScreen({ route }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   body: { flex: 1, justifyContent: 'center', paddingHorizontal: spacing(6) },
   title: { color: colors.textPrimary, fontSize: 26, fontWeight: '800' },

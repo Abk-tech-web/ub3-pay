@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, spacing } from '../../config/theme';
+import { useTheme } from '../../context/ThemeContext';
+import { spacing } from '../../config/theme';
 import PrimaryButton from '../../components/PrimaryButton';
 
 export default function BuyCryptoScreen({ navigation }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.body}>
@@ -21,7 +24,7 @@ export default function BuyCryptoScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   body: { flex: 1, padding: spacing(6), paddingTop: spacing(10) },
   title: { color: colors.textPrimary, fontSize: 22, fontWeight: '800' },

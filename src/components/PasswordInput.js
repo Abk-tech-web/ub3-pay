@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { View, TextInput, Pressable, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { colors, radii, spacing } from '../config/theme';
+import { useTheme } from '../context/ThemeContext';
+import { radii, spacing } from '../config/theme';
 
 export default function PasswordInput({ value, onChangeText, placeholder = '••••••••', style }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const [visible, setVisible] = useState(false);
 
   return (
@@ -23,7 +26,7 @@ export default function PasswordInput({ value, onChangeText, placeholder = '•�
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   wrap: {
     flexDirection: 'row', alignItems: 'center',
     backgroundColor: colors.bgCard, borderRadius: radii.md,
