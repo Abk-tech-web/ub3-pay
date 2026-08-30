@@ -1,21 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, Pressable, Share } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { spacing, radii } from '../../config/theme';
 import { useAuth } from '../../context/AuthContext';
-import * as baasService from '../../services/baasService';
 import SkeletonLoader from '../../components/SkeletonLoader';
 
 export default function NairaAccountScreen({ navigation }) {
   const { colors } = useTheme();
   const styles = getStyles(colors);
   const { user } = useAuth();
-  const [account, setAccount] = useState(null);
+  const accountName = ((user && user.firstName) || '') + ' ' + ((user && user.lastName) || '');
+  const account = user && user.accountNumber ? { accountNumber: user.accountNumber, bankName: user.accountBank, accountName: accountName.trim() || 'UB3 Pay User' } : null;
 
-  useEffect(() => {
-    if (user) baasService.getNairaAccount(user.uid).then(setAccount);
-  }, [user]);
 
   return (
     <SafeAreaView style={styles.safe}>

@@ -19,6 +19,9 @@ export function AuthProvider({ children }) {
           email: firebaseUser.email,
           emailVerified: firebaseUser.emailVerified,
           kycStatus: profile?.kycStatus ?? 'unverified',
+            bvnVerified: profile?.bvnVerified ?? false,
+            accountNumber: profile?.accountNumber ?? null,
+            accountBank: profile?.accountBank ?? null,
         });
       } else {
         setUser(null);
@@ -61,7 +64,7 @@ export function AuthProvider({ children }) {
     if (!user) return;
     const profile = await authService.getUserProfile(user.uid);
     const bvnVerified = profile?.bvnVerified ?? false;
-    setUser((prev) => (prev ? { ...prev, bvnVerified } : prev));
+    setUser((prev) => (prev ? { ...prev, bvnVerified, accountNumber: profile?.accountNumber ?? prev.accountNumber, accountBank: profile?.accountBank ?? prev.accountBank } : prev));
     return bvnVerified;
   }, [user]);
 
