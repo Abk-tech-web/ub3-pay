@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, FlatList, Pressable, Modal, Image, ActivityIndicator, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -103,7 +104,7 @@ export default function VerifyBvnScreen({ navigation }) {
         <View style={{ width: 24 }} />
       </View>
 
-      <ScrollView style={styles.body} contentContainerStyle={{ paddingBottom: spacing(10) }}>
+      <KeyboardAwareScrollView style={styles.body} contentContainerStyle={{ paddingBottom: spacing(10) }} enableOnAndroid={true} extraScrollHeight={20} keyboardShouldPersistTaps="handled">
         <Text style={styles.subtitle}>
           We use your Bank Verification Number to confirm your identity before enabling withdrawals, airtime, data, and deposits.
         </Text>
@@ -169,7 +170,7 @@ export default function VerifyBvnScreen({ navigation }) {
           loading={submitting}
           disabled={!canSubmit}
         />
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       <Modal
         visible={pickerVisible}
@@ -177,6 +178,7 @@ export default function VerifyBvnScreen({ navigation }) {
         transparent
         onRequestClose={() => setPickerVisible(false)}
       >
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
         <Pressable style={styles.modalBackdrop} onPress={() => setPickerVisible(false)} />
         <View style={styles.modalSheet}>
           <Text style={styles.modalTitle}>Select Bank</Text>
@@ -215,6 +217,7 @@ export default function VerifyBvnScreen({ navigation }) {
             />
           )}
         </View>
+      </KeyboardAvoidingView>
       </Modal>
     </SafeAreaView>
     </KeyboardAvoidingView>
