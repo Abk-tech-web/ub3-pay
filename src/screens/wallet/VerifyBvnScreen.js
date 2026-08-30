@@ -78,6 +78,7 @@ export default function VerifyBvnScreen({ navigation }) {
     try {
       await apiPost('/verify-bvn', {
         uid: user.uid,
+            email: user.email,
         bvn,
         bank_code: selectedBank.code,
         account_number: accountNumber,
