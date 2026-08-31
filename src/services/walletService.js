@@ -12,12 +12,12 @@ import { apiPost } from './api';
 // 15-chain lineup is visible. Swap these for real balances once a wallet
 // custody provider is wired in.
 const MOCK_HOLDINGS = [
-  { chainId: 'bitcoin', symbol: 'BTC', balance: '0.031' },
-  { chainId: 'ethereum', symbol: 'ETH', balance: '0.82' },
+  { chainId: 'solana', symbol: 'SOL', balance: '2.4' },
   { chainId: 'ethereum', symbol: 'USDT', balance: '150.00' },
   { chainId: 'ethereum', symbol: 'USDC', balance: '75.00' },
   { chainId: 'bsc', symbol: 'BNB', balance: '1.4' },
-  { chainId: 'solana', symbol: 'SOL', balance: '2.4' },
+  { chainId: 'bitcoin', symbol: 'BTC', balance: '0.031' },
+  { chainId: 'ethereum', symbol: 'ETH', balance: '0.82' },
   { chainId: 'tron', symbol: 'TRX', balance: '820' },
   { chainId: 'polygon', symbol: 'MATIC', balance: '340' },
   { chainId: 'sui', symbol: 'SUI', balance: '95' },
@@ -30,8 +30,6 @@ const MOCK_HOLDINGS = [
   { chainId: 'litecoin', symbol: 'LTC', balance: '1.1' },
   { chainId: 'ripple', symbol: 'XRP', balance: '260' },
 ];
-
-export async function getPortfolio(uid) {
   await delay(300);
   const prices = await getAllUsdPrices();
   const assets = MOCK_HOLDINGS.map((h) => {
