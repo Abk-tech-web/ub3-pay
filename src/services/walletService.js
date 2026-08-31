@@ -30,6 +30,7 @@ const MOCK_HOLDINGS = [
   { chainId: 'litecoin', symbol: 'LTC', balance: '1.1' },
   { chainId: 'ripple', symbol: 'XRP', balance: '260' },
 ];
+export async function getPortfolio(uid) {
   await delay(300);
   const prices = await getAllUsdPrices();
   const assets = MOCK_HOLDINGS.map((h) => {
