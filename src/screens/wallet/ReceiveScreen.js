@@ -21,7 +21,7 @@ export default function ReceiveScreen({ route }) {
   const [address, setAddress] = useState(null);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState(null);
-  const UNSUPPORTED_CHAINS = ['bitcoin', 'litecoin', 'tron', 'xrp', 'ton', 'sui', 'cardano'];
+  const UNSUPPORTED_CHAINS = ['bitcoin', 'litecoin', 'tron', 'xrp', 'ton', 'sui'];
 
   useEffect(() => {
     if (!user) return;
