@@ -4,7 +4,6 @@ import { View, ActivityIndicator } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import AuthNavigator from './AuthNavigator';
-import KycNavigator from './KycNavigator';
 import MainTabNavigator from './MainTabNavigator';
 import VerifyEmailScreen from '../screens/auth/VerifyEmailScreen';
 

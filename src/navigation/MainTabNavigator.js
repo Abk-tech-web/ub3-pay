@@ -6,6 +6,8 @@ import { useTheme } from '../context/ThemeContext';
 import CustomTabBar from '../components/CustomTabBar';
 
 import PortfolioScreen from '../screens/home/PortfolioScreen';
+import NotificationsScreen from '../screens/home/NotificationsScreen';
+import AccountSnapshotScreen from '../screens/home/AccountSnapshotScreen';
 import AssetDetailScreen from '../screens/home/AssetDetailScreen';
 import NairaDetailScreen from '../screens/wallet/NairaDetailScreen';
 import NairaWithdrawScreen from '../screens/wallet/WithdrawScreen';
@@ -42,6 +44,7 @@ import DataScreen from '../screens/billpay/DataScreen';
 import ConfirmPurchaseScreen from '../screens/billpay/ConfirmPurchaseScreen';
 import BillConfirmPinScreen from '../screens/billpay/BillConfirmPinScreen';
 import WalletSettingsScreen from '../screens/profile/WalletSettingsScreen';
+import TransactionLimitsScreen from '../screens/profile/TransactionLimitsScreen';
 
 const Tab = createBottomTabNavigator();
 const ActivityStack = createNativeStackNavigator();
@@ -54,6 +57,9 @@ function HomeStackScreen() {
   return (
     <HomeStack.Navigator screenOptions={{ headerShown: false }}>
       <HomeStack.Screen name="Portfolio" component={PortfolioScreen} />
+        <HomeStack.Screen name="Notifications" component={NotificationsScreen} />
+        <HomeStack.Screen name="AccountSnapshot" component={AccountSnapshotScreen} />
+        <HomeStack.Screen name="TransactionLimits" component={TransactionLimitsScreen} />
       <HomeStack.Screen name="AssetDetail" component={AssetDetailScreen} />
       <HomeStack.Screen name="NairaDetail" component={NairaDetailScreen} />
       <HomeStack.Screen name="NairaWithdraw" component={NairaWithdrawScreen} />
@@ -120,6 +126,7 @@ function ProfileStackScreen() {
       <ProfileStack.Screen name="SecuritySettings" component={SecuritySettingsScreen} />
       <ProfileStack.Screen name="PinSetup" component={PinSetupScreen} />
       <ProfileStack.Screen name="WalletSettings" component={WalletSettingsScreen} />
+        <ProfileStack.Screen name="TransactionLimits" component={TransactionLimitsScreen} />
     </ProfileStack.Navigator>
   );
 }

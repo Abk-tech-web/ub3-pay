@@ -8,7 +8,7 @@ import { formatUsd, formatNgn } from '../utils/formatters';
 import { useAuth } from '../context/AuthContext';
 import * as Clipboard from 'expo-clipboard';
 
-export default function BalanceCard({ totalUsd, totalNgn, totalPnl24hUsd = 0, stale = false }) {
+export default function BalanceCard({ totalUsd, totalNgn, totalPnl24hUsd = 0, stale = false, navigation }) {
   const { colors } = useTheme();
   const { user } = useAuth();
   const [hidden, setHidden] = useState(false);
@@ -57,6 +57,14 @@ export default function BalanceCard({ totalUsd, totalNgn, totalPnl24hUsd = 0, st
             pointerEvents="none"
             style={[styles.sheen, { transform: [{ translateX: shimmerTranslate }, { rotate: '20deg' }] }]}
           />
+          <View style={styles.cardHeaderIcons}>
+            <Pressable onPress={() => navigation && navigation.navigate('AccountSnapshot')} style={styles.cardIconBtn} hitSlop={8}>
+              <Feather name="user" size={16} color="#fff" />
+            </Pressable>
+            <Pressable onPress={() => navigation && navigation.navigate('Notifications')} style={styles.cardIconBtn} hitSlop={8}>
+              <Feather name="bell" size={16} color="#fff" />
+            </Pressable>
+          </View>
           <View style={styles.rowBetween}>
             <Text style={styles.label}>Total balance</Text>
             <View style={styles.hideRow}>
@@ -108,8 +116,12 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: radii.lg,
     padding: spacing(6),
+    paddingTop: spacing(4),
     overflow: 'hidden',
   },
+  cardHeaderIcons: { flexDirection: 'row', justifyContent: 'flex-start', gap: 8, marginBottom: spacing(3) },
+  cardIconBtn: { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.15)' },
+
   sheen: {
     position: 'absolute',
     top: -60, bottom: -60, width: 60,

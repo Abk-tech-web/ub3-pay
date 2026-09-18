@@ -42,13 +42,13 @@ export default function PortfolioScreen({ navigation }) {
         contentContainerStyle={styles.list}
         ListHeaderComponent={
           <>
-            <View style={styles.topRow}>
-              <Logo size={20} />
-              <Pressable onPress={toggleTheme} style={styles.themeToggle} hitSlop={10}>
-                <Feather name={isDark ? 'moon' : 'sun'} size={18} color={colors.textPrimary} />
-              </Pressable>
-            </View>
-            <BalanceCard totalUsd={portfolio.totalUsd} totalNgn={portfolio.totalNgn} totalPnl24hUsd={portfolio.totalPnl24hUsd} />
+          <View style={styles.topRow}>
+            <Logo size={20} />
+            <Pressable onPress={toggleTheme} style={styles.themeToggle} hitSlop={10}>
+              <Feather name={isDark ? 'moon' : 'sun'} size={18} color={colors.textPrimary} />
+            </Pressable>
+          </View>
+            <BalanceCard navigation={navigation} totalUsd={portfolio.totalUsd} totalNgn={portfolio.totalNgn} totalPnl24hUsd={portfolio.totalPnl24hUsd} />
 
             <View style={styles.actionsRow}>
               {ACTIONS.map((a) => (
@@ -90,6 +90,9 @@ const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   list: { padding: spacing(5) },
   topRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing(3) },
+  leftIcons: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  headerIconBtn: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border },
+
   themeToggle: {
     width: 34, height: 34, borderRadius: 17,
     alignItems: 'center', justifyContent: 'center',

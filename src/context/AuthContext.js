@@ -22,6 +22,8 @@ export function AuthProvider({ children }) {
             bvnVerified: profile?.bvnVerified ?? false,
             accountNumber: profile?.accountNumber ?? null,
             accountBank: profile?.accountBank ?? null,
+            firstName: profile?.first_name ?? null,
+            lastName: profile?.last_name ?? null,
         });
       } else {
         setUser(null);
@@ -64,7 +66,7 @@ export function AuthProvider({ children }) {
     if (!user) return;
     const profile = await authService.getUserProfile(user.uid);
     const bvnVerified = profile?.bvnVerified ?? false;
-    setUser((prev) => (prev ? { ...prev, bvnVerified, accountNumber: profile?.accountNumber ?? prev.accountNumber, accountBank: profile?.accountBank ?? prev.accountBank } : prev));
+    setUser((prev) => (prev ? { ...prev, bvnVerified, accountNumber: profile?.accountNumber ?? prev.accountNumber, accountBank: profile?.accountBank ?? prev.accountBank, firstName: profile?.first_name ?? prev.firstName, lastName: profile?.last_name ?? prev.lastName, kycStatus: profile?.kycStatus ?? prev.kycStatus } : prev));
     return bvnVerified;
   }, [user]);
 

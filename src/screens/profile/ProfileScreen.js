@@ -6,12 +6,15 @@ import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { spacing, radii } from '../../config/theme';
 import { useAuth } from '../../context/AuthContext';
+import * as Clipboard from 'expo-clipboard';
+import { useState } from 'react';
 
 const ROWS = [
   { key: 'VerifyBvn', label: 'Verify BVN', icon: 'shield', color: '#34d399' },
   { key: 'SecuritySettings', label: 'Security', icon: 'lock', color: '#60a5fa' },
   { key: 'PinSetup', label: 'Transaction PIN', icon: 'key', color: '#a78bfa' },
   { key: 'WalletSettings', label: 'Operational wallets', icon: 'briefcase', color: '#34d399' },
+  { key: 'TransactionLimits', label: 'Transaction Limits', icon: 'sliders', color: '#60a5fa' },
 ];
 
 export default function ProfileScreen({ navigation }) {
@@ -38,6 +41,9 @@ export default function ProfileScreen({ navigation }) {
             </View>
           )}
         </View>
+          {(user?.firstName || user?.lastName) ? (
+            <Text style={styles.fullName}>{[user?.firstName, user?.lastName].filter(Boolean).join(' ')}</Text>
+          ) : null}
         <Text style={styles.email}>{user?.email}</Text>
         <View style={[styles.kycBadge, { backgroundColor: verified ? '#0f2e22' : '#2e2a0f' }]}>
           <Feather name={verified ? 'shield' : 'shield-off'} size={12} color={verified ? '#34d399' : '#facc15'} />
@@ -46,6 +52,13 @@ export default function ProfileScreen({ navigation }) {
           </Text>
         </View>
 
+          <Pressable style={styles.uidRow} onPress={async () => { if (!user?.uid) return; await Clipboard.setStringAsync(user.uid); }} hitSlop={8}>
+            <Text style={styles.uidLabel}>UB3 ID</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Text style={styles.uidValue} numberOfLines={1}>{user?.uid || '—'}</Text>
+              <Feather name="copy" size={13} color={colors.textSecondary} />
+            </View>
+          </Pressable>
         <View style={{ height: spacing(7) }} />
 
         <View style={styles.card}>
@@ -110,4 +123,8 @@ const getStyles = (colors) => StyleSheet.create({
     backgroundColor: colors.bgCard, borderRadius: radii.md, borderWidth: 1, borderColor: '#3a1a1f',
     padding: spacing(4),
   },
+  fullName: { fontSize: 15, fontWeight: '600', color: colors.textPrimary, marginTop: spacing(1) },
+  uidRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: spacing(4) },
+  uidLabel: { color: colors.textSecondary, fontSize: 12, fontWeight: '600' },
+  uidValue: { color: colors.textPrimary, fontSize: 13, fontWeight: '600', flexShrink: 1 },
 });
