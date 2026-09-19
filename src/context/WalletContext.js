@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useCallback, useRef, useEff
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as walletService from '../services/walletService';
 import { getMidMarketUsdToNgn } from '../services/rateService';
+import { apiGet } from '../services/api';
 
 const WalletContext = createContext(null);
 const STORAGE_KEY = 'ub3_wallet_adjustments_v1';
@@ -24,6 +25,7 @@ export function WalletProvider({ children }) {
   const ngnBalanceRef = useRef(0);
   const activityRef = useRef([]);
   const loadedRef = useRef(false);
+  const lastUidRef = useRef(null);
 
   const persist = useCallback(() => {
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({
@@ -38,7 +40,7 @@ export function WalletProvider({ children }) {
       if (raw) {
         try {
           const saved = JSON.parse(raw);
-          ngnBalanceRef.current = saved.ngnBalance ?? 0;
+          ngnBalanceRef.current = 0; // real balance comes from /ngn-balance
           adjustmentsRef.current = saved.adjustments ?? {};
           activityRef.current = saved.activity ?? [];
         } catch {}
@@ -49,21 +51,28 @@ export function WalletProvider({ children }) {
 
   const refreshPortfolio = useCallback(async (uid) => {
     setRefreshing(true);
+    lastUidRef.current = uid;
     try {
       const [p, usdNgn] = await Promise.all([walletService.getPortfolio(uid), getMidMarketUsdToNgn()]);
       const assets = p.assets;
       const totalUsd = assets.reduce((sum, a) => sum + a.usdValue, 0);
-      setPortfolio({ ...p, assets, totalUsd, totalNgn: totalUsd * usdNgn, ngnBalance: ngnBalanceRef.current, activity: activityRef.current });
+      let ngn = ngnBalanceRef.current;
+      try {
+        const r = await apiGet('/ngn-balance');
+        ngn = Number(r.ngnBalance) || 0;
+        ngnBalanceRef.current = ngn;
+      } catch (e) {}
+      const cryptoUsd = totalUsd;
+      const allUsd = cryptoUsd + (usdNgn > 0 ? ngn / usdNgn : 0);
+      setPortfolio({ ...p, assets, totalUsd: allUsd, totalNgn: cryptoUsd * usdNgn + ngn, ngnBalance: ngn, activity: activityRef.current });
     } finally {
       setRefreshing(false);
     }
   }, []);
 
   const adjustNgnBalance = useCallback((delta) => {
-    ngnBalanceRef.current = Math.max(0, ngnBalanceRef.current + delta);
-    setPortfolio((p) => ({ ...p, ngnBalance: ngnBalanceRef.current }));
-    persist();
-  }, [persist]);
+    if (lastUidRef.current) refreshPortfolio(lastUidRef.current);
+  }, [refreshPortfolio]);
 
   const adjustCryptoBalance = useCallback((symbol, delta) => {
     return; // real balances now come from /portfolio
