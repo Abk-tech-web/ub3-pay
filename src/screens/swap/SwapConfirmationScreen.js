@@ -33,6 +33,9 @@ export default function SwapConfirmationScreen({ route, navigation }) {
           addActivity({ id: 'act_' + Date.now(), label: 'swap ngn to crypto', at: new Date().toISOString(), status: 'success', amount: quote.amountCrypto, symbol, direction: 'in', kind: 'swap', fromSymbol: 'NGN', fromAmount: parseFloat(amount), toSymbol: symbol, toAmount: quote.amountCrypto });
       }
       setDone(true);
+    } catch (e) {
+      const msg = e && e.code === 'bvn_verification_required' ? 'Please verify your BVN to continue.' : ((e && e.message) || 'Something went wrong');
+      require('react-native').Alert.alert('Swap failed', msg);
     } finally {
       setLoading(false);
     }

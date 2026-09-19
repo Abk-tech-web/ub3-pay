@@ -1,3 +1,4 @@
+import { apiPost } from './api';
 import { getCryptoToNgnRate, getNgnToCryptoRate, getMarginPerUsd, getUsdPrice } from './rateService';
 
 // Both directions require an explicit confirm step — see quoteXxx vs
@@ -16,12 +17,19 @@ export async function quoteCryptoToNgn(symbol, amountCrypto) {
   return { rate, amountNgn, revenueNgn };
 }
 
+const CHAIN_BY_SYMBOL = { SOL: 'solana', ETH: 'ethereum', MATIC: 'polygon', AVAX: 'avalanche' };
+
+function resolveChain(symbol, chainId) {
+  const c = chainId || CHAIN_BY_SYMBOL[symbol];
+  if (!c) throw new Error(symbol + ' swaps are not available yet');
+  return c;
+}
+
+// Real swap: the backend computes the rate and moves the funds; its payout replaces the quote figure.
 export async function executeCryptoToNgn(uid, symbol, chainId, amountCrypto, quote) {
-  // TODO(integration): debit in-app crypto balance, credit NGN balance,
-  // write an immutable transactions/{id} record keyed by idempotencyKey,
-  // and credit quote.revenueNgn to the connected revenue wallet ledger.
-  await delay(900);
-  return { id: 'swap_' + Date.now(), status: 'completed' };
+  const data = await apiPost('/sell', { chainId: resolveChain(symbol, chainId), cryptoAmount: Number(amountCrypto) });
+  if (quote && data.ngnPayout != null) quote.amountNgn = Number(data.ngnPayout);
+  return { id: data.txHash || 'swap_' + Date.now(), status: 'completed', txHash: data.txHash };
 }
 
 export async function quoteNgnToCrypto(symbol, amountNgn) {
@@ -34,8 +42,10 @@ export async function quoteNgnToCrypto(symbol, amountNgn) {
 }
 
 export async function executeNgnToCrypto(uid, symbol, chainId, amountNgn, quote, destination = 'in_app') {
-  await delay(900);
-  return { id: 'swap_' + Date.now(), status: 'completed' };
+  const data = await apiPost('/buy', { chainId: resolveChain(symbol, chainId), ngnAmount: Number(amountNgn) });
+  const got = data.cryptoAmount != null ? data.cryptoAmount : data.amountCrypto;
+  if (quote && got != null) quote.amountCrypto = Number(got);
+  return { id: data.txHash || 'swap_' + Date.now(), status: 'completed', txHash: data.txHash };
 }
 
 function delay(ms) {
