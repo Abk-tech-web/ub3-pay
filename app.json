@@ -12,7 +12,7 @@
       "resizeMode": "contain"
     },
     "android": {
-    "softwareKeyboardLayoutMode": "resize",
+      "softwareKeyboardLayoutMode": "resize",
       "package": "app.ub3pay.wallet",
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
@@ -22,7 +22,8 @@
     },
     "plugins": [
       "expo-secure-store",
-      "expo-font"
+      "expo-font",
+      "expo-notifications"
     ],
     "extra": {
       "eas": {

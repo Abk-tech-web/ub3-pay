@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { registerForPush } from '../services/pushRegistration';
 import * as authService from '../services/authService';
 
 const AuthContext = createContext(null);
@@ -32,6 +33,10 @@ export function AuthProvider({ children }) {
     });
     return unsubscribe;
   }, []);
+
+  useEffect(() => {
+    if (user && user.uid) registerForPush();
+  }, [user && user.uid]);
 
   const signIn = useCallback(async (email, password) => {
     setLoading(true);
