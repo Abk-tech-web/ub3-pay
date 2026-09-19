@@ -126,6 +126,7 @@ function ProfileStackScreen() {
       <ProfileStack.Screen name="SecuritySettings" component={SecuritySettingsScreen} />
       <ProfileStack.Screen name="PinSetup" component={PinSetupScreen} />
       <ProfileStack.Screen name="WalletSettings" component={WalletSettingsScreen} />
+        <ProfileStack.Screen name="Notifications" component={NotificationsScreen} />
         <ProfileStack.Screen name="TransactionLimits" component={TransactionLimitsScreen} />
     </ProfileStack.Navigator>
   );

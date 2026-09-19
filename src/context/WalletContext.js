@@ -51,7 +51,7 @@ export function WalletProvider({ children }) {
     setRefreshing(true);
     try {
       const [p, usdNgn] = await Promise.all([walletService.getPortfolio(uid), getMidMarketUsdToNgn()]);
-      const assets = applyAdjustments(p.assets, adjustmentsRef.current);
+      const assets = p.assets;
       const totalUsd = assets.reduce((sum, a) => sum + a.usdValue, 0);
       setPortfolio({ ...p, assets, totalUsd, totalNgn: totalUsd * usdNgn, ngnBalance: ngnBalanceRef.current, activity: activityRef.current });
     } finally {
@@ -66,6 +66,7 @@ export function WalletProvider({ children }) {
   }, [persist]);
 
   const adjustCryptoBalance = useCallback((symbol, delta) => {
+    return; // real balances now come from /portfolio
     adjustmentsRef.current[symbol] = (adjustmentsRef.current[symbol] || 0) + delta;
     setPortfolio((prev) => {
       const assets = applyAdjustments(prev.assets, { [symbol]: delta });

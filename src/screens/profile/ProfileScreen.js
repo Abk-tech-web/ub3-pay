@@ -15,6 +15,7 @@ const ROWS = [
   { key: 'PinSetup', label: 'Transaction PIN', icon: 'key', color: '#a78bfa' },
   { key: 'WalletSettings', label: 'Operational wallets', icon: 'briefcase', color: '#34d399' },
   { key: 'TransactionLimits', label: 'Transaction Limits', icon: 'sliders', color: '#60a5fa' },
+  { key: 'Notifications', label: 'Notifications', icon: 'bell', color: '#a78bfa' },
 ];
 
 export default function ProfileScreen({ navigation }) {

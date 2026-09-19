@@ -31,10 +31,27 @@ const MOCK_HOLDINGS = [
   { chainId: 'litecoin', symbol: 'LTC', balance: '1.1' },
   { chainId: 'ripple', symbol: 'XRP', balance: '260' },
 ];
+async function fetchRealBalances() {
+  const user = auth.currentUser;
+  if (!user) return {};
+  try {
+    const token = await user.getIdToken();
+    const r = await fetch(API_URL + '/portfolio', { headers: { Authorization: 'Bearer ' + token } });
+    if (!r.ok) return {};
+    const data = await r.json();
+    const out = {};
+    for (const x of data.balances || []) out[x.chainId + ':' + x.symbol] = x.balance;
+    return out;
+  } catch (e) {
+    return {};
+  }
+}
+
 export async function getPortfolio(uid) {
-  await delay(300);
   const prices = await getAllUsdPrices();
-  const assets = MOCK_HOLDINGS.map((h) => {
+  const real = await fetchRealBalances();
+  const assets = MOCK_HOLDINGS.map((h0) => {
+    const h = { ...h0, balance: real[h0.chainId + ':' + h0.symbol] ?? '0' };
     const p = prices[h.symbol] || { usd: 0, change24h: 0 };
     const usdValue = p.usd * parseFloat(h.balance);
     const change24h = p.change24h;
