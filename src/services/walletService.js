@@ -7,6 +7,7 @@ import { CHAINS } from '../config/chains';
 import { getUsdPrice, getAllUsdPrices } from './rateService';
 import { estimateWithdrawalFee } from './feeService';
 import { apiPost } from './api';
+import { auth } from './firebase';
 
 // Mock per-chain holdings - one entry per supported chain so the whole
 // 15-chain lineup is visible. Swap these for real balances once a wallet
@@ -99,10 +100,24 @@ export async function validateAddress(chainId, address) {
 }
 
 export async function sendCrypto(uid, chainId, symbol, toAddress, amount) {
-  // TODO(integration): broadcast via wallet-infra provider, and credit the
-  // $0.10 revenue-fee portion (see feeService) to the connected revenue wallet.
-  await delay(1000);
-  return { id: 'tx_' + Date.now(), status: 'processing', txHash: null };
+  const user = auth.currentUser;
+  if (!user) throw new Error('Please sign in again');
+  const token = await user.getIdToken();
+  const response = await fetch(`${API_URL}/send`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ chainId, toAddress, amount: Number(amount) }),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    const err = new Error(data.message || data.error || 'Send failed');
+    err.code = data.error;
+    throw err;
+  }
+  return { id: 'tx_' + data.txHash, status: 'processing', txHash: data.txHash };
 }
 
 export async function getTransactionHistory(uid) {

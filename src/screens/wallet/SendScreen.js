@@ -76,6 +76,9 @@ export default function SendScreen({ route, navigation }) {
         ],
         date: new Date().toISOString(),
       });
+    } catch (e) {
+      setConfirmVisible(false);
+      setError(e.message || "Send failed");
     } finally {
       setSending(false);
     }
