@@ -100,7 +100,7 @@ export default function BalanceCard({ totalUsd, totalNgn, totalPnl24hUsd = 0, st
             <Pressable style={styles.acctValueRow} onPress={handleCopy} hitSlop={8}>
               <Text style={styles.acctValue} numberOfLines={1}>
                 {tab === 'account'
-                  ? (account ? `${account.accountNumber} \u00b7 ${account.bankName}` : 'Not verified')
+                  ? (account ? `${account.accountNumber} \u00b7 ${account.bankName}` : (user?.bvnVerified ? 'Account setup pending' : 'Verify your BVN'))
                   : (user?.uid || '\u2014')}
               </Text>
               <Feather name={copied ? 'check' : 'copy'} size={14} color="rgba(255,255,255,0.85)" />
