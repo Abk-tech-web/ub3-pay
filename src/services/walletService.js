@@ -126,7 +126,7 @@ export async function sendCrypto(uid, chainId, symbol, toAddress, amount) {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ chainId, toAddress, amount: Number(amount) }),
+    body: JSON.stringify({ chainId, symbol, toAddress, amount: Number(amount) }),
   });
   const data = await response.json();
   if (!response.ok) {

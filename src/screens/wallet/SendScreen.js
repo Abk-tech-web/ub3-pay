@@ -10,6 +10,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useWallet } from '../../context/WalletContext';
 import * as walletService from '../../services/walletService';
 import { getUsdPrice } from '../../services/rateService';
+import { getMarginUsd } from '../../services/feeService';
 import { isPositiveAmount } from '../../utils/validators';
 import { truncateAddress, formatUsd } from '../../utils/formatters';
 
@@ -36,15 +37,18 @@ export default function SendScreen({ route, navigation }) {
   }, [symbol]);
 
   const amountUsd = usdRate && amount ? Number(amount) * usdRate : null;
-  const FEE_RESERVE = { SOL: 0.00001, BTC: 0.00005, ETH: 0.0005, BNB: 0.001, MATIC: 0.01, AVAX: 0.005, TRX: 1, TON: 0.05, ADA: 1, LTC: 0.0001, XRP: 1, SUI: 0.01 };
+  const FEE_RESERVE = { SOL: 0.00002, BTC: 0.00005, ETH: 0.0005, BNB: 0.001, MATIC: 0.01, AVAX: 0.005, TRX: 1, TON: 0.05, ADA: 1, LTC: 0.0001, XRP: 1, SUI: 0.01 };
   const heldAsset = ((portfolio && portfolio.assets) || []).find((a) => a.symbol === symbol);
   const available = heldAsset ? parseFloat(heldAsset.balance) || 0 : null;
   const trim = (n, d) => n.toFixed(d).replace(/\.?0+$/, '');
   const availText = available === null ? null : trim(available, 6);
-  const insufficient = available !== null && amount !== '' && Number(amount) > available + 1e-9;
+  const serviceFee = usdRate ? getMarginUsd() / usdRate : 0;
+  const needed = Number(amount) + serviceFee + (FEE_RESERVE[symbol] || 0);
+  const insufficient = available !== null && amount !== '' && needed > available + 1e-9;
+  const insufficientMsg = 'Insufficient balance. You have ' + availText + ' ' + symbol + ', but the amount plus the service fee needs about ' + trim(needed, 6) + ' ' + symbol + '.';
   const onMax = () => {
     if (available === null) return;
-    const max = Math.max(0, available - (FEE_RESERVE[symbol] || 0));
+    const max = Math.max(0, available - serviceFee - (FEE_RESERVE[symbol] || 0));
     setAmount(trim(max, 8));
   };
 
@@ -53,7 +57,7 @@ export default function SendScreen({ route, navigation }) {
     if (!address.trim()) return setError('Enter the recipient address.');
     if (!(await walletService.validateAddress(chainId, address))) return setError('That address doesn\u2019t look right for this network.');
     if (!isPositiveAmount(amount)) return setError('Enter an amount greater than 0.');
-    if (available !== null && Number(amount) > available) return setError('Insufficient balance. You have ' + availText + ' ' + symbol + '.');
+    if (insufficient) return setError(insufficientMsg);
     try {
       const f = await walletService.estimateNetworkFee(chainId);
       setFee(f);
@@ -107,7 +111,7 @@ export default function SendScreen({ route, navigation }) {
       <View style={styles.body}>
         <Text style={styles.title}>Send {symbol}</Text>
 
-        {insufficient ? <Text style={styles.error}>{'Insufficient balance. You have ' + availText + ' ' + symbol + '.'}</Text> : error ? <Text style={styles.error}>{error}</Text> : null}
+        {insufficient ? <Text style={styles.error}>{insufficientMsg}</Text> : error ? <Text style={styles.error}>{error}</Text> : null}
 
         <Text style={styles.label}>Recipient address</Text>
         <FloatingInput
@@ -148,6 +152,7 @@ export default function SendScreen({ route, navigation }) {
           { label: 'Amount', value: `${amount} ${symbol}` },
           { label: 'Network fee', value: fee ? formatUsd(fee.networkFeeUsd) : '...' },
           { label: 'Service fee', value: fee ? formatUsd(fee.revenueFeeUsd) : '...' },
+            { label: 'Total from your balance', value: usdRate ? trim(Number(amount) + serviceFee, 8) + ' ' + symbol : '...' },
           { label: 'Total fee', value: fee ? formatUsd(fee.totalFeeUsd) : '...' },
         ]}
         onConfirm={onConfirm}
