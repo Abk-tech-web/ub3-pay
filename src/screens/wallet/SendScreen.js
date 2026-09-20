@@ -41,6 +41,7 @@ export default function SendScreen({ route, navigation }) {
   const available = heldAsset ? parseFloat(heldAsset.balance) || 0 : null;
   const trim = (n, d) => n.toFixed(d).replace(/\.?0+$/, '');
   const availText = available === null ? null : trim(available, 6);
+  const insufficient = available !== null && amount !== '' && Number(amount) > available + 1e-9;
   const onMax = () => {
     if (available === null) return;
     const max = Math.max(0, available - (FEE_RESERVE[symbol] || 0));
@@ -49,6 +50,7 @@ export default function SendScreen({ route, navigation }) {
 
   const onReview = async () => {
     setError('');
+    if (!address.trim()) return setError('Enter the recipient address.');
     if (!(await walletService.validateAddress(chainId, address))) return setError('That address doesn\u2019t look right for this network.');
     if (!isPositiveAmount(amount)) return setError('Enter an amount greater than 0.');
     if (available !== null && Number(amount) > available) return setError('Insufficient balance. You have ' + availText + ' ' + symbol + '.');
@@ -105,13 +107,13 @@ export default function SendScreen({ route, navigation }) {
       <View style={styles.body}>
         <Text style={styles.title}>Send {symbol}</Text>
 
-        {error ? <Text style={styles.error}>{error}</Text> : null}
+        {insufficient ? <Text style={styles.error}>{'Insufficient balance. You have ' + availText + ' ' + symbol + '.'}</Text> : error ? <Text style={styles.error}>{error}</Text> : null}
 
         <Text style={styles.label}>Recipient address</Text>
         <FloatingInput
           label={`${symbol} Address`}
           value={address}
-          onChangeText={setAddress}
+          onChangeText={(t) => { setAddress(t); setError(''); }}
           autoCapitalize="none"
         />
 
@@ -119,7 +121,7 @@ export default function SendScreen({ route, navigation }) {
         <FloatingInput
           label="Amount"
           value={amount}
-          onChangeText={setAmount}
+          onChangeText={(t) => { setAmount(t); setError(''); }}
           keyboardType="decimal-pad"
         />
         {amountUsd !== null ? (
