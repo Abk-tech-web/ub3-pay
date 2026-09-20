@@ -24,6 +24,21 @@ let fxCache = { rate: null, at: 0 };
 const CACHE_TTL_MS = 30_000;
 
 export async function getAllUsdPrices() {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      return await fetchFreshUsdPrices();
+    } catch (err) {
+      if (priceCache.data) {
+        priceCache.at = Date.now() - CACHE_TTL_MS + 10000;
+        return priceCache.data;
+      }
+      if (attempt === 0) await new Promise((r) => setTimeout(r, 1500));
+    }
+  }
+  throw new Error('Prices are temporarily unavailable. Please try again in a moment.');
+}
+
+async function fetchFreshUsdPrices() {
   if (priceCache.data && Date.now() - priceCache.at < CACHE_TTL_MS) {
     return priceCache.data;
   }
@@ -31,7 +46,7 @@ export async function getAllUsdPrices() {
   const res = await fetch(
     `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`
   );
-  if (!res.ok) throw new Error(`CoinGecko error: ${res.status}`);
+  if (!res.ok) throw new Error(`Price source returned ${res.status}`);
   const json = await res.json();
   const bySymbol = {};
   for (const [symbol, id] of Object.entries(COINGECKO_IDS)) {
@@ -115,7 +130,7 @@ export async function getMarketChart(symbol, timeframe = '1D') {
   const res = await fetch(
     `https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=usd&days=${days}`
   );
-  if (!res.ok) throw new Error(`CoinGecko chart error: ${res.status}`);
+  if (!res.ok) throw new Error(`Chart data is temporarily unavailable`);
   const json = await res.json();
   let points = (json.prices || []).map(([timestamp, price]) => ({ timestamp, price }));
 
