@@ -53,18 +53,24 @@ export function WalletProvider({ children }) {
     setRefreshing(true);
     lastUidRef.current = uid;
     try {
-      const [p, usdNgn] = await Promise.all([walletService.getPortfolio(uid), getMidMarketUsdToNgn()]);
+      const raw = await AsyncStorage.getItem('ub3_portfolio_cache_v1');
+      const c = raw ? JSON.parse(raw) : null;
+      if (c && c.uid === uid && c.data) setPortfolio((p) => (p.assets && p.assets.length ? p : { ...p, ...c.data }));
+    } catch (e) {}
+    try {
+      const [p, usdNgn, ngnRes] = await Promise.all([walletService.getPortfolio(uid), getMidMarketUsdToNgn(), apiGet('/ngn-balance').catch(() => null)]);
       const assets = p.assets;
       const totalUsd = assets.reduce((sum, a) => sum + a.usdValue, 0);
       let ngn = ngnBalanceRef.current;
-      try {
-        const r = await apiGet('/ngn-balance');
-        ngn = Number(r.ngnBalance) || 0;
+      if (ngnRes && ngnRes.ngnBalance != null) {
+        ngn = Number(ngnRes.ngnBalance) || 0;
         ngnBalanceRef.current = ngn;
-      } catch (e) {}
+      }
       const cryptoUsd = totalUsd;
       const allUsd = cryptoUsd + (usdNgn > 0 ? ngn / usdNgn : 0);
-      setPortfolio({ ...p, assets, totalUsd: allUsd, totalNgn: cryptoUsd * usdNgn + ngn, ngnBalance: ngn, activity: activityRef.current });
+      const next = { ...p, assets, totalUsd: allUsd, totalNgn: cryptoUsd * usdNgn + ngn, ngnBalance: ngn, activity: activityRef.current };
+      setPortfolio(next);
+      AsyncStorage.setItem('ub3_portfolio_cache_v1', JSON.stringify({ uid, data: next })).catch(() => {});
     } finally {
       setRefreshing(false);
     }
