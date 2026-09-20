@@ -18,7 +18,7 @@ export default function SendScreen({ route, navigation }) {
   const styles = getStyles(colors);
   const { chainId = 'bitcoin', symbol = 'BTC' } = route.params ?? {};
   const { user } = useAuth();
-  const { adjustCryptoBalance, addActivity } = useWallet();
+  const { adjustCryptoBalance, addActivity, portfolio, refreshPortfolio } = useWallet();
   const [address, setAddress] = useState('');
   const [amount, setAmount] = useState('');
   const [error, setError] = useState('');
@@ -36,14 +36,29 @@ export default function SendScreen({ route, navigation }) {
   }, [symbol]);
 
   const amountUsd = usdRate && amount ? Number(amount) * usdRate : null;
+  const FEE_RESERVE = { SOL: 0.00001, BTC: 0.00005, ETH: 0.0005, BNB: 0.001, MATIC: 0.01, AVAX: 0.005, TRX: 1, TON: 0.05, ADA: 1, LTC: 0.0001, XRP: 1, SUI: 0.01 };
+  const heldAsset = ((portfolio && portfolio.assets) || []).find((a) => a.symbol === symbol);
+  const available = heldAsset ? parseFloat(heldAsset.balance) || 0 : null;
+  const trim = (n, d) => n.toFixed(d).replace(/\.?0+$/, '');
+  const availText = available === null ? null : trim(available, 6);
+  const onMax = () => {
+    if (available === null) return;
+    const max = Math.max(0, available - (FEE_RESERVE[symbol] || 0));
+    setAmount(trim(max, 8));
+  };
 
   const onReview = async () => {
     setError('');
     if (!(await walletService.validateAddress(chainId, address))) return setError('That address doesn\u2019t look right for this network.');
     if (!isPositiveAmount(amount)) return setError('Enter an amount greater than 0.');
-    const f = await walletService.estimateNetworkFee(chainId);
-    setFee(f);
-    setConfirmVisible(true);
+    if (available !== null && Number(amount) > available) return setError('Insufficient balance. You have ' + availText + ' ' + symbol + '.');
+    try {
+      const f = await walletService.estimateNetworkFee(chainId);
+      setFee(f);
+      setConfirmVisible(true);
+    } catch (e) {
+      setError((e && e.message) ? e.message : 'Something went wrong. Please try again.');
+    }
   };
 
   const onConfirm = async () => {
@@ -51,6 +66,7 @@ export default function SendScreen({ route, navigation }) {
     try {
       const result = await walletService.sendCrypto(user.uid, chainId, symbol, address, amount);
       adjustCryptoBalance(symbol, -Number(amount));
+      if (refreshPortfolio) refreshPortfolio();
       addActivity({
         id: result?.id ?? String(Date.now()),
         label: `Sent ${symbol}`,
@@ -108,6 +124,13 @@ export default function SendScreen({ route, navigation }) {
         />
         {amountUsd !== null ? (
           <Text style={styles.usdLine}>{formatUsd(amountUsd)}</Text>
+        ) : null}
+
+        {availText !== null ? (
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 }}>
+            <Text style={{ color: '#6b7280', fontSize: 13 }}>Available: {availText} {symbol}</Text>
+            <Text onPress={onMax} style={{ color: '#7c3aed', fontSize: 13, fontWeight: '700' }}>Max</Text>
+          </View>
         ) : null}
 
         <View style={{ flex: 1 }} />
