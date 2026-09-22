@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TextInput, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
+import { useFocusEffect } from '@react-navigation/native';
 import { spacing, radii } from '../../config/theme';
 import PrimaryButton from '../../components/PrimaryButton';
 import ConfirmationSheet from '../../components/ConfirmationSheet';
@@ -26,6 +27,15 @@ export default function SendScreen({ route, navigation }) {
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [sending, setSending] = useState(false);
   const [fee, setFee] = useState(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      setAddress('');
+      setAmount('');
+      setError('');
+      setFee(null);
+    }, [])
+  );
   const [usdRate, setUsdRate] = useState(null);
 
   useEffect(() => {
@@ -73,18 +83,6 @@ export default function SendScreen({ route, navigation }) {
       const result = await walletService.sendCrypto(user.uid, chainId, symbol, address, amount);
       adjustCryptoBalance(symbol, -Number(amount));
       if (refreshPortfolio) refreshPortfolio();
-      addActivity({
-        id: result?.id ?? String(Date.now()),
-        label: `Sent ${symbol}`,
-        at: new Date().toISOString(),
-        status: result?.status ?? 'processing',
-        amount: Number(amount),
-        symbol,
-        direction: 'send',
-        chainId,
-        toAddress: address,
-        txHash: result?.txHash ?? null,
-      });
       setConfirmVisible(false);
       navigation.navigate('TransactionReceipt', {
         amountPrefix: '-',

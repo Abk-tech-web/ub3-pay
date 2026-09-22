@@ -42,7 +42,7 @@ export function WalletProvider({ children }) {
           const saved = JSON.parse(raw);
           ngnBalanceRef.current = 0; // real balance comes from /ngn-balance
           adjustmentsRef.current = saved.adjustments ?? {};
-          activityRef.current = saved.activity ?? [];
+          activityRef.current = [];
         } catch {}
       }
       loadedRef.current = true;
