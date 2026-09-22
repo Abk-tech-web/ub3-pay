@@ -6,7 +6,7 @@
 import { CHAINS } from '../config/chains';
 import { getUsdPrice, getAllUsdPrices } from './rateService';
 import { estimateWithdrawalFee } from './feeService';
-import { apiPost } from './api';
+import { apiPost, apiGet } from './api';
 import { auth } from './firebase';
 
 // Mock per-chain holdings - one entry per supported chain so the whole
@@ -14,8 +14,15 @@ import { auth } from './firebase';
 // custody provider is wired in.
 const MOCK_HOLDINGS = [
   { chainId: 'solana', symbol: 'SOL', balance: '2.4' },
-  { chainId: 'ethereum', symbol: 'USDT', balance: '150.00' },
-  { chainId: 'ethereum', symbol: 'USDC', balance: '75.00' },
+  { chainId: 'ethereum', symbol: 'USDT', balance: '0' },
+  { chainId: 'tron', symbol: 'USDT', balance: '0' },
+  { chainId: 'bsc', symbol: 'USDT', balance: '0' },
+  { chainId: 'solana', symbol: 'USDT', balance: '0' },
+  { chainId: 'ton', symbol: 'USDT', balance: '0' },
+  { chainId: 'ethereum', symbol: 'USDC', balance: '0' },
+  { chainId: 'solana', symbol: 'USDC', balance: '0' },
+  { chainId: 'base', symbol: 'USDC', balance: '0' },
+  { chainId: 'polygon', symbol: 'USDC', balance: '0' },
   { chainId: 'bsc', symbol: 'BNB', balance: '1.4' },
   { chainId: 'bitcoin', symbol: 'BTC', balance: '0.031' },
   { chainId: 'ethereum', symbol: 'ETH', balance: '0.82' },
@@ -138,11 +145,20 @@ export async function sendCrypto(uid, chainId, symbol, toAddress, amount) {
 }
 
 export async function getTransactionHistory(uid) {
-  await delay(400);
-  return [
-    { id: 'tx_1', type: 'deposit_crypto', symbol: 'BTC', chainId: 'bitcoin', txHash: '3a7f...9e21', amount: '0.01', direction: 'in', status: 'completed', at: '2026-08-09T11:00:00Z' },
-    { id: 'tx_2', type: 'swap_crypto_to_ngn', symbol: 'USDT', chainId: 'ethereum', txHash: '0x8c2b...f471', amount: '50', direction: 'out', status: 'completed', at: '2026-08-05T08:30:00Z' },
-  ];
+  const data = await apiGet('/transactions');
+  const txs = data.transactions || [];
+  return txs.map((t) => ({
+    id: t.id,
+    type: t.type,
+    at: t.createdAt,
+    status: t.status,
+    amount: t.amount,
+    symbol: t.symbol,
+    chainId: t.chainId,
+    toAddress: t.toAddress,
+    txHash: t.txHash,
+    direction: t.type === 'send' ? 'out' : 'in',
+  }));
 }
 
 async function withdrawFunds({ uid, amount, account_number, bank_code, name, reason }) {
