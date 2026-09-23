@@ -1,7 +1,8 @@
 import { getChain } from '../../config/chains';
 import { openReceipt } from '../../utils/receiptRows';
 import AssetIcon from '../../components/AssetIcon';
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { View, Text, FlatList, StyleSheet, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
@@ -57,14 +58,15 @@ export default function ActivityScreen({ navigation }) {
   const { portfolio } = useWallet();
   const [items, setItems] = useState([]);
 
-  useEffect(() => {
-    if (!user) return;
-    Promise.all([walletService.getTransactionHistory(user.uid), baasService.getDepositHistory(user.uid)]).then(
-      ([txs, deposits]) => {
+  useFocusEffect(
+    useCallback(() => {
+      if (!user) return;
+      Promise.all([walletService.getTransactionHistory(user.uid), baasService.getDepositHistory(user.uid)]).then(
+        ([txs, deposits]) => {
         const merged = [
           ...txs.map((t) => ({
             id: t.id, label: t.type.replace(/_/g, ' '), at: t.at, status: t.status,
-            amount: t.amount, symbol: t.symbol, direction: t.direction,
+            amount: t.amount, symbol: t.symbol, direction: t.direction, chainId: t.chainId, txHash: t.txHash,
           })),
           ...deposits.map((d) => ({
             id: d.id, label: 'naira deposit', at: d.receivedAt, status: d.status,
@@ -72,10 +74,11 @@ export default function ActivityScreen({ navigation }) {
           })),
                   ...(portfolio.activity || []),
         ].sort((a, b) => new Date(b.at) - new Date(a.at));
-        setItems(merged);
-      }
-    );
-  }, [user, portfolio.activity]);
+          setItems(merged);
+        }
+      );
+    }, [user, portfolio.activity])
+  );
 
   const sections = useMemo(() => {
     const groups = {};
