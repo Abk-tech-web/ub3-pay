@@ -47,7 +47,7 @@ export default function AssetDetailScreen({ route, navigation }) {
             <TokenIcon symbol={asset?.symbol} chainId={asset?.chainId} size={64} />
           </View>
           <Text style={styles.symbol}>{asset?.symbol}</Text>
-          <Text style={styles.chainName}>{chain?.name}</Text>
+          <Text style={styles.chainName}>{asset?.networkCount > 1 ? asset.networkCount + ' Networks' : chain?.name}</Text>
 
           <Text style={styles.balance}>{formatCrypto(asset?.balance, asset?.symbol)}</Text>
           <Text style={styles.usd}>{formatUsd(asset?.usdValue)}</Text>
@@ -69,7 +69,14 @@ export default function AssetDetailScreen({ route, navigation }) {
           />
           <ActionPill styles={styles}
             label="Send"
-            onPress={() => navigation.navigate('Send', { chainId: asset?.chainId, symbol: asset?.symbol })}
+            onPress={() => {
+              const nets = getNetworksForSymbol(asset?.symbol);
+              if (nets.length > 1) {
+                navigation.navigate('NetworkPicker', { symbol: asset?.symbol, networks: nets, targetRoute: 'SendAmount' });
+              } else {
+                navigation.navigate('SendAmount', { chainId: asset?.chainId, symbol: asset?.symbol });
+              }
+            }}
           />
           <ActionPill styles={styles}
             label="Swap to NGN"
