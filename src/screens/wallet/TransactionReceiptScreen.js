@@ -125,16 +125,16 @@ export default function TransactionReceiptScreen({ navigation, route }) {
           </View>
         </ViewShot>
 
+
+        </ScrollView>
+
+        <View style={styles.footer}>
         {explorerUrl ? (
           <Pressable style={styles.explorerBtn} onPress={openExplorer}>
             <Ionicons name="open-outline" size={16} color="#fff" />
             <Text style={styles.explorerLabel}>View on Block Explorer</Text>
           </Pressable>
         ) : null}
-
-        </ScrollView>
-
-        <View style={styles.footer}>
           <Pressable style={styles.shareBtn} onPress={onShare} disabled={sharing}>
             <Ionicons name="share-outline" size={18} color={colors.textPrimary} />
             <Text style={styles.shareLabel}>{sharing ? 'Preparing...' : 'Share Receipt'}</Text>
@@ -151,7 +151,7 @@ export default function TransactionReceiptScreen({ navigation, route }) {
 
 const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
-  body: { flex: 1, padding: spacing(6), paddingTop: spacing(6) },
+  body: { flex: 1, padding: spacing(5), paddingTop: spacing(4) },
   scrollContent: { flexGrow: 1, paddingBottom: spacing(2) },
   footer: { paddingTop: spacing(2) },
   shotWrap: { backgroundColor: colors.bg },
@@ -161,14 +161,14 @@ const getStyles = (colors) => StyleSheet.create({
     borderRadius: radii.lg,
     borderWidth: 1,
     borderColor: colors.border,
-    padding: spacing(6),
+    padding: spacing(5),
     overflow: 'hidden',
   },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing(6),
+    marginBottom: spacing(4),
   },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: spacing(2) },
   brandLogo: { width: 40, height: 40, borderRadius: 10 },
@@ -181,11 +181,11 @@ const getStyles = (colors) => StyleSheet.create({
   topRightImg: { width: 16, height: 16, borderRadius: 8 },
   topRightText: { color: '#fff', fontSize: 13, fontWeight: '600' },
   amount: { fontSize: 38, fontWeight: '800', color: '#fff', marginBottom: spacing(1) },
-  dateTime: { fontSize: 13, color: '#9a9a9a', fontWeight: '600', marginBottom: spacing(6) },
+  dateTime: { fontSize: 13, color: '#9a9a9a', fontWeight: '600', marginBottom: spacing(4) },
   detailsCard: {
     backgroundColor: '#151515',
     borderRadius: radii.md,
-    padding: spacing(5),
+    padding: spacing(4),
   },
   rowLabel: { fontSize: 12, color: '#9a9a9a', marginBottom: spacing(1) },
   rowValueRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: spacing(3) },
@@ -220,7 +220,7 @@ const getStyles = (colors) => StyleSheet.create({
     backgroundColor: '#5B3FD1',
     borderRadius: radii.md,
     paddingVertical: spacing(3),
-    marginTop: spacing(5),
+    marginBottom: spacing(3),
   },
   explorerLabel: { color: '#fff', fontWeight: '700', fontSize: 13 },
   shareBtn: {
