@@ -155,7 +155,7 @@ export async function getTransactionHistory(uid) {
     amount: t.amount,
     symbol: t.symbol,
     chainId: t.chainId,
-    toAddress: t.toAddress,
+    toAddress: t.toAddress, fromAddress: t.fromAddress,
     txHash: t.txHash,
     direction: t.type === 'send' ? 'out' : 'in',
   }));

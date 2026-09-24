@@ -30,6 +30,9 @@ export function getReceiptParams(item) {
         copyValue: item.toAddress,
       });
     }
+    if (item.fromAddress) {
+      rows.push({ label: 'From', value: item.fromAddress.slice(0, 6) + '...' + item.fromAddress.slice(-4), copyValue: item.fromAddress });
+    }
     rows.push({ label: 'Tx Hash', value: item.txHash || 'Pending' });
     if (chain?.explorer && item.txHash) {
       explorerUrl = chain.explorer + item.txHash.replace('...', '');
