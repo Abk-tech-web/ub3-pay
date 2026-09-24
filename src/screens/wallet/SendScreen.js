@@ -47,7 +47,7 @@ export default function SendScreen({ route, navigation }) {
   }, [symbol]);
 
   const amountUsd = usdRate && amount ? Number(amount) * usdRate : null;
-  const FEE_RESERVE = { SOL: 0.00002, BTC: 0.00005, ETH: 0.0005, BNB: 0.001, MATIC: 0.01, AVAX: 0.005, TRX: 1, TON: 0.05, ADA: 1, LTC: 0.0001, XRP: 1, SUI: 0.01 };
+  const FEE_RESERVE = { SOL: 0.00095, BTC: 0.00005, ETH: 0.0005, BNB: 0.001, MATIC: 0.01, AVAX: 0.005, TRX: 1, TON: 0.05, ADA: 1, LTC: 0.0001, XRP: 1, SUI: 0.01 };
   const heldAsset = ((portfolio && portfolio.assets) || []).find((a) => a.symbol === symbol && a.chainId === chainId);
   const available = heldAsset ? parseFloat(heldAsset.balance) || 0 : null;
   const trim = (n, d) => n.toFixed(d).replace(/\.?0+$/, '');
