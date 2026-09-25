@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, TextInput, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { useFocusEffect } from '@react-navigation/native';
@@ -30,11 +30,17 @@ export default function SendScreen({ route, navigation }) {
 
   useFocusEffect(
     useCallback(() => {
-      setAddress('');
-      setAmount('');
-      setError('');
-      setFee(null);
-    }, [])
+      if (route.params?.selectedAddress) {
+        setAddress(route.params.selectedAddress);
+        setError('');
+        navigation.setParams({ selectedAddress: undefined });
+      } else {
+        setAddress('');
+        setAmount('');
+        setError('');
+        setFee(null);
+      }
+    }, [route.params?.selectedAddress])
   );
   const [usdRate, setUsdRate] = useState(null);
 
@@ -111,7 +117,12 @@ export default function SendScreen({ route, navigation }) {
 
         {insufficient ? <Text style={styles.error}>{insufficientMsg}</Text> : error ? <Text style={styles.error}>{error}</Text> : null}
 
-        <Text style={styles.label}>Recipient address</Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Text style={styles.label}>Recipient address</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('SelectRecipient', { targetRoute: 'SendAmount', chainId, symbol })}>
+            <Text style={{ color: colors.textPrimary, fontWeight: '700', fontSize: 13 }}>Select saved</Text>
+          </TouchableOpacity>
+        </View>
         <FloatingInput
           label={`${symbol} Address`}
           value={address}

@@ -40,4 +40,16 @@ async function apiGet(path) {
   return data;
 }
 
-export { apiGet, apiPost, BASE_URL };
+async function apiDelete(path) {
+  const res = await fetch(`${BASE_URL}${path}`, { method: "DELETE", headers: await authHeader() });
+  const data = await res.json();
+  if (!res.ok) {
+    const err = new Error(data.error || "Request failed");
+    err.status = res.status;
+    err.code = data.error;
+    throw err;
+  }
+  return data;
+}
+
+export { apiGet, apiPost, apiDelete, BASE_URL };

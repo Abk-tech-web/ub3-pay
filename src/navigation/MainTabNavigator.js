@@ -34,6 +34,7 @@ import ReceiveSelectScreen from '../screens/wallet/ReceiveSelectScreen';
 import SendScreen from '../screens/wallet/SendScreen';
 import SendSelectScreen from '../screens/wallet/SendSelectScreen';
 import NetworkPickerScreen from '../screens/wallet/NetworkPickerScreen';
+import SelectRecipientScreen from '../screens/wallet/SelectRecipientScreen';
 import TransactionHistoryScreen from '../screens/wallet/TransactionHistoryScreen';
 import AddCustomTokenScreen from '../screens/wallet/AddCustomTokenScreen';
 import BuyCryptoScreen from '../screens/buysell/BuyCryptoScreen';
@@ -75,6 +76,7 @@ function HomeStackScreen() {
       <HomeStack.Screen name="Send" component={SendSelectScreen} />
       <HomeStack.Screen name="SendAmount" component={SendScreen} />
       <HomeStack.Screen name="NetworkPicker" component={NetworkPickerScreen} />
+        <HomeStack.Screen name="SelectRecipient" component={SelectRecipientScreen} />
       <HomeStack.Screen name="TransactionHistory" component={TransactionHistoryScreen} />
       <HomeStack.Screen name="AddCustomToken" component={AddCustomTokenScreen} />
       <HomeStack.Screen name="BuyCrypto" component={BuyCryptoScreen} />
