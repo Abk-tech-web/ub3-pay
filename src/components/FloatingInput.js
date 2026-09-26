@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { View, TextInput, Text, Animated, StyleSheet } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { spacing, radii } from '../config/theme';
@@ -34,6 +34,14 @@ export default function FloatingInput({
     setFocused(false);
     if (!value) animateTo(0);
   };
+
+  useEffect(() => {
+    if (value) {
+      animateTo(1);
+    } else if (!focused) {
+      animateTo(0);
+    }
+  }, [value]);
 
   const borderColor = anim.interpolate({
     inputRange: [0, 1],
