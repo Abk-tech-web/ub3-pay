@@ -60,12 +60,13 @@ export default function SendScreen({ route, navigation }) {
   const availText = available === null ? null : trim(available, 6);
   const serviceFee = usdRate ? getMarginUsd() / usdRate : 0;
   const needed = Number(amount) + serviceFee + (FEE_RESERVE[symbol] || 0);
-  const insufficient = available !== null && amount !== '' && needed > available + 1e-9;
+  const insufficient = available !== null && amount !== '' && needed > available + 1e-6;
   const insufficientMsg = 'Insufficient balance. You have ' + availText + ' ' + symbol + ', but the amount plus the service fee needs about ' + trim(needed, 6) + ' ' + symbol + '.';
   const onMax = () => {
     if (available === null) return;
-    const max = Math.max(0, available - serviceFee - (FEE_RESERVE[symbol] || 0));
-    setAmount(trim(max, 8));
+    const raw = Math.max(0, available - serviceFee - (FEE_RESERVE[symbol] || 0));
+    const floored = Math.floor(raw * 1e8) / 1e8;
+    setAmount(trim(floored, 8));
   };
 
   const onReview = async () => {
