@@ -20,6 +20,17 @@ export function getMarginUsd() {
   return REVENUE_MARGIN_USD;
 }
 
+// Tiered service fee by USD value of the transaction (mirrors backend services/sendSplService.js tierFeeUsd)
+export function tierFeeUsd(usdValue) {
+  if (usdValue <= 20) return 0.10;
+  if (usdValue <= 50) return 0.15;
+  if (usdValue <= 100) return 0.20;
+  if (usdValue <= 200) return 0.25;
+  if (usdValue <= 500) return 0.30;
+  if (usdValue <= 1000) return 0.50;
+  return 1.00;
+}
+
 export async function estimateWithdrawalFee(chainId) {
   await delay(200);
   const networkFeeUsd = ESTIMATED_NETWORK_FEE_USD[chainId] ?? 0.50;
