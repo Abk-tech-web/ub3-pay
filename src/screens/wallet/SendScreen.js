@@ -28,12 +28,17 @@ export default function SendScreen({ route, navigation }) {
   const [sending, setSending] = useState(false);
   const [fee, setFee] = useState(null);
 
+  const justAppliedAddress = useRef(false);
+
   useFocusEffect(
     useCallback(() => {
       if (route.params?.selectedAddress) {
+        justAppliedAddress.current = true;
         setAddress(route.params.selectedAddress);
         setError('');
         navigation.setParams({ selectedAddress: undefined });
+      } else if (justAppliedAddress.current) {
+        justAppliedAddress.current = false;
       } else {
         setAddress('');
         setAmount('');
