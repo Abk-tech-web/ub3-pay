@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert, TextInput } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
@@ -66,6 +66,7 @@ export default function SelectRecipientScreen({ route, navigation }) {
 
   return (
     <SafeAreaView style={styles.safe}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={styles.back}>{'←'}</Text>
@@ -140,6 +141,7 @@ export default function SelectRecipientScreen({ route, navigation }) {
           </TouchableOpacity>
         </View>
       )}
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
