@@ -123,7 +123,7 @@ export async function validateAddress(chainId, address) {
   return address.length > 10; // TODO(integration): real per-chain checksum validation
 }
 
-export async function sendCrypto(uid, chainId, symbol, toAddress, amount) {
+export async function sendCrypto(uid, chainId, symbol, toAddress, amount, isMax) {
   const user = auth.currentUser;
   if (!user) throw new Error('Please sign in again');
   const token = await user.getIdToken();
@@ -133,7 +133,7 @@ export async function sendCrypto(uid, chainId, symbol, toAddress, amount) {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ chainId, symbol, toAddress, amount: Number(amount) }),
+    body: JSON.stringify({ chainId, symbol, toAddress, amount: Number(amount), isMax: !!isMax }),
   });
   const data = await response.json();
   if (!response.ok) {

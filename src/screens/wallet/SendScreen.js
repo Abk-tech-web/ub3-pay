@@ -23,6 +23,7 @@ export default function SendScreen({ route, navigation }) {
   const { adjustCryptoBalance, addActivity, portfolio, refreshPortfolio } = useWallet();
   const [address, setAddress] = useState('');
   const [amount, setAmount] = useState('');
+  const [isMax, setIsMax] = useState(false);
   const [error, setError] = useState('');
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [sending, setSending] = useState(false);
@@ -75,6 +76,7 @@ export default function SendScreen({ route, navigation }) {
     const raw = Math.max(0, available - serviceFee - (FEE_RESERVE[symbol] || 0));
     const floored = Math.floor(raw * 1e8) / 1e8;
     setAmount(trim(floored, 8));
+    setIsMax(true);
   };
 
   const onReview = async () => {
@@ -95,7 +97,7 @@ export default function SendScreen({ route, navigation }) {
   const onConfirm = async () => {
     setSending(true);
     try {
-      const result = await walletService.sendCrypto(user.uid, chainId, symbol, address, amount);
+      const result = await walletService.sendCrypto(user.uid, chainId, symbol, address, amount, isMax);
       adjustCryptoBalance(symbol, -Number(amount));
       if (refreshPortfolio) refreshPortfolio();
       setConfirmVisible(false);
@@ -143,7 +145,7 @@ export default function SendScreen({ route, navigation }) {
         <FloatingInput
           label="Amount"
           value={amount}
-          onChangeText={(t) => { setAmount(t); setError(''); }}
+          onChangeText={(t) => { setAmount(t); setError(''); setIsMax(false); }}
           keyboardType="decimal-pad"
         />
         {amountUsd !== null ? (
