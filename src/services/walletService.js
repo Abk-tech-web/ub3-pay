@@ -15,28 +15,17 @@ import { auth } from './firebase';
 const MOCK_HOLDINGS = [
   { chainId: 'solana', symbol: 'SOL', balance: '2.4' },
   { chainId: 'ethereum', symbol: 'USDT', balance: '0' },
-  { chainId: 'tron', symbol: 'USDT', balance: '0' },
   { chainId: 'bsc', symbol: 'USDT', balance: '0' },
   { chainId: 'solana', symbol: 'USDT', balance: '0' },
-  { chainId: 'ton', symbol: 'USDT', balance: '0' },
   { chainId: 'ethereum', symbol: 'USDC', balance: '0' },
   { chainId: 'solana', symbol: 'USDC', balance: '0' },
   { chainId: 'base', symbol: 'USDC', balance: '0' },
-  { chainId: 'polygon', symbol: 'USDC', balance: '0' },
   { chainId: 'bsc', symbol: 'BNB', balance: '1.4' },
   { chainId: 'bitcoin', symbol: 'BTC', balance: '0.031' },
   { chainId: 'ethereum', symbol: 'ETH', balance: '0.82' },
-  { chainId: 'tron', symbol: 'TRX', balance: '820' },
-  { chainId: 'polygon', symbol: 'MATIC', balance: '340' },
-  { chainId: 'sui', symbol: 'SUI', balance: '95' },
-  { chainId: 'ton', symbol: 'TON', balance: '18' },
-  { chainId: 'avalanche', symbol: 'AVAX', balance: '6.5' },
   { chainId: 'arbitrum', symbol: 'ETH', balance: '0.05' },
   { chainId: 'optimism', symbol: 'ETH', balance: '0.03' },
   { chainId: 'base', symbol: 'ETH', balance: '0.02' },
-  { chainId: 'cardano', symbol: 'ADA', balance: '410' },
-  { chainId: 'litecoin', symbol: 'LTC', balance: '1.1' },
-  { chainId: 'ripple', symbol: 'XRP', balance: '260' },
 ];
 async function fetchRealBalances() {
   const user = auth.currentUser;
