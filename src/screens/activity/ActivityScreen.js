@@ -128,7 +128,7 @@ export default function ActivityScreen({ navigation }) {
                     <View style={{ alignItems: 'flex-end' }}>
                       {hasAmount && (
                         <Text style={[styles.amount, { color: isOut ? colors.textPrimary : '#34d399' }]}>
-                          {isOut ? '- ' : '+ '}{item.symbol === 'NGN' ? '₦' : ''}{item.amount}{item.symbol && item.symbol !== 'NGN' ? ` ${item.symbol}` : ''}
+                          {isOut ? '- ' : '+ '}{item.symbol === 'NGN' ? '₦' : ''}{typeof item.amount === 'number' ? item.amount.toFixed(8).replace(/\.?0+$/, '') : item.amount}{item.symbol && item.symbol !== 'NGN' ? ` ${item.symbol}` : ''}
                         </Text>
                       )}
                       <View style={[styles.statusPill, { backgroundColor: st.bg }]}>
