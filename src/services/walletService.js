@@ -150,8 +150,8 @@ export async function getTransactionHistory(uid) {
   }));
 }
 
-async function withdrawFunds({ uid, amount, account_number, bank_code, name, reason }) {
-  return apiPost('/withdraw', { uid, amount, account_number, bank_code, name, reason });
+async function withdrawFunds({ uid, amount, account_number, bank_code, name, reason, pin }) {
+  return apiPost('/withdraw', { uid, amount, account_number, bank_code, name, reason, pin });
 }
 
 function delay(ms) {

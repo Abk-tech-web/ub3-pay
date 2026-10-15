@@ -8,6 +8,7 @@ import { isValidPin } from '../../utils/validators';
 import { useWallet } from '../../context/WalletContext';
 import { useAuth } from '../../context/AuthContext';
 import { withdrawFunds } from '../../services/walletService';
+import PinGate from '../../components/PinGate';
 
 function genSessionId() {
   return `${Date.now()}${Math.floor(Math.random() * 1000000)}`;
@@ -23,10 +24,13 @@ export default function ConfirmPinScreen({ navigation, route }) {
   const [error, setError] = useState('');
   const [bvnBlocked, setBvnBlocked] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [gateOpen, setGateOpen] = useState(true);
+  const [pinErrCode, setPinErrCode] = useState('');
 
-  const onConfirm = async () => {
+  const onConfirm = async (pinValue) => {
+    setPinErrCode('');
     setError('');
-    if (!isValidPin(pin)) return setError('PIN must be 4 digits.');
+    if (!pinValue) return;
     setLoading(true);
     try {
       await withdrawFunds({
@@ -35,13 +39,18 @@ export default function ConfirmPinScreen({ navigation, route }) {
         account_number: accountNumber,
         bank_code: bank.code,
         name: accountName,
+        pin: pinValue,
       });
     } catch (err) {
       setLoading(false);
-      if (err.status === 403 && err.code === 'bvn_verification_required') {
+      if (['PIN_INVALID', 'PIN_LOCKED', 'PIN_NOT_SET', 'PIN_REQUIRED'].includes(err.code || err.message)) {
+        setPinErrCode(err.code || err.message);
+      } else if (err.status === 403 && err.code === 'bvn_verification_required') {
+        setGateOpen(false);
         setError('Please verify your BVN before withdrawing.');
         setBvnBlocked(true);
       } else {
+        setGateOpen(false);
         setError(err.message || 'Withdrawal failed. Please try again.');
       }
       return;
@@ -100,25 +109,21 @@ export default function ConfirmPinScreen({ navigation, route }) {
         </Pressable>
       ) : null}
 
-        <TextInput
-          style={styles.input}
-          placeholder="Enter PIN"
-          placeholderTextColor={colors.textSecondary}
-          secureTextEntry
-          keyboardType="number-pad"
-          maxLength={4}
-          value={pin}
-          onChangeText={setPin}
-        />
-
         <View style={{ flex: 1 }} />
 
         <PrimaryButton
           title="Confirm"
-          onPress={onConfirm}
-          disabled={pin.length !== 4}
+          onPress={() => { setPinErrCode(''); setGateOpen(true); }}
+          disabled={loading}
         />
       </View>
+    <PinGate
+        visible={gateOpen}
+        busy={loading}
+        errorCode={pinErrCode}
+        onSubmit={onConfirm}
+        onCancel={() => setGateOpen(false)}
+      />
     </SafeAreaView>
   );
 }
