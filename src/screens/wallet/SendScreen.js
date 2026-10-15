@@ -15,6 +15,7 @@ import { getMarginUsd, tierFeeUsd } from '../../services/feeService';
 import { isPositiveAmount } from '../../utils/validators';
 import { truncateAddress, formatUsd } from '../../utils/formatters';
 import PinPad from '../../components/PinPad';
+import ForgotPinModal from '../../components/ForgotPinModal';
 
 export default function SendScreen({ route, navigation }) {
   const { colors } = useTheme();
@@ -29,6 +30,7 @@ export default function SendScreen({ route, navigation }) {
   const [pinError, setPinError] = useState('');
   const [firstPin, setFirstPin] = useState('');
   const [pinBusy, setPinBusy] = useState(false);
+  const [forgotOpen, setForgotOpen] = useState(false);
   const [error, setError] = useState('');
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [sending, setSending] = useState(false);
@@ -160,12 +162,18 @@ export default function SendScreen({ route, navigation }) {
 
   return (
     <SafeAreaView style={styles.safe}>
+      <ForgotPinModal
+        visible={forgotOpen}
+        onClose={() => { setForgotOpen(false); setPinError(''); setPinMode('enter'); }}
+        onDone={() => { setForgotOpen(false); setPinError(''); setPinMode('enter'); }}
+      />
       <PinPad
         visible={!!pinMode}
         title={pinMode === 'enter' ? 'Enter PIN' : pinMode === 'create' ? 'Create a PIN' : 'Confirm your PIN'}
         subtitle={pinMode === 'enter' ? 'Enter your 4-digit PIN to approve this payment' : pinMode === 'create' ? 'Choose a 4-digit PIN to protect your payments' : 'Enter the PIN again to confirm'}
         error={pinError}
         busy={sending || pinBusy}
+        onForgot={pinMode === 'enter' ? () => { setPinMode(null); setPinError(''); setForgotOpen(true); } : undefined}
         onComplete={onPinComplete}
         onCancel={() => { setPinMode(null); setPinError(''); setFirstPin(''); }}
       />

@@ -167,3 +167,11 @@ export async function getPinStatus() {
 export async function setPin(pin, currentPin) {
   return apiPost('/pin/set', { pin, currentPin });
 }
+
+export async function requestPinReset() {
+  return apiPost('/pin/reset-request', {});
+}
+
+export async function confirmPinReset(otp, newPin) {
+  return apiPost('/pin/reset-confirm', { otp, newPin });
+}
