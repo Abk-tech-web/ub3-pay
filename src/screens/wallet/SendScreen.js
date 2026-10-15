@@ -14,6 +14,7 @@ import { getUsdPrice } from '../../services/rateService';
 import { getMarginUsd, tierFeeUsd } from '../../services/feeService';
 import { isPositiveAmount } from '../../utils/validators';
 import { truncateAddress, formatUsd } from '../../utils/formatters';
+import PinPad from '../../components/PinPad';
 
 export default function SendScreen({ route, navigation }) {
   const { colors } = useTheme();
@@ -24,6 +25,10 @@ export default function SendScreen({ route, navigation }) {
   const [address, setAddress] = useState('');
   const [amount, setAmount] = useState('');
   const [isMax, setIsMax] = useState(false);
+  const [pinMode, setPinMode] = useState(null);
+  const [pinError, setPinError] = useState('');
+  const [firstPin, setFirstPin] = useState('');
+  const [pinBusy, setPinBusy] = useState(false);
   const [error, setError] = useState('');
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [sending, setSending] = useState(false);
@@ -95,12 +100,44 @@ export default function SendScreen({ route, navigation }) {
   };
 
   const onConfirm = async () => {
+    setConfirmVisible(false);
+    try {
+      const s = await walletService.getPinStatus();
+      setPinError('');
+      setFirstPin('');
+      setPinMode(s.hasPin ? 'enter' : 'create');
+    } catch (e) {
+      setError('Could not start the PIN check. Please try again.');
+    }
+  };
+
+  const handlePinError = (code) => {
+    if (code === 'PIN_LOCKED') setPinError('Too many wrong attempts. Try again in 15 minutes.');
+    else if (code === 'PIN_NOT_SET') { setPinError(''); setPinMode('create'); }
+    else setPinError('Wrong PIN. Try again.');
+  };
+
+  const onPinComplete = async (pin) => {
+    if (pinMode === 'enter') return doSend(pin);
+    if (pinMode === 'create') { setFirstPin(pin); setPinError(''); setPinMode('confirm'); return; }
+    if (pinMode === 'confirm') {
+      if (pin !== firstPin) { setPinError('PINs do not match. Start again.'); setFirstPin(''); setPinMode('create'); return; }
+      setPinBusy(true);
+      try { await walletService.setPin(pin); }
+      catch (e) { setPinBusy(false); setPinError(e.message || 'Could not save PIN'); return; }
+      setPinBusy(false);
+      return doSend(pin);
+    }
+  };
+
+  const doSend = async (pin) => {
     setSending(true);
     try {
-      const result = await walletService.sendCrypto(user.uid, chainId, symbol, address, amount, isMax);
+      const result = await walletService.sendCrypto(user.uid, chainId, symbol, address, amount, isMax, pin);
       adjustCryptoBalance(symbol, -Number(amount));
       if (refreshPortfolio) refreshPortfolio();
       setConfirmVisible(false);
+      setPinMode(null);
       navigation.navigate('TransactionReceipt', {
         amountPrefix: '-',
         amount: `${amount} ${symbol}`,
@@ -115,7 +152,7 @@ export default function SendScreen({ route, navigation }) {
       });
     } catch (e) {
       setConfirmVisible(false);
-      setError(e.message || "Send failed");
+      if (['PIN_INVALID', 'PIN_LOCKED', 'PIN_NOT_SET', 'PIN_REQUIRED'].includes(e.message)) { handlePinError(e.message); } else { setPinMode(null); setError(e.message || "Send failed"); }
     } finally {
       setSending(false);
     }
@@ -123,6 +160,15 @@ export default function SendScreen({ route, navigation }) {
 
   return (
     <SafeAreaView style={styles.safe}>
+      <PinPad
+        visible={!!pinMode}
+        title={pinMode === 'enter' ? 'Enter PIN' : pinMode === 'create' ? 'Create a PIN' : 'Confirm your PIN'}
+        subtitle={pinMode === 'enter' ? 'Enter your 4-digit PIN to approve this payment' : pinMode === 'create' ? 'Choose a 4-digit PIN to protect your payments' : 'Enter the PIN again to confirm'}
+        error={pinError}
+        busy={sending || pinBusy}
+        onComplete={onPinComplete}
+        onCancel={() => { setPinMode(null); setPinError(''); setFirstPin(''); }}
+      />
       <View style={styles.body}>
         <Text style={styles.title}>Send {symbol}</Text>
 

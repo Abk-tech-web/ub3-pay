@@ -112,7 +112,7 @@ export async function validateAddress(chainId, address) {
   return address.length > 10; // TODO(integration): real per-chain checksum validation
 }
 
-export async function sendCrypto(uid, chainId, symbol, toAddress, amount, isMax) {
+export async function sendCrypto(uid, chainId, symbol, toAddress, amount, isMax, pin) {
   const user = auth.currentUser;
   if (!user) throw new Error('Please sign in again');
   const token = await user.getIdToken();
@@ -122,7 +122,7 @@ export async function sendCrypto(uid, chainId, symbol, toAddress, amount, isMax)
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ chainId, symbol, toAddress, amount: Number(amount), isMax: !!isMax }),
+    body: JSON.stringify({ chainId, symbol, toAddress, amount: Number(amount), isMax: !!isMax, pin }),
   });
   const data = await response.json();
   if (!response.ok) {
@@ -159,3 +159,11 @@ function delay(ms) {
 }
 
 export { withdrawFunds };
+
+export async function getPinStatus() {
+  return apiGet('/pin/status');
+}
+
+export async function setPin(pin, currentPin) {
+  return apiPost('/pin/set', { pin, currentPin });
+}
