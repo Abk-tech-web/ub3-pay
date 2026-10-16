@@ -27,11 +27,11 @@ export async function getDataVariations(networkId) {
   }));
 }
 
-export async function buyAirtime(uid, network, phone, amountNgn) {
-  return apiPost("/airtime", { uid, phone, amount: amountNgn, serviceID: network });
+export async function buyAirtime(uid, network, phone, amountNgn, pin) {
+  return apiPost("/airtime", { uid, phone, amount: amountNgn, serviceID: network, pin });
 }
 
-export async function buyData(uid, network, phone, variationCode) {
+export async function buyData(uid, network, phone, variationCode, pin) {
   const serviceID = DATA_SERVICE_IDS[network];
-  return apiPost("/data", { uid, phone, serviceID, variation_code: variationCode });
+  return apiPost("/data", { uid, phone, serviceID, variation_code: variationCode, pin });
 }

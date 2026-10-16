@@ -8,6 +8,7 @@ import { isValidPin } from '../../utils/validators';
 import { useWallet } from '../../context/WalletContext';
 import { useAuth } from '../../context/AuthContext';
 import { NETWORKS, buyAirtime, buyData } from '../../services/billService';
+import PinGate from '../../components/PinGate';
 
 function genSessionId() {
   return Date.now() + '' + Math.floor(Math.random() * 1000000);
@@ -23,21 +24,24 @@ export default function BillConfirmPinScreen({ navigation, route }) {
   const [error, setError] = useState('');
   const [bvnBlocked, setBvnBlocked] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [gateOpen, setGateOpen] = useState(true);
+  const [pinErrCode, setPinErrCode] = useState('');
 
   const networkObj = NETWORKS.find((n) => n.id === network);
   const formattedAmount = Number(amount).toLocaleString('en-NG', { minimumFractionDigits: 2 });
 
-  const onConfirm = async () => {
+  const onConfirm = async (pinValue) => {
+    setPinErrCode('');
     setError('');
-    if (!isValidPin(pin)) return setError('PIN must be 4 digits.');
+    if (!pinValue) return;
     // TODO (integration): verify PIN against stored hash via expo-secure-store,
     // then call real VTU delivery API. Currently proceeds to receipt screen.
     setLoading(true);
     try {
       if (kind === 'data') {
-        await buyData(user.uid, network, phone, planId);
+        await buyData(user.uid, network, phone, planId, pinValue);
       } else {
-        await buyAirtime(user.uid, network, phone, amount);
+        await buyAirtime(user.uid, network, phone, amount, pinValue);
       }
       const sessionId = genSessionId();
       adjustNgnBalance(-amount);
@@ -71,10 +75,14 @@ export default function BillConfirmPinScreen({ navigation, route }) {
         date: new Date().toISOString(),
       });
     } catch (err) {
-      if (err.status === 403 && err.code === 'bvn_verification_required') {
+      if (['PIN_INVALID', 'PIN_LOCKED', 'PIN_NOT_SET', 'PIN_REQUIRED'].includes(err.code || err.message)) {
+        setPinErrCode(err.code || err.message);
+      } else if (err.status === 403 && err.code === 'bvn_verification_required') {
+        setGateOpen(false);
         setError('Please verify your BVN before making purchases.');
         setBvnBlocked(true);
       } else {
+        setGateOpen(false);
         setError(err.message || 'Purchase failed. Please try again.');
       }
     } finally {
@@ -100,26 +108,22 @@ export default function BillConfirmPinScreen({ navigation, route }) {
         </Pressable>
       ) : null}
 
-        <TextInput
-          style={styles.input}
-          placeholder="Enter PIN"
-          placeholderTextColor={colors.textSecondary}
-          secureTextEntry
-          keyboardType="number-pad"
-          maxLength={4}
-          value={pin}
-          onChangeText={setPin}
-        />
-
         <View style={{ flex: 1 }} />
 
         <PrimaryButton
           title="Confirm"
-          onPress={onConfirm}
+          onPress={() => { setPinErrCode(''); setGateOpen(true); }}
           loading={loading}
-          disabled={pin.length !== 4}
+          disabled={loading}
         />
       </View>
+    <PinGate
+        visible={gateOpen}
+        busy={loading}
+        errorCode={pinErrCode}
+        onSubmit={onConfirm}
+        onCancel={() => setGateOpen(false)}
+      />
     </SafeAreaView>
   );
 }
