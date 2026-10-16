@@ -14,6 +14,7 @@ function genSessionId() {
   return `${Date.now()}${Math.floor(Math.random() * 1000000)}`;
 }
 
+const withdrawFee = (n) => (n < 20000 ? 25 : 10 * Math.floor(n / 10000) + 10);
 export default function ConfirmPinScreen({ navigation, route }) {
   const { colors } = useTheme();
   const styles = getStyles(colors);
@@ -81,6 +82,8 @@ export default function ConfirmPinScreen({ navigation, route }) {
         { label: 'Sent to', value: accountName },
         { label: 'Receiver\u2019s Account', value: `${bank.name} (${accountNumber})` },
         { label: 'Amount', value: `NGN ${Number(amount).toLocaleString('en-NG', { minimumFractionDigits: 2 })}` },
+        { label: 'Fee', value: 'NGN ' + withdrawFee(Number(amount)).toLocaleString('en-NG', { minimumFractionDigits: 2 }) },
+        { label: 'You receive', value: 'NGN ' + (Number(amount) - withdrawFee(Number(amount))).toLocaleString('en-NG', { minimumFractionDigits: 2 }) },
         { label: 'Session ID', value: sessionId },
       ],
       date: new Date().toISOString(),
@@ -100,6 +103,10 @@ export default function ConfirmPinScreen({ navigation, route }) {
           <Text style={styles.summaryValue}>{accountName}</Text>
           <Text style={[styles.summaryLabel, { marginTop: 12 }]}>Amount</Text>
           <Text style={styles.summaryValue}>NGN {Number(amount).toLocaleString('en-NG', { minimumFractionDigits: 2 })}</Text>
+          <Text style={[styles.summaryLabel, { marginTop: 12 }]}>Fee</Text>
+          <Text style={styles.summaryValue}>NGN {withdrawFee(Number(amount)).toLocaleString('en-NG', { minimumFractionDigits: 2 })}</Text>
+          <Text style={[styles.summaryLabel, { marginTop: 12 }]}>You receive</Text>
+          <Text style={styles.summaryValue}>NGN {(Number(amount) - withdrawFee(Number(amount))).toLocaleString('en-NG', { minimumFractionDigits: 2 })}</Text>
         </View>
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
