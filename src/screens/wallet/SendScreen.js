@@ -225,9 +225,9 @@ export default function SendScreen({ route, navigation }) {
           { label: 'To', value: truncateAddress(address) },
           { label: 'Amount', value: `${amount} ${symbol}` },
           { label: 'Network fee', value: fee ? formatUsd(fee.networkFeeUsd) : '...' },
-          { label: 'Service fee', value: fee ? formatUsd(fee.revenueFeeUsd) : '...' },
+              { label: 'Service fee (1%, min $0.10)', value: serviceFee ? formatUsd(serviceFee * usdRate) : '...' },
             { label: 'Total from your balance', value: usdRate ? trim(Number(amount) + serviceFee, 8) + ' ' + symbol : '...' },
-          { label: 'Total fee', value: fee ? formatUsd(fee.totalFeeUsd) : '...' },
+          { label: 'Total fee', value: fee && usdRate ? formatUsd(fee.networkFeeUsd + serviceFee * usdRate) : '...' },
         ]}
         onConfirm={onConfirm}
         onCancel={() => setConfirmVisible(false)}
