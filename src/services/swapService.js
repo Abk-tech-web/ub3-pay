@@ -12,8 +12,8 @@ export async function quoteCryptoToNgn(symbol, amountCrypto) {
   const rate = await getCryptoToNgnRate(symbol);
   const usd = await getUsdPrice(symbol);
   const marginPerUsd = getMarginPerUsd();
-  const amountNgn = amountCrypto * rate;
-  const revenueNgn = amountCrypto * usd * marginPerUsd;
+  const amountNgn = amountCrypto * rate * 0.99;
+  const revenueNgn = amountCrypto * rate * 0.01;
   return { rate, amountNgn, revenueNgn };
 }
 
@@ -36,8 +36,8 @@ export async function quoteNgnToCrypto(symbol, amountNgn) {
   const rate = await getNgnToCryptoRate(symbol);
   const usd = await getUsdPrice(symbol);
   const marginPerUsd = getMarginPerUsd();
-  const amountCrypto = amountNgn / rate;
-  const revenueNgn = amountCrypto * usd * marginPerUsd;
+  const amountCrypto = (amountNgn * 0.99) / rate;
+  const revenueNgn = amountNgn * 0.01;
   return { rate, amountCrypto, revenueNgn };
 }
 

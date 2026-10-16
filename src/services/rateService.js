@@ -9,6 +9,7 @@
 // value converted, on top of the live mid-market rate — not a percentage.
 // Example: $10 converted → NGN 200 goes to Ub3 Pay's revenue wallet.
 import { CHAINS, STABLECOINS } from '../config/chains';
+import { apiGet } from "./api";
 
 const COINGECKO_IDS = {
   BTC: 'bitcoin', ETH: 'ethereum', BNB: 'binancecoin', SOL: 'solana',
@@ -17,7 +18,7 @@ const COINGECKO_IDS = {
   USDT: 'tether', USDC: 'usd-coin',
 };
 
-const NGN_MARGIN_PER_USD = 20; // ₦20 revenue per $1 converted, per spec
+const NGN_MARGIN_PER_USD = 0;
 
 let priceCache = { data: null, at: 0 };
 let fxCache = { rate: null, at: 0 };
@@ -68,11 +69,9 @@ export async function getMidMarketUsdToNgn() {
   if (fxCache.rate && Date.now() - fxCache.at < CACHE_TTL_MS) {
     return fxCache.rate;
   }
-  const res = await fetch('https://open.er-api.com/v6/latest/USD');
-  if (!res.ok) throw new Error(`FX rate error: ${res.status}`);
-  const json = await res.json();
-  const rate = json?.rates?.NGN;
-  if (!rate) throw new Error('NGN rate not found in FX response');
+  const q = await apiGet("/rates").catch(() => null);
+  const rate = q && q.usdNgn;
+  if (!rate) { if (fxCache.rate) return fxCache.rate; throw new Error('NGN rate unavailable'); }
   fxCache = { rate, at: Date.now() };
   return rate;
 }
