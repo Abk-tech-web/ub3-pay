@@ -89,7 +89,11 @@ export default function SwapConfirmationScreen({ route, navigation }) {
           </View>
           <View style={styles.row}>
             <Text style={styles.label}>Rate</Text>
-            <Text style={styles.value}>Live, ₦20/$ margin included</Text>
+            <Text style={styles.value}>Live P2P rate, 1% fee included</Text>
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.label}>Fee (1%)</Text>
+            <Text style={styles.value}>{formatNgn(direction === "crypto_to_ngn" ? (quote?.amountNgn || 0) / 99 : parseFloat(amount || "0") * 0.01)}</Text>
           </View>
         </View>
         <View style={{ flex: 1 }} />
