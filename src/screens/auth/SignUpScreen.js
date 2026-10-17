@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { View, Text, TextInput, StyleSheet, KeyboardAvoidingView, Platform, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
@@ -8,6 +8,7 @@ import PrimaryButton from '../../components/PrimaryButton';
 import PasswordInput from '../../components/PasswordInput';
 import { useAuth } from '../../context/AuthContext';
 import { isValidEmail, isStrongPassword } from '../../utils/validators';
+import { apiGet, apiPost } from '../../services/api';
 
 function friendlyAuthError(err) {
   const code = err?.code ?? '';
@@ -25,13 +26,33 @@ export default function SignUpScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [refCode, setRefCode] = useState('');
+  const [refState, setRefState] = useState('');
+  const refLatest = useRef('');
+
+  const onRefChange = (t) => {
+    const v = t.toUpperCase().replace(/\s/g, '');
+    refLatest.current = v;
+    setRefCode(v);
+    setRefState('');
+    if (v.length >= 9) {
+      setRefState('checking');
+      apiGet('/referral/check/' + encodeURIComponent(v))
+        .then((r) => { if (refLatest.current === v) setRefState(r && r.valid ? 'ok' : 'bad'); })
+        .catch(() => { if (refLatest.current === v) setRefState(''); });
+    }
+  };
 
   const onSubmit = async () => {
     setError('');
     if (!isValidEmail(email)) return setError('Enter a valid email address.');
     if (!isStrongPassword(password)) return setError('Password needs 8+ characters with a letter and a number.');
+    if (refCode.length > 0 && refState === 'bad') return setError('That referral code is not valid. Fix it or clear the field.');
     try {
       await signUp(email, password);
+      if (refCode.length > 0) {
+        try { await apiPost('/referral/apply', { code: refCode }); } catch (e) {}
+      }
       // AuthContext's onAuthStateChanged listener signs them in automatically;
       // RootNavigator will route to KycNavigator once that fires. We just
       // need to get them to the "verify your email" screen first.
@@ -65,7 +86,20 @@ export default function SignUpScreen({ navigation }) {
           <Text style={styles.label}>Password</Text>
     <PasswordInput value={password} onChangeText={setPassword} placeholder="At least 8 characters" />
 
-          <PrimaryButton title="Create account" onPress={onSubmit} loading={loading} />
+          <Text style={styles.label}>Referral code (optional)</Text>
+        <TextInput
+          style={[styles.input, refState === 'bad' && { borderColor: colors.danger }, refState === 'ok' && { borderColor: '#34d399' }]}
+          placeholder="UB3-XXXXX"
+          placeholderTextColor={colors.textSecondary}
+          autoCapitalize="characters"
+          autoCorrect={false}
+          value={refCode}
+          onChangeText={onRefChange}
+        />
+        {refState === 'ok' ? <Text style={styles.refOk}>Valid code. Your welcome reward is unlocked.</Text> : null}
+        {refState === 'bad' ? <Text style={styles.error}>This code does not exist.</Text> : null}
+
+        <PrimaryButton title="Create account" onPress={onSubmit} loading={loading} />
 
           <Pressable onPress={() => navigation.goBack()} style={{ marginTop: spacing(8), alignSelf: 'center' }}>
             <Text style={styles.footerText}>
@@ -93,4 +127,5 @@ const getStyles = (colors) => StyleSheet.create({
   link: { color: colors.violetSoft, fontWeight: '600' },
   footerText: { color: colors.textSecondary, fontSize: 13 },
   error: { color: colors.danger, fontSize: 13, marginBottom: spacing(3) },
+  refOk: { color: '#34d399', fontSize: 13, marginBottom: spacing(3) },
 });

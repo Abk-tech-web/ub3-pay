@@ -45,6 +45,7 @@ import DataScreen from '../screens/billpay/DataScreen';
 import ConfirmPurchaseScreen from '../screens/billpay/ConfirmPurchaseScreen';
 import BillConfirmPinScreen from '../screens/billpay/BillConfirmPinScreen';
 import WalletSettingsScreen from '../screens/profile/WalletSettingsScreen';
+import ReferralScreen from '../screens/profile/ReferralScreen';
 import TransactionLimitsScreen from '../screens/profile/TransactionLimitsScreen';
 
 const Tab = createBottomTabNavigator();
@@ -130,6 +131,7 @@ function ProfileStackScreen() {
       <ProfileStack.Screen name="WalletSettings" component={WalletSettingsScreen} />
         <ProfileStack.Screen name="Notifications" component={NotificationsScreen} />
         <ProfileStack.Screen name="TransactionLimits" component={TransactionLimitsScreen} />
+        <ProfileStack.Screen name="Referral" component={ReferralScreen} />
     </ProfileStack.Navigator>
   );
 }

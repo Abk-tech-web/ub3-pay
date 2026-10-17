@@ -35,7 +35,7 @@ export async function signUpWithEmail(email, password) {
   // up yet, so this uses Firebase's built-in link-based verification
   // rather than a 6-digit code (Firebase Auth doesn't do numeric email
   // OTPs natively — only link-based verification or phone SMS codes).
-  await sendEmailVerification(cred.user);
+  // Email verification now uses the 6-digit code flow (VerifyEmailScreen -> /auth/send-otp). No link email.
   return cred.user;
 }
 
@@ -45,7 +45,7 @@ export async function signInWithEmail(email, password) {
 }
 
 export async function resendVerificationEmail() {
-  if (auth.currentUser) await sendEmailVerification(auth.currentUser);
+  // No-op: link emails were removed, the 6-digit code is used instead.
 }
 
 // Firebase doesn't push verification status to the client automatically —

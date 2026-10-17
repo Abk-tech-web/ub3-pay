@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
@@ -10,6 +10,7 @@ import * as Clipboard from 'expo-clipboard';
 import { useState } from 'react';
 
 const ROWS = [
+  { key: 'Referral', label: 'Invite & Earn', icon: 'gift', color: '#fbbf24' },
   { key: 'VerifyBvn', label: 'Verify BVN', icon: 'shield', color: '#34d399' },
   { key: 'SecuritySettings', label: 'Security', icon: 'lock', color: '#60a5fa' },
   { key: 'PinSetup', label: 'Transaction PIN', icon: 'key', color: '#a78bfa' },
@@ -26,7 +27,7 @@ export default function ProfileScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <View style={styles.body}>
+      <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
         <View style={styles.avatarWrap}>
           <LinearGradient
             colors={[colors.violet, colors.violetDeep]}
@@ -86,14 +87,14 @@ export default function ProfileScreen({ navigation }) {
           </View>
           <Text style={[styles.rowLabel, { color: '#f87171' }]}>Sign out</Text>
         </Pressable>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
-  body: { flex: 1, padding: spacing(6), alignItems: 'center' },
+  body: { flexGrow: 1, padding: spacing(6), paddingBottom: spacing(12), alignItems: 'center' },
   avatarWrap: { marginTop: spacing(4) },
   avatar: {
     width: 84, height: 84, borderRadius: 42, alignItems: 'center', justifyContent: 'center',
