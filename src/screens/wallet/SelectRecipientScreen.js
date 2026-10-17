@@ -7,6 +7,8 @@ import { spacing, radii } from '../../config/theme';
 import { truncateAddress } from '../../utils/formatters';
 import { getFavourites, addFavourite, removeFavourite, getRecents } from '../../services/favouritesService';
 
+const idText = (id) => (/^[0-9]{8}$/.test(id) ? id.slice(0, 4) + ' ' + id.slice(4) : '@' + id);
+
 export default function SelectRecipientScreen({ route, navigation }) {
   const { colors } = useTheme();
   const styles = getStyles(colors);
@@ -44,7 +46,13 @@ export default function SelectRecipientScreen({ route, navigation }) {
       return;
     }
     try {
-      await addFavourite(newLabel.trim(), newAddress.trim());
+      const raw = newAddress.trim();
+      const idv = raw.replace(/^@/, '').toLowerCase();
+      if (/^[a-z0-9_]{3,20}$/.test(idv)) {
+        await addFavourite(newLabel.trim(), '', idv);
+      } else {
+        await addFavourite(newLabel.trim(), raw);
+      }
       setNewAddress('');
       setNewLabel('');
       load();
@@ -100,14 +108,14 @@ export default function SelectRecipientScreen({ route, navigation }) {
           </Text>
         ) : null}
         renderItem={({ item }) => (
-          <TouchableOpacity style={styles.row} onPress={() => pick(item.address)}>
+          <TouchableOpacity style={styles.row} onPress={() => pick(item.ub3Id || item.address)}>
             <View style={styles.avatar}>
-              <Text style={styles.avatarText}>{(item.label || item.address).slice(0, 1).toUpperCase()}</Text>
+              <Text style={styles.avatarText}>{(item.label || item.ub3Id || item.address).slice(0, 1).toUpperCase()}</Text>
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.rowLabel}>{item.label || truncateAddress(item.address)}</Text>
+              <Text style={styles.rowLabel}>{item.ub3Id ? (item.label || idText(item.ub3Id)) : (item.label || truncateAddress(item.address))}</Text>
               <Text style={styles.rowSub}>
-                {item.label ? truncateAddress(item.address) : (item.symbol || '')}
+                {item.ub3Id ? ('UB3 ID ' + idText(item.ub3Id)) : (item.label ? truncateAddress(item.address) : (item.symbol || ''))}
               </Text>
             </View>
             {tab === 'favourites' && (
@@ -129,7 +137,7 @@ export default function SelectRecipientScreen({ route, navigation }) {
             style={styles.input}
           />
           <TextInput
-            placeholder="Address"
+            placeholder="Address or UB3 ID"
             placeholderTextColor={colors.textSecondary}
             value={newAddress}
             onChangeText={setNewAddress}

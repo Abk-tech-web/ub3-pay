@@ -5,8 +5,8 @@ export async function getFavourites() {
   return data.favourites || [];
 }
 
-export async function addFavourite(label, address) {
-  return apiPost('/favourites', { label, address });
+export async function addFavourite(label, address, ub3Id) {
+  return apiPost('/favourites', ub3Id ? { label, ub3Id } : { label, address });
 }
 
 export async function removeFavourite(id) {
