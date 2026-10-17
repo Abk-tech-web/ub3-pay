@@ -1,3 +1,4 @@
+import { Feather } from '@expo/vector-icons';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -206,10 +207,22 @@ export default function SendScreen({ route, navigation }) {
 
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
           <Text style={styles.label}>Recipient address</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('SelectRecipient', { targetRoute: 'SendAmount', chainId, symbol })}>
-            <Text style={{ color: colors.textPrimary, fontWeight: '700', fontSize: 13 }}>Select saved</Text>
-          </TouchableOpacity>
+          
         </View>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => navigation.navigate('SelectRecipient', { targetRoute: 'SendAmount', chainId, symbol })}
+          style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border, borderRadius: 14, paddingVertical: 12, paddingHorizontal: 14, marginBottom: 14 }}
+        >
+          <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.violet, alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>
+            <Feather name="users" size={20} color="#fff" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: colors.textPrimary, fontSize: 16, fontWeight: '800' }}>Saved & Recent</Text>
+            <Text style={{ color: colors.textSecondary, fontSize: 12, marginTop: 2 }}>Pick from your favourites or people you have sent to before</Text>
+          </View>
+          <Feather name="chevron-right" size={22} color={colors.textSecondary} />
+        </TouchableOpacity>
         <FloatingInput
           label={symbol === 'SOL' ? 'SOL address or UB3 ID' : `${symbol} Address`}
           value={address}
