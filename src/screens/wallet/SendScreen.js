@@ -16,6 +16,7 @@ import { isPositiveAmount } from '../../utils/validators';
 import { truncateAddress, formatUsd } from '../../utils/formatters';
 import PinPad from '../../components/PinPad';
 import ForgotPinModal from '../../components/ForgotPinModal';
+import { apiGet } from '../../services/api';
 
 export default function SendScreen({ route, navigation }) {
   const { colors } = useTheme();
@@ -35,6 +36,7 @@ export default function SendScreen({ route, navigation }) {
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [sending, setSending] = useState(false);
   const [fee, setFee] = useState(null);
+  const [ub3Recipient, setUb3Recipient] = useState(null);
 
   const justAppliedAddress = useRef(false);
 
@@ -74,10 +76,11 @@ export default function SendScreen({ route, navigation }) {
   const feeBasisUsd = amountUsd !== null
     ? amountUsd
     : (available !== null && usdRate ? available * usdRate : null);
-  const serviceFee = (usdRate && feeBasisUsd !== null) ? tierFeeUsd(feeBasisUsd) / usdRate : 0;
+  const isUb3Id = chainId === 'solana' && symbol === 'SOL' && /^[a-z0-9_]{3,20}$/.test(address.trim().replace(/^@/, '').toLowerCase());
+  const serviceFee = isUb3Id ? 0 : (usdRate && feeBasisUsd !== null) ? tierFeeUsd(feeBasisUsd) / usdRate : 0;
   const needed = Number(amount) + serviceFee + (FEE_RESERVE[symbol] || 0);
   const insufficient = available !== null && amount !== '' && needed > available + 1e-6;
-  const insufficientMsg = 'Insufficient balance. You have ' + availText + ' ' + symbol + ', but the amount plus the service fee needs about ' + trim(needed, 6) + ' ' + symbol + '.';
+  const insufficientMsg = 'Insufficient balance. You have ' + availText + ' ' + symbol + ', but the amount plus ' + (isUb3Id ? 'the network reserve' : 'the service fee') + ' needs about ' + trim(needed, 6) + ' ' + symbol + '.';
   const onMax = () => {
     if (available === null) return;
     const raw = Math.max(0, available - serviceFee - (FEE_RESERVE[symbol] || 0));
@@ -88,6 +91,25 @@ export default function SendScreen({ route, navigation }) {
 
   const onReview = async () => {
     setError('');
+    const idValue = address.trim().replace(/^@/, '').toLowerCase();
+    if (/^[a-z0-9_]{3,20}$/.test(idValue)) {
+      if (chainId !== 'solana' || symbol !== 'SOL') return setError('UB3 ID transfers are available for SOL for now.');
+      if (!isPositiveAmount(amount)) return setError('Enter an amount greater than 0.');
+      if (insufficient) return setError(insufficientMsg);
+      try {
+        const r = await apiGet('/ub3id/lookup/' + encodeURIComponent(idValue));
+        if (!r || !r.valid) return setError('UB3 ID not found.');
+        if (r.isSelf) return setError('You cannot send to your own UB3 ID.');
+        const f = await walletService.estimateNetworkFee(chainId);
+        setFee(f);
+        setUb3Recipient({ id: idValue, name: r.displayName || idValue });
+        setConfirmVisible(true);
+      } catch (e) {
+        setError((e && e.message) ? e.message : 'Something went wrong. Please try again.');
+      }
+      return;
+    }
+    setUb3Recipient(null);
     if (!address.trim()) return setError('Enter the recipient address.');
     if (!(await walletService.validateAddress(chainId, address))) return setError('That address doesn\u2019t look right for this network.');
     if (!isPositiveAmount(amount)) return setError('Enter an amount greater than 0.');
@@ -135,7 +157,7 @@ export default function SendScreen({ route, navigation }) {
   const doSend = async (pin) => {
     setSending(true);
     try {
-      const result = await walletService.sendCrypto(user.uid, chainId, symbol, address, amount, isMax, pin);
+      const result = await walletService.sendCrypto(user.uid, chainId, symbol, ub3Recipient ? '' : address, amount, isMax, pin, ub3Recipient ? ub3Recipient.id : undefined);
       adjustCryptoBalance(symbol, -Number(amount));
       if (refreshPortfolio) refreshPortfolio();
       setConfirmVisible(false);
@@ -145,7 +167,7 @@ export default function SendScreen({ route, navigation }) {
         amount: `${amount} ${symbol}`,
         topRightLabel: 'Sent',
         rows: [
-          { label: 'To', value: truncateAddress(address) },
+          { label: 'To', value: ub3Recipient ? (ub3Recipient.name + ' (' + ub3Recipient.id + ')') : truncateAddress(address) },
           { label: 'Network', value: chainId },
           { label: 'Amount', value: `${amount} ${symbol}` },
           { label: 'Network fee', value: fee ? formatUsd(fee.networkFeeUsd) : '...' },
@@ -189,9 +211,9 @@ export default function SendScreen({ route, navigation }) {
           </TouchableOpacity>
         </View>
         <FloatingInput
-          label={`${symbol} Address`}
+          label={symbol === 'SOL' ? 'SOL address or UB3 ID' : `${symbol} Address`}
           value={address}
-          onChangeText={(t) => { setAddress(t); setError(''); }}
+          onChangeText={(t) => { setAddress(t); setError(''); setUb3Recipient(null); }}
           autoCapitalize="none"
         />
 
@@ -222,12 +244,12 @@ export default function SendScreen({ route, navigation }) {
         title={`Send ${symbol}`}
         icon="paper-plane"
         rows={[
-          { label: 'To', value: truncateAddress(address) },
+          { label: 'To', value: ub3Recipient ? (ub3Recipient.name + ' (' + ub3Recipient.id + ')') : truncateAddress(address) },
           { label: 'Amount', value: `${amount} ${symbol}` },
           { label: 'Network fee', value: fee ? formatUsd(fee.networkFeeUsd) : '...' },
-              { label: 'Service fee (1%, min $0.10)', value: serviceFee ? formatUsd(serviceFee * usdRate) : '...' },
-            { label: 'Total from your balance', value: usdRate ? trim(Number(amount) + serviceFee, 8) + ' ' + symbol : '...' },
-          { label: 'Total fee', value: fee && usdRate ? formatUsd(fee.networkFeeUsd + serviceFee * usdRate) : '...' },
+              { label: ub3Recipient ? 'Service fee' : 'Service fee (1%, min $0.10)', value: ub3Recipient ? 'Free' : (serviceFee ? formatUsd(serviceFee * usdRate) : '...') },
+            { label: 'Total from your balance', value: usdRate ? trim(Number(amount) + (ub3Recipient ? 0 : serviceFee), 8) + ' ' + symbol : '...' },
+          { label: 'Total fee', value: fee && usdRate ? formatUsd(fee.networkFeeUsd + (ub3Recipient ? 0 : serviceFee) * usdRate) : '...' },
         ]}
         onConfirm={onConfirm}
         onCancel={() => setConfirmVisible(false)}
