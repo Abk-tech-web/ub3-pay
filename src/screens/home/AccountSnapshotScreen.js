@@ -1,3 +1,4 @@
+import useUb3Id from '../../hooks/useUb3Id';
 import React from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -24,11 +25,12 @@ export default function AccountSnapshotScreen({ navigation }) {
   const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(' ');
   const displayName = fullName || user?.email || 'UB3 Pay User';
   const initial = (fullName || user?.email || 'U').charAt(0).toUpperCase();
+  const ub3Id = useUb3Id();
   const avatarColor = getAvatarColor(user?.uid);
 
   const copyUid = async () => {
-    if (!user?.uid) return;
-    await Clipboard.setStringAsync(user.uid);
+    if (!ub3Id) return;
+    await Clipboard.setStringAsync(ub3Id);
   };
 
   return (
@@ -57,7 +59,7 @@ export default function AccountSnapshotScreen({ navigation }) {
           <Pressable style={styles.row} onPress={copyUid} hitSlop={8}>
             <Text style={styles.rowLabel}>UB3 ID</Text>
             <View style={styles.rowValueWrap}>
-              <Text style={styles.rowValue} numberOfLines={1}>{user?.uid || '—'}</Text>
+              <Text style={styles.rowValue} numberOfLines={1}>{ub3Id || '—'}</Text>
               <Feather name="copy" size={13} color={colors.textSecondary} />
             </View>
           </Pressable>

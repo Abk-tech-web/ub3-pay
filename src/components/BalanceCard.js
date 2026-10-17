@@ -1,3 +1,4 @@
+import useUb3Id from '../hooks/useUb3Id';
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, Pressable, StyleSheet, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -9,6 +10,7 @@ import { useAuth } from '../context/AuthContext';
 import * as Clipboard from 'expo-clipboard';
 
 export default function BalanceCard({ totalUsd, totalNgn, totalPnl24hUsd = 0, stale = false, navigation }) {
+  const ub3Id = useUb3Id();
   const { colors } = useTheme();
   const { user } = useAuth();
   const [hidden, setHidden] = useState(false);
@@ -37,7 +39,7 @@ export default function BalanceCard({ totalUsd, totalNgn, totalPnl24hUsd = 0, st
   const shimmerTranslate = shimmer.interpolate({ inputRange: [0, 1], outputRange: [-40, 40] });
 
   const handleCopy = async () => {
-    const value = tab === 'account' ? account?.accountNumber : user?.uid;
+  const value = tab === 'account' ? account?.accountNumber : ub3Id;
     if (!value) return;
     await Clipboard.setStringAsync(value);
     setCopied(true);
@@ -94,14 +96,14 @@ export default function BalanceCard({ totalUsd, totalNgn, totalPnl24hUsd = 0, st
                 <Text style={[styles.acctTabText, tab === 'account' && { color: colors.violetDeep }]}>Account</Text>
               </Pressable>
               <Pressable onPress={() => setTab('uid')} style={[styles.acctTab, tab === 'uid' && styles.acctTabActive]}>
-                <Text style={[styles.acctTabText, tab === 'uid' && { color: colors.violetDeep }]}>UID</Text>
+                <Text style={[styles.acctTabText, tab === 'uid' && { color: colors.violetDeep }]}>UB3 ID</Text>
               </Pressable>
             </View>
             <Pressable style={styles.acctValueRow} onPress={handleCopy} hitSlop={8}>
               <Text style={styles.acctValue} numberOfLines={1}>
                 {tab === 'account'
                   ? (account ? `${account.accountNumber} \u00b7 ${account.bankName}` : (user?.bvnVerified ? 'Account setup pending' : 'Verify your BVN'))
-                  : (user?.uid || '\u2014')}
+                  : (ub3Id || '\u2014')}
               </Text>
               <Feather name={copied ? 'check' : 'copy'} size={14} color="rgba(255,255,255,0.85)" />
             </Pressable>
