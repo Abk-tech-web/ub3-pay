@@ -1,3 +1,4 @@
+import * as Clipboard from 'expo-clipboard';
 import { Feather } from '@expo/vector-icons';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
@@ -227,6 +228,18 @@ export default function SendScreen({ route, navigation }) {
           label={symbol === 'SOL' ? 'SOL address or UB3 ID' : `${symbol} Address`}
           value={address}
           onChangeText={(t) => { setAddress(t); setError(''); setUb3Recipient(null); }}
+          rightElement={address ? (
+            <TouchableOpacity hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }} onPress={() => { setAddress(''); setError(''); setUb3Recipient(null); }}>
+              <Feather name="x-circle" size={20} color={colors.textSecondary} />
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={{ backgroundColor: colors.violet, borderRadius: 999, paddingVertical: 6, paddingHorizontal: 14 }}
+              onPress={async () => { try { const t = await Clipboard.getStringAsync(); if (t) { setAddress(t.trim()); setError(''); setUb3Recipient(null); } } catch (e) {} }}
+            >
+              <Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>Paste</Text>
+            </TouchableOpacity>
+          )}
           autoCapitalize="none"
         />
 
@@ -236,10 +249,14 @@ export default function SendScreen({ route, navigation }) {
           value={amount}
           onChangeText={(t) => { setAmount(t); setError(''); setIsMax(false); }}
           keyboardType="decimal-pad"
+          rightElement={(
+            <View style={{ alignItems: 'flex-end', marginLeft: 8 }}>
+              <Text style={{ color: colors.textPrimary, fontSize: 15, fontWeight: '800' }}>{symbol}</Text>
+              {amountUsd !== null ? <Text style={{ color: colors.textSecondary, fontSize: 12, marginTop: 1 }}>{formatUsd(amountUsd)}</Text> : null}
+            </View>
+          )}
         />
-        {amountUsd !== null ? (
-          <Text style={styles.usdLine}>{formatUsd(amountUsd)}</Text>
-        ) : null}
+        
 
         {availText !== null ? (
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 }}>

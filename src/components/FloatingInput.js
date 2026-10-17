@@ -50,7 +50,7 @@ export default function FloatingInput({
 
   const labelTop = anim.interpolate({
     inputRange: [0, 1],
-    outputRange: [18, 8],
+    outputRange: [25, 9],
   });
   const labelSize = anim.interpolate({
     inputRange: [0, 1],
@@ -102,11 +102,11 @@ export default function FloatingInput({
 const getStyles = (colors) => StyleSheet.create({
   card: {
     backgroundColor: colors.bgCard,
-    borderRadius: radii.md,
+    borderRadius: 18,
     borderWidth: 1.5,
     paddingHorizontal: spacing(4),
-    paddingTop: spacing(6),
-    paddingBottom: spacing(2.5),
+    paddingTop: 31,
+    paddingBottom: 15,
     marginBottom: spacing(4),
     shadowColor: colors.violet,
     shadowOffset: { width: 0, height: 0 },
@@ -125,9 +125,9 @@ const getStyles = (colors) => StyleSheet.create({
   input: {
     flex: 1,
     color: colors.textPrimary,
-    fontSize: 17,
+    fontSize: 19,
     fontWeight: '600',
     paddingVertical: 0,
-    height: 26,
+    height: 30,
   },
 });
