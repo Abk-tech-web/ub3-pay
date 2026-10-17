@@ -66,7 +66,7 @@ export default function ActivityScreen({ navigation }) {
         const merged = [
           ...txs.map((t) => ({
             id: t.id, label: t.type.replace(/_/g, ' '), at: t.at, status: t.status,
-            amount: t.amount, symbol: t.symbol, direction: t.direction, chainId: t.chainId, txHash: t.txHash, toAddress: t.toAddress, fromAddress: t.fromAddress,
+            amount: t.amount, symbol: t.symbol, direction: t.direction, chainId: t.chainId, txHash: t.txHash, toAddress: t.toAddress, toUb3Id: t.toUb3Id, fromAddress: t.fromAddress,
           })),
           ...deposits.map((d) => ({
             id: d.id, label: 'naira deposit', at: d.receivedAt, status: d.status,

@@ -144,7 +144,7 @@ export async function getTransactionHistory(uid) {
     amount: t.amount,
     symbol: t.symbol,
     chainId: t.chainId,
-    toAddress: t.toAddress, fromAddress: t.fromAddress,
+    toAddress: t.toAddress, toUb3Id: t.toUb3Id, fromAddress: t.fromAddress,
     txHash: t.txHash,
     direction: t.type === 'send' ? 'out' : 'in',
   }));

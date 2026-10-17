@@ -23,7 +23,14 @@ export function getReceiptParams(item) {
   } else if (isCrypto) {
     const chain = getChain(item.chainId);
     rows.push({ label: 'Network', value: chain?.name });
-    if (item.toAddress) {
+    if (item.toUb3Id) {
+    const uid8 = String(item.toUb3Id);
+    rows.push({
+      label: 'To',
+      value: /^[0-9]{8}$/.test(uid8) ? ('UB3 ID ' + uid8.slice(0, 4) + ' ' + uid8.slice(4)) : ('UB3 ID @' + uid8),
+      copyValue: uid8,
+    });
+  } else if (item.toAddress) {
       rows.push({
         label: 'To',
         value: `${item.toAddress.slice(0, 6)}...${item.toAddress.slice(-4)}`,
