@@ -40,7 +40,7 @@ export default function ProcessingOverlay({ visible, phase, title, subtitle }) {
     if (!visible || !isSuccess || !createAudioPlayer) return undefined;
     let player = null;
     try {
-      player = createAudioPlayer(require('../../assets/sounds/success.wav'));
+      player = createAudioPlayer(require('../../assets/sounds/success.mp3'));
       player.volume = 1;
       player.play();
     } catch (e) { player = null; }
