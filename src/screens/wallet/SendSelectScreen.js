@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable, FlatList } from 'react-native';
+import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { spacing } from '../../config/theme';
 import { getGroupedTransferableAssets } from '../../config/chains';
-import TokenIcon from '../../components/TokenIcon';
+import AssetSelectCard from '../../components/AssetSelectCard';
 
 export default function SendSelectScreen({ navigation }) {
   const { colors } = useTheme();
@@ -25,29 +26,28 @@ export default function SendSelectScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Send</Text>
-        <Text style={styles.subtitle}>Choose which asset you're sending.</Text>
+      <View style={styles.headerRow}>
+        <View style={styles.badge}>
+          <Feather name="arrow-up-right" size={26} color="#fff" />
+        </View>
+        <View style={{ flex: 1, marginLeft: spacing(4) }}>
+          <Text style={styles.title}>Send</Text>
+          <Text style={styles.subtitle}>Choose which asset you're sending.</Text>
+        </View>
       </View>
       <FlatList
-        contentContainerStyle={{ paddingHorizontal: spacing(6), paddingBottom: spacing(6) }}
+        contentContainerStyle={{ paddingHorizontal: spacing(5), paddingBottom: spacing(28) }}
         data={groups}
         keyExtractor={(g) => g.symbol}
-        renderItem={({ item }) => (
-          <Pressable
-            style={styles.row}
+        showsVerticalScrollIndicator={false}
+        renderItem={({ item, index }) => (
+          <AssetSelectCard
+            symbol={item.symbol}
+            chainIds={item.networks.map((n) => n.id)}
+            index={index}
             onPress={() => handlePress(item)}
-          >
-            <TokenIcon symbol={item.symbol} size={38} />
-            <View style={{ flex: 1, marginLeft: spacing(3) }}>
-              <Text style={styles.symbol}>{item.symbol}</Text>
-              <Text style={styles.chainName}>
-                {item.networks.length === 1 ? item.networks[0].name : `${item.networks.length} networks`}
-              </Text>
-            </View>
-          </Pressable>
+          />
         )}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
       />
     </SafeAreaView>
   );
@@ -55,11 +55,11 @@ export default function SendSelectScreen({ navigation }) {
 
 const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
-  header: { paddingHorizontal: spacing(6), paddingTop: spacing(8), paddingBottom: spacing(4) },
-  title: { color: colors.textPrimary, fontSize: 22, fontWeight: '800' },
-  subtitle: { color: colors.textSecondary, fontSize: 13, marginTop: spacing(2) },
-  row: { flexDirection: 'row', alignItems: 'center', paddingVertical: spacing(3) },
-  symbol: { color: colors.textPrimary, fontWeight: '700', fontSize: 15 },
-  chainName: { color: colors.textSecondary, fontSize: 12, marginTop: 2 },
-  separator: { height: 1, backgroundColor: colors.border, marginLeft: 50 },
+  headerRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing(6), paddingTop: spacing(8), paddingBottom: spacing(5) },
+  badge: {
+    width: 56, height: 56, borderRadius: 18, backgroundColor: '#5B21B6', alignItems: 'center', justifyContent: 'center',
+    shadowColor: '#2a1260', shadowOpacity: 0.35, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 8,
+  },
+  title: { color: colors.textPrimary, fontSize: 26, fontWeight: '800' },
+  subtitle: { color: colors.textSecondary, fontSize: 13, marginTop: 2 },
 });
