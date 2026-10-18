@@ -1,3 +1,4 @@
+import AnimatedCard from '../../components/AnimatedCard';
 import React, { useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, Pressable, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -50,31 +51,29 @@ export default function PortfolioScreen({ navigation }) {
           </View>
             <BalanceCard navigation={navigation} totalUsd={portfolio.totalUsd} totalNgn={portfolio.totalNgn} totalPnl24hUsd={portfolio.totalPnl24hUsd} />
 
-            <View style={styles.actionsRow}>
-              {ACTIONS.map((a) => (
-                <ActionButton
-                  key={a.key}
-                  icon={a.icon}
-                  label={a.label}
-                  gradient={a.gradient}
-                  style={styles.actionItem}
-                  onPress={() => navigation.navigate(a.key)}
-                />
-              ))}
+            <View style={styles.actionsPanel}>
+              <View style={styles.actionsLine}>
+                {ACTIONS.slice(0, 4).map((a, i) => (
+                  <ActionButton key={a.key} index={i} icon={a.icon} label={a.label} gradient={a.gradient} style={styles.actionItem} onPress={() => navigation.navigate(a.key)} />
+                ))}
+              </View>
+              <View style={styles.actionsLine2}>
+                {ACTIONS.slice(4).map((a, i) => (
+                  <ActionButton key={a.key} index={i + 4} icon={a.icon} label={a.label} gradient={a.gradient} style={styles.actionItem} onPress={() => navigation.navigate(a.key)} />
+                ))}
+              </View>
             </View>
 
             <View style={styles.sectionHeaderRow}>
               <Text style={styles.sectionHeader}>Assets</Text>
-              <Pressable onPress={() => navigation.navigate('AddCustomToken')}>
-                <Text style={styles.sectionAction}>Add token</Text>
-              </Pressable>
+              
             </View>
           </>
         }
         data={[{ symbol: 'NGN', balance: portfolio.ngnBalance ?? 0 }, ...groupAssetsBySymbol(portfolio.assets || [])]}
         keyExtractor={(item, i) => `${item.chainId}-${item.symbol}-${i}`}
-        renderItem={({ item }) => (
-          item.symbol === 'NGN' ? (<NgnListItem balance={item.balance} onPress={() => navigation.navigate('NairaDetail')} />) : (<AssetListItem asset={item} onPress={() => navigation.navigate('AssetDetail', { asset: item })} />)
+        renderItem={({ item, index }) => (
+          item.symbol === 'NGN' ? (<AnimatedCard index={index} style={styles.assetCard}><NgnListItem balance={item.balance} onPress={() => navigation.navigate('NairaDetail')} /></AnimatedCard>) : (<AnimatedCard index={index} style={styles.assetCard}><AssetListItem asset={item} onPress={() => navigation.navigate('AssetDetail', { asset: item })} /></AnimatedCard>)
         )}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         ListEmptyComponent={<EmptyState title="No assets yet" subtitle="Deposit crypto or buy with Naira to get started." />}
@@ -88,7 +87,7 @@ export default function PortfolioScreen({ navigation }) {
 
 const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
-  list: { padding: spacing(5) },
+  list: { padding: spacing(5), paddingBottom: spacing(12) },
   topRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing(3) },
   leftIcons: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   headerIconBtn: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border },
@@ -108,9 +107,38 @@ const getStyles = (colors) => StyleSheet.create({
     marginTop: spacing(5),
     marginBottom: spacing(4),
   },
-  actionItem: { width: '21%' },
+  actionItem: { width: '25%' },
+  actionsPanel: {
+    backgroundColor: colors.bgCard,
+    borderRadius: 26,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingVertical: 20,
+    paddingHorizontal: 6,
+    marginTop: spacing(5),
+    marginBottom: spacing(5),
+    shadowColor: '#2a1260',
+    shadowOpacity: 0.26,
+    shadowRadius: 26,
+    shadowOffset: { width: 0, height: 14 },
+    elevation: 12,
+  },
+  actionsLine: { flexDirection: 'row', justifyContent: 'space-around' },
+  actionsLine2: { flexDirection: 'row', justifyContent: 'space-evenly', marginTop: 18 },
+  assetCard: {
+    backgroundColor: colors.bgCard,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: 16,
+    shadowColor: '#2a1260',
+    shadowOpacity: 0.2,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 9 },
+    elevation: 7,
+  },
   sectionHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing(2) },
   sectionHeader: { color: colors.textPrimary, fontSize: 16, fontWeight: '700' },
   sectionAction: { color: colors.violetSoft, fontSize: 13, fontWeight: '600' },
-  separator: { height: 1, backgroundColor: colors.border, marginLeft: 52 },
+  separator: { height: 16 },
 });

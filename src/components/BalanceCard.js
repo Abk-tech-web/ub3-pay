@@ -19,6 +19,43 @@ export default function BalanceCard({ totalUsd, totalNgn, totalPnl24hUsd = 0, st
   const [copied, setCopied] = useState(false);
   const fade = useRef(new Animated.Value(0)).current;
   const shimmer = useRef(new Animated.Value(0)).current;
+  const cardRef = useRef(null);
+  const box = useRef(null);
+  const tiltX = useRef(new Animated.Value(0)).current;
+  const tiltY = useRef(new Animated.Value(0)).current;
+  const rotX = tiltY.interpolate({ inputRange: [-1, 1], outputRange: ['10deg', '-10deg'] });
+  const rotY = tiltX.interpolate({ inputRange: [-1, 1], outputRange: ['-10deg', '10deg'] });
+  const clamp = (v) => Math.max(-1, Math.min(1, v));
+  const applyTilt = (px, py) => {
+    const b = box.current;
+    if (!b) return;
+    tiltX.setValue(clamp((px - (b.x + b.w / 2)) / (b.w / 2)));
+    tiltY.setValue(clamp((py - (b.y + b.h / 2)) / (b.h / 2)));
+  };
+  const onTS = (e) => {
+    const px = e.nativeEvent.pageX;
+    const py = e.nativeEvent.pageY;
+    if (cardRef.current && cardRef.current.measureInWindow) {
+      cardRef.current.measureInWindow((x, y, w, h) => { box.current = { x: x, y: y, w: w, h: h }; applyTilt(px, py); });
+    }
+  };
+  const onTM = (e) => applyTilt(e.nativeEvent.pageX, e.nativeEvent.pageY);
+  const onTE = () => {
+    Animated.spring(tiltX, { toValue: 0, friction: 5, tension: 70, useNativeDriver: true }).start();
+    Animated.spring(tiltY, { toValue: 0, friction: 5, tension: 70, useNativeDriver: true }).start();
+  };
+  const [disp, setDisp] = useState({ ngn: 0, usd: 0 });
+  const prevTotals = useRef({ ngn: 0, usd: 0 });
+  useEffect(() => {
+    const from = prevTotals.current;
+    const to = { ngn: Number(totalNgn) || 0, usd: Number(totalUsd) || 0 };
+    prevTotals.current = to;
+    const v = new Animated.Value(0);
+    const id = v.addListener(({ value }) => setDisp({ ngn: from.ngn + (to.ngn - from.ngn) * value, usd: from.usd + (to.usd - from.usd) * value }));
+    const anim = Animated.timing(v, { toValue: 1, duration: 800, useNativeDriver: false });
+    anim.start();
+    return () => { anim.stop(); v.removeListener(id); };
+  }, [totalNgn, totalUsd]);
 
   useEffect(() => {
     Animated.timing(fade, { toValue: 1, duration: 450, useNativeDriver: true }).start();
@@ -47,7 +84,24 @@ export default function BalanceCard({ totalUsd, totalNgn, totalPnl24hUsd = 0, st
   };
 
   return (
-    <Animated.View style={{ opacity: fade }}>
+    <Animated.View
+      ref={cardRef}
+      onTouchStart={onTS}
+      onTouchMove={onTM}
+      onTouchEnd={onTE}
+      onTouchCancel={onTE}
+      style={{
+        opacity: fade,
+        borderRadius: radii.lg,
+        backgroundColor: colors.violetDeep,
+        shadowColor: colors.violet,
+        shadowOpacity: 0.5,
+        shadowRadius: 22,
+        shadowOffset: { width: 0, height: 14 },
+        elevation: 14,
+        transform: [{ perspective: 900 }, { rotateX: rotX }, { rotateY: rotY }],
+      }}
+    >
       <Pressable onPress={() => setHidden((h) => !h)}>
         <LinearGradient
           colors={[colors.violetDeep, colors.violet, '#3A1F6B']}
@@ -75,8 +129,8 @@ export default function BalanceCard({ totalUsd, totalNgn, totalPnl24hUsd = 0, st
             </View>
           </View>
 
-          <Text style={styles.primaryAmount}>{hidden ? '\u2022\u2022\u2022\u2022\u2022\u2022' : formatNgn(totalNgn)}</Text>
-          <Text style={styles.secondaryAmount}>{hidden ? '\u2022\u2022\u2022\u2022\u2022\u2022' : formatUsd(totalUsd)}</Text>
+          <Text style={styles.primaryAmount}>{hidden ? '\u2022\u2022\u2022\u2022\u2022\u2022' : formatNgn(disp.ngn)}</Text>
+          <Text style={styles.secondaryAmount}>{hidden ? '\u2022\u2022\u2022\u2022\u2022\u2022' : formatUsd(disp.usd)}</Text>
 
           <View style={styles.pnlRow}>
             <View style={[styles.pnlBadge, pnlPositive ? styles.pnlUp : styles.pnlDown]}>
