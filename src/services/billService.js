@@ -19,7 +19,13 @@ export async function getDataVariations(networkId) {
   const serviceID = DATA_SERVICE_IDS[networkId];
   const result = await apiGet(`/data/variations/${serviceID}`);
   // VTpass returns { content: { variations: [{ variation_code, name, variation_amount }] } }
-  const variations = result?.content?.variations || [];
+  const raw = result?.content?.variations || [];
+  const seen = {};
+  const variations = raw.filter((v) => {
+    if (seen[v.variation_code]) return false;
+    seen[v.variation_code] = true;
+    return true;
+  });
   return variations.map((v) => ({
     id: v.variation_code,
     label: v.name,
