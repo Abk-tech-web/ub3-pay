@@ -46,6 +46,7 @@ import ConfirmPurchaseScreen from '../screens/billpay/ConfirmPurchaseScreen';
 import BillConfirmPinScreen from '../screens/billpay/BillConfirmPinScreen';
 import WalletSettingsScreen from '../screens/profile/WalletSettingsScreen';
 import ReferralScreen from '../screens/profile/ReferralScreen';
+import Ub3IdScreen from '../screens/profile/Ub3IdScreen';
 import TransactionLimitsScreen from '../screens/profile/TransactionLimitsScreen';
 
 const Tab = createBottomTabNavigator();
@@ -132,6 +133,7 @@ function ProfileStackScreen() {
         <ProfileStack.Screen name="Notifications" component={NotificationsScreen} />
         <ProfileStack.Screen name="TransactionLimits" component={TransactionLimitsScreen} />
         <ProfileStack.Screen name="Referral" component={ReferralScreen} />
+      <ProfileStack.Screen name="Ub3Id" component={Ub3IdScreen} />
     </ProfileStack.Navigator>
   );
 }

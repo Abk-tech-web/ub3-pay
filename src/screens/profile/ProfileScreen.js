@@ -7,6 +7,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { spacing, radii } from '../../config/theme';
 import { useAuth } from '../../context/AuthContext';
 import * as Clipboard from 'expo-clipboard';
+import Ub3IdRow from './Ub3IdRow';
 import { useState } from 'react';
 
 const ROWS = [
@@ -54,13 +55,7 @@ export default function ProfileScreen({ navigation }) {
           </Text>
         </View>
 
-          <Pressable style={styles.uidRow} onPress={async () => { if (!user?.uid) return; await Clipboard.setStringAsync(user.uid); }} hitSlop={8}>
-            <Text style={styles.uidLabel}>UB3 ID</Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <Text style={styles.uidValue} numberOfLines={1}>{user?.uid || '—'}</Text>
-              <Feather name="copy" size={13} color={colors.textSecondary} />
-            </View>
-          </Pressable>
+          <Ub3IdRow navigation={navigation} styles={styles} />
         <View style={{ height: spacing(7) }} />
 
         <View style={styles.card}>

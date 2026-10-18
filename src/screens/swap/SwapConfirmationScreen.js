@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Feather } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../context/ThemeContext';
 import { spacing, radii } from '../../config/theme';
 import PrimaryButton from '../../components/PrimaryButton';
@@ -76,24 +78,31 @@ export default function SwapConfirmationScreen({ route, navigation }) {
     <SafeAreaView style={styles.safe}>
       <View style={styles.body}>
         <Text style={styles.title}>Confirm swap</Text>
+        <View style={styles.hero}>
+          <Text style={styles.heroLabel}>You send</Text>
+          <Text style={styles.heroAmount} numberOfLines={1} adjustsFontSizeToFit>
+            {direction === 'crypto_to_ngn' ? amount + ' ' + symbol : formatNgn(parseFloat(amount || '0'))}
+          </Text>
+          <View style={styles.dividerRow}>
+            <View style={styles.line} />
+            <LinearGradient colors={['#9B6CF7', colors.violet, colors.violetDeep]} style={styles.badge}>
+              <Feather name="arrow-down" size={20} color="#fff" />
+            </LinearGradient>
+            <View style={styles.line} />
+          </View>
+          <Text style={styles.heroLabel}>You receive</Text>
+          <Text style={styles.heroReceive} numberOfLines={1} adjustsFontSizeToFit>
+            {direction === 'crypto_to_ngn' ? formatNgn(quote?.amountNgn) : formatCrypto(quote?.amountCrypto, symbol)}
+          </Text>
+        </View>
         <View style={styles.box}>
-          <View style={styles.row}>
-            <Text style={styles.label}>You send</Text>
-            <Text style={styles.value}>{direction === 'crypto_to_ngn' ? `${amount} ${symbol}` : formatNgn(parseFloat(amount || '0'))}</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>You receive</Text>
-            <Text style={styles.value}>
-              {direction === 'crypto_to_ngn' ? formatNgn(quote?.amountNgn) : formatCrypto(quote?.amountCrypto, symbol)}
-            </Text>
-          </View>
           <View style={styles.row}>
             <Text style={styles.label}>Rate</Text>
             <Text style={styles.value}>Live P2P rate, 1% fee included</Text>
           </View>
-          <View style={styles.row}>
+          <View style={[styles.row, { borderBottomWidth: 0 }]}>
             <Text style={styles.label}>Fee (1%)</Text>
-            <Text style={styles.value}>{formatNgn(direction === "crypto_to_ngn" ? (quote?.amountNgn || 0) / 99 : parseFloat(amount || "0") * 0.01)}</Text>
+            <Text style={styles.value}>{formatNgn(direction === 'crypto_to_ngn' ? (quote?.amountNgn || 0) / 99 : parseFloat(amount || '0') * 0.01)}</Text>
           </View>
         </View>
         <View style={{ flex: 1 }} />
@@ -106,10 +115,17 @@ export default function SwapConfirmationScreen({ route, navigation }) {
 const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   body: { flex: 1, padding: spacing(6) },
-  title: { color: colors.textPrimary, fontSize: 22, fontWeight: '800', marginBottom: spacing(6) },
+  title: { color: colors.textPrimary, fontSize: 26, fontWeight: '800', marginBottom: spacing(6) },
   subtitle: { color: colors.textSecondary, fontSize: 14, marginTop: spacing(2) },
-  box: { backgroundColor: colors.bgCard, borderRadius: radii.md, padding: spacing(4), borderWidth: 1, borderColor: colors.border },
-  row: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: spacing(2) },
-  label: { color: colors.textSecondary, fontSize: 13 },
-  value: { color: colors.textPrimary, fontSize: 13, fontWeight: '700' },
+  hero: { backgroundColor: colors.bgCard, borderRadius: 32, paddingVertical: spacing(8), paddingHorizontal: spacing(6), borderWidth: 1, borderColor: colors.border, shadowColor: '#2a1260', shadowOpacity: 0.3, shadowRadius: 28, shadowOffset: { width: 0, height: 16 }, elevation: 14 },
+  heroLabel: { color: colors.textSecondary, fontSize: 12, fontWeight: '700', letterSpacing: 1.2, textTransform: 'uppercase' },
+  heroAmount: { color: colors.textPrimary, fontSize: 34, fontWeight: '900', marginTop: spacing(2) },
+  heroReceive: { color: colors.violet, fontSize: 38, fontWeight: '900', marginTop: spacing(2) },
+  dividerRow: { flexDirection: 'row', alignItems: 'center', marginVertical: spacing(6) },
+  line: { flex: 1, height: StyleSheet.hairlineWidth, backgroundColor: colors.border },
+  badge: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', marginHorizontal: spacing(3), shadowColor: colors.violetDeep, shadowOpacity: 0.5, shadowRadius: 12, shadowOffset: { width: 0, height: 7 }, elevation: 10 },
+  box: { marginTop: spacing(5), backgroundColor: colors.bgCard, borderRadius: 26, paddingHorizontal: spacing(5), paddingVertical: spacing(2), borderWidth: 1, borderColor: colors.border, shadowColor: '#2a1260', shadowOpacity: 0.22, shadowRadius: 20, shadowOffset: { width: 0, height: 11 }, elevation: 10 },
+  row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: spacing(4), borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border },
+  label: { color: colors.textSecondary, fontSize: 14 },
+  value: { color: colors.textPrimary, fontSize: 15, fontWeight: '800', maxWidth: '62%', textAlign: 'right' },
 });
