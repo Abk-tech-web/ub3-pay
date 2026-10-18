@@ -1,7 +1,7 @@
 import * as Clipboard from 'expo-clipboard';
 import { Feather } from '@expo/vector-icons';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Vibration } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Vibration, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { useFocusEffect } from '@react-navigation/native';
@@ -43,6 +43,8 @@ export default function SendScreen({ route, navigation }) {
   const [ub3Recipient, setUb3Recipient] = useState(null);
 
   const justAppliedAddress = useRef(false);
+  const enter = useRef(new Animated.Value(0)).current;
+  useEffect(() => { Animated.spring(enter, { toValue: 1, friction: 8, tension: 60, useNativeDriver: true }).start(); }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -209,20 +211,20 @@ export default function SendScreen({ route, navigation }) {
         onComplete={onPinComplete}
         onCancel={() => { setPinMode(null); setPinError(''); setFirstPin(''); }}
       />
-      <View style={styles.body}>
+      <Animated.View style={[styles.body, { opacity: enter, transform: [{ translateY: enter.interpolate({ inputRange: [0, 1], outputRange: [24, 0] }) }] }]}>
         <ProcessingOverlay visible={phase !== 'idle'} phase={phase} title={phase === 'success' ? 'Sent successfully' : 'Sending payment'} />
-        <Text style={styles.title}>Send {symbol}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing(6) }}><View style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: colors.violet, alignItems: 'center', justifyContent: 'center', marginRight: 14, shadowColor: '#2a1260', shadowOpacity: 0.35, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 8 }}><Feather name="send" size={22} color="#fff" /></View><View><Text style={{ color: colors.textPrimary, fontSize: 22, fontWeight: '800' }}>Send {symbol}</Text><Text style={{ color: colors.textSecondary, fontSize: 13, marginTop: 2, textTransform: 'capitalize' }}>{'on ' + chainId}</Text></View></View>
 
         {insufficient ? <Text style={styles.error}>{insufficientMsg}</Text> : error ? <Text style={styles.error}>{error}</Text> : null}
 
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Text style={styles.label}>Recipient address</Text>
+          <Text style={styles.label}>Recipient</Text>
           
         </View>
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={() => navigation.navigate('SelectRecipient', { targetRoute: 'SendAmount', chainId, symbol })}
-          style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border, borderRadius: 14, paddingVertical: 12, paddingHorizontal: 14, marginBottom: 14 }}
+          style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border, borderRadius: 22, paddingVertical: 14, paddingHorizontal: 16, marginBottom: 16, shadowColor: '#2a1260', shadowOpacity: 0.2, shadowRadius: 18, shadowOffset: { width: 0, height: 9 }, elevation: 7 }}
         >
           <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.violet, alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>
             <Feather name="users" size={20} color="#fff" />
@@ -269,14 +271,14 @@ export default function SendScreen({ route, navigation }) {
 
         {availText !== null ? (
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 }}>
-            <Text style={{ color: '#6b7280', fontSize: 13 }}>Available: {availText} {symbol}</Text>
-            <Text onPress={onMax} style={{ color: '#7c3aed', fontSize: 13, fontWeight: '700' }}>Max</Text>
+            <Text style={{ color: colors.textSecondary, fontSize: 13 }}>Available: {availText} {symbol}</Text>
+            <TouchableOpacity onPress={onMax} activeOpacity={0.8} style={{ backgroundColor: colors.violet, borderRadius: 999, paddingVertical: 5, paddingHorizontal: 16, shadowColor: '#2a1260', shadowOpacity: 0.3, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 5 }}><Text style={{ color: '#fff', fontSize: 13, fontWeight: '800' }}>MAX</Text></TouchableOpacity>
           </View>
         ) : null}
 
         <View style={{ flex: 1 }} />
         <PrimaryButton title="Review" onPress={onReview} />
-      </View>
+      </Animated.View>
 
       <ConfirmationSheet
         visible={confirmVisible}
