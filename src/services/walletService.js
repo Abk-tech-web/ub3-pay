@@ -73,6 +73,7 @@ export function groupAssetsBySymbol(assets) {
         usdValue: 0,
         pnl24hUsd: 0,
         networkCount: 0,
+        chainIds: [],
       };
     }
     const g = groups[a.symbol];
@@ -80,6 +81,7 @@ export function groupAssetsBySymbol(assets) {
     g.usdValue += a.usdValue || 0;
     g.pnl24hUsd += a.pnl24hUsd || 0;
     g.networkCount += 1;
+    if (g.chainIds.indexOf(a.chainId) < 0) g.chainIds.push(a.chainId);
   }
   return Object.values(groups).map((g) => {
     const priorUsdValue = g.usdValue - g.pnl24hUsd;

@@ -5,6 +5,7 @@ import { spacing } from '../config/theme';
 import { formatUsd, formatCrypto } from '../utils/formatters';
 import { getChain } from '../config/chains';
 import TokenIcon from './TokenIcon';
+import NetworkPills from './NetworkPills';
 
 export default function AssetListItem({ asset, onPress }) {
   const { colors } = useTheme();
@@ -19,7 +20,7 @@ export default function AssetListItem({ asset, onPress }) {
       <TokenIcon symbol={asset.symbol} size={40} />
       <View style={styles.info}>
         <Text style={styles.symbol}>{asset.symbol}</Text>
-        <Text style={styles.chainName}>{asset.networkCount > 1 ? `${asset.networkCount} Networks` : (chain?.name ?? asset.chainId)}</Text>
+        {asset.chainIds && asset.chainIds.length > 1 ? <NetworkPills chainIds={asset.chainIds} /> : <Text style={styles.chainName}>{asset.networkCount > 1 ? `${asset.networkCount} Networks` : (chain?.name ?? asset.chainId)}</Text>}
             <Text style={styles.price}>{formatUsd(price)}</Text>
       </View>
       <View style={styles.amounts}>

@@ -7,6 +7,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { spacing, radii } from '../../config/theme';
 import { formatUsd, formatCrypto } from '../../utils/formatters';
 import { getChain, getNetworksForSymbol } from '../../config/chains';
+import NetworkPills from '../../components/NetworkPills';
 import TokenIcon from '../../components/TokenIcon';
 import PriceChart from '../../components/PriceChart';
 
@@ -47,7 +48,7 @@ export default function AssetDetailScreen({ route, navigation }) {
             <TokenIcon symbol={asset?.symbol} chainId={asset?.chainId} size={64} />
           </View>
           <Text style={styles.symbol}>{asset?.symbol}</Text>
-          <Text style={styles.chainName}>{asset?.networkCount > 1 ? asset.networkCount + ' Networks' : chain?.name}</Text>
+          {asset?.chainIds && asset.chainIds.length > 1 ? <NetworkPills chainIds={asset.chainIds} center /> : <Text style={styles.chainName}>{asset?.networkCount > 1 ? asset.networkCount + ' Networks' : chain?.name}</Text>}
 
           <Text style={styles.balance}>{formatCrypto(asset?.balance, asset?.symbol)}</Text>
           <Text style={styles.usd}>{formatUsd(asset?.usdValue)}</Text>
