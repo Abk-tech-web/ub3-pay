@@ -1,7 +1,7 @@
 import * as Clipboard from 'expo-clipboard';
 import { Feather } from '@expo/vector-icons';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Vibration } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { useFocusEffect } from '@react-navigation/native';
@@ -17,6 +17,7 @@ import { getMarginUsd, tierFeeUsd } from '../../services/feeService';
 import { isPositiveAmount } from '../../utils/validators';
 import { truncateAddress, formatUsd } from '../../utils/formatters';
 import PinPad from '../../components/PinPad';
+import ProcessingOverlay from '../../components/ProcessingOverlay';
 import ForgotPinModal from '../../components/ForgotPinModal';
 import { apiGet } from '../../services/api';
 
@@ -37,6 +38,7 @@ export default function SendScreen({ route, navigation }) {
   const [error, setError] = useState('');
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [sending, setSending] = useState(false);
+  const [phase, setPhase] = useState('idle');
   const [fee, setFee] = useState(null);
   const [ub3Recipient, setUb3Recipient] = useState(null);
 
@@ -159,11 +161,16 @@ export default function SendScreen({ route, navigation }) {
   const doSend = async (pin) => {
     setSending(true);
     try {
+      setPhase('processing');
       const result = await walletService.sendCrypto(user.uid, chainId, symbol, ub3Recipient ? '' : address, amount, isMax, pin, ub3Recipient ? ub3Recipient.id : undefined);
       adjustCryptoBalance(symbol, -Number(amount));
       if (refreshPortfolio) refreshPortfolio();
       setConfirmVisible(false);
       setPinMode(null);
+      setPhase('success');
+      Vibration.vibrate([0, 70, 90, 70]);
+      await new Promise((resolve) => setTimeout(resolve, 1300));
+      setTimeout(() => setPhase('idle'), 700);
       navigation.navigate('TransactionReceipt', {
         amountPrefix: '-',
         amount: `${amount} ${symbol}`,
@@ -178,6 +185,7 @@ export default function SendScreen({ route, navigation }) {
       });
     } catch (e) {
       setConfirmVisible(false);
+      setPhase('idle');
       if (['PIN_INVALID', 'PIN_LOCKED', 'PIN_NOT_SET', 'PIN_REQUIRED'].includes(e.message)) { handlePinError(e.message); } else { setPinMode(null); setError(e.message || "Send failed"); }
     } finally {
       setSending(false);
@@ -202,6 +210,7 @@ export default function SendScreen({ route, navigation }) {
         onCancel={() => { setPinMode(null); setPinError(''); setFirstPin(''); }}
       />
       <View style={styles.body}>
+        <ProcessingOverlay visible={phase !== 'idle'} phase={phase} title={phase === 'success' ? 'Sent successfully' : 'Sending payment'} />
         <Text style={styles.title}>Send {symbol}</Text>
 
         {insufficient ? <Text style={styles.error}>{insufficientMsg}</Text> : error ? <Text style={styles.error}>{error}</Text> : null}
