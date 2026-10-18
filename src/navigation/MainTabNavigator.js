@@ -44,7 +44,6 @@ import AirtimeScreen from '../screens/billpay/AirtimeScreen';
 import DataScreen from '../screens/billpay/DataScreen';
 import ConfirmPurchaseScreen from '../screens/billpay/ConfirmPurchaseScreen';
 import BillConfirmPinScreen from '../screens/billpay/BillConfirmPinScreen';
-import WalletSettingsScreen from '../screens/profile/WalletSettingsScreen';
 import ReferralScreen from '../screens/profile/ReferralScreen';
 import Ub3IdScreen from '../screens/profile/Ub3IdScreen';
 import TransactionLimitsScreen from '../screens/profile/TransactionLimitsScreen';
@@ -129,7 +128,6 @@ function ProfileStackScreen() {
       <ProfileStack.Screen name="ProfileHome" component={ProfileScreen} />
       <ProfileStack.Screen name="SecuritySettings" component={SecuritySettingsScreen} />
       <ProfileStack.Screen name="PinSetup" component={PinSetupScreen} />
-      <ProfileStack.Screen name="WalletSettings" component={WalletSettingsScreen} />
         <ProfileStack.Screen name="Notifications" component={NotificationsScreen} />
         <ProfileStack.Screen name="TransactionLimits" component={TransactionLimitsScreen} />
         <ProfileStack.Screen name="Referral" component={ReferralScreen} />
