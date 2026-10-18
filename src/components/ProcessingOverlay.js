@@ -4,6 +4,9 @@ import { Feather } from '@expo/vector-icons';
 
 const VIOLET = '#7C3AED';
 
+let createAudioPlayer = null;
+try { createAudioPlayer = require('expo-audio').createAudioPlayer; } catch (e) { createAudioPlayer = null; }
+
 export default function ProcessingOverlay({ visible, phase, title, subtitle }) {
   const spin = useRef(new Animated.Value(0)).current;
   const pulse = useRef(new Animated.Value(0)).current;
@@ -31,6 +34,17 @@ export default function ProcessingOverlay({ visible, phase, title, subtitle }) {
   useEffect(() => {
     if (!visible || !isSuccess) { pop.setValue(0); return; }
     Animated.spring(pop, { toValue: 1, friction: 5, tension: 120, useNativeDriver: true }).start();
+  }, [visible, isSuccess]);
+
+  useEffect(() => {
+    if (!visible || !isSuccess || !createAudioPlayer) return undefined;
+    let player = null;
+    try {
+      player = createAudioPlayer(require('../../assets/sounds/success.wav'));
+      player.volume = 1;
+      player.play();
+    } catch (e) { player = null; }
+    return () => { try { if (player) player.remove(); } catch (e) {} };
   }, [visible, isSuccess]);
 
   const rotate = spin.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
