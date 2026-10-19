@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as walletService from '../services/walletService';
 import { getMidMarketUsdToNgn } from '../services/rateService';
 import { apiGet } from '../services/api';
+import { useAuth } from './AuthContext';
 
 const WalletContext = createContext(null);
 const STORAGE_KEY = 'ub3_wallet_adjustments_v1';
@@ -26,6 +27,17 @@ export function WalletProvider({ children }) {
   const activityRef = useRef([]);
   const loadedRef = useRef(false);
   const lastUidRef = useRef(null);
+  const { user: authUser } = useAuth();
+  const uidNow = authUser ? authUser.uid : null;
+  useEffect(() => {
+    if (lastUidRef.current && lastUidRef.current !== uidNow) {
+      ngnBalanceRef.current = 0;
+      activityRef.current = [];
+      adjustmentsRef.current = {};
+      setPortfolio({ totalUsd: 0, totalNgn: 0, ngnBalance: 0, assets: [], activity: [] });
+      lastUidRef.current = null;
+    }
+  }, [uidNow]);
 
   const persist = useCallback(() => {
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({
@@ -69,6 +81,7 @@ export function WalletProvider({ children }) {
       const cryptoUsd = totalUsd;
       const allUsd = cryptoUsd + (usdNgn > 0 ? ngn / usdNgn : 0);
       const next = { ...p, assets, totalUsd: allUsd, totalNgn: cryptoUsd * usdNgn + ngn, ngnBalance: ngn, activity: activityRef.current };
+      if (lastUidRef.current !== uid) return;
       setPortfolio(next);
       AsyncStorage.setItem('ub3_portfolio_cache_v1', JSON.stringify({ uid, data: next })).catch(() => {});
     } finally {

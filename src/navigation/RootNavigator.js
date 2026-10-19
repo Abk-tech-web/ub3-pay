@@ -37,7 +37,7 @@ export default function RootNavigator() {
   }
 
   return (
-    <NavigationContainer theme={navTheme}>
+    <NavigationContainer key={user ? user.uid : 'guest'} theme={navTheme}>
       {!user ? (
         <AuthNavigator />
       ) : !user.emailVerified ? (
