@@ -63,6 +63,7 @@ export function getReceiptParams(item) {
     rows,
     explorerUrl,
     date: item.at,
+    status: item.status,
   };
 }
 
