@@ -12,6 +12,9 @@ import { useWallet } from '../../context/WalletContext';
 import * as walletService from '../../services/walletService';
 import * as baasService from '../../services/baasService';
 import EmptyState from '../../components/EmptyState';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import UB3Loader from '../../components/UB3Loader';
+
 import { timeAgo } from '../../utils/formatters';
 
 const VIOLET = '#7C3AED';
@@ -155,6 +158,22 @@ export default function ActivityScreen({ navigation }) {
   const { user } = useAuth();
   const { portfolio } = useWallet();
   const [items, setItems] = useState([]);
+  const [loaded, setLoaded] = useState(false);
+  const loadedRef = useRef(false);
+  const cacheKey = 'ub3_history_cache_v1_' + (user ? user.uid : '');
+
+  useEffect(() => {
+    if (!user) return undefined;
+    let alive = true;
+    AsyncStorage.getItem(cacheKey).then((raw) => {
+      if (!alive || loadedRef.current || !raw) return;
+      try {
+        const c = JSON.parse(raw);
+        if (Array.isArray(c) && c.length) { setItems(c); loadedRef.current = true; setLoaded(true); }
+      } catch (e) {}
+    }).catch(() => {});
+    return () => { alive = false; };
+  }, [cacheKey]);
   const [filterOpen, setFilterOpen] = useState(false);
   const [typeFilter, setTypeFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -163,8 +182,10 @@ export default function ActivityScreen({ navigation }) {
   useFocusEffect(
     useCallback(() => {
       if (!user) return;
-      Promise.all([walletService.getTransactionHistory(user.uid), baasService.getDepositHistory(user.uid)]).then(
-        ([txs, deposits]) => {
+      Promise.all([walletService.getTransactionHistory(user.uid), baasService.getDepositHistory(user.uid)]).catch(() => { loadedRef.current = true; setLoaded(true); return null; }).then(
+        (res) => {
+                                if (!res) return;
+                                const [txs, deposits] = res;
           const merged = [
             ...txs.map((t) => ({
               id: t.id, label: t.type.replace(/_/g, ' '), at: t.at, status: t.status,
@@ -177,6 +198,9 @@ export default function ActivityScreen({ navigation }) {
             ...(portfolio.activity || []),
           ].sort((a, b) => new Date(b.at) - new Date(a.at));
           setItems(merged);
+                                loadedRef.current = true;
+                                setLoaded(true);
+                                AsyncStorage.setItem(cacheKey, JSON.stringify(merged.slice(0, 60))).catch(() => {});
         }
       );
     }, [user, portfolio.activity])
@@ -218,7 +242,15 @@ export default function ActivityScreen({ navigation }) {
         data={sections}
         keyExtractor={(s) => s.title}
         showsVerticalScrollIndicator={false}
-        ListEmptyComponent={<EmptyState title="Nothing here yet" subtitle="Your transactions and deposits will show up here." />}
+        ListEmptyComponent={loaded ? (
+          items.length > 0
+            ? <EmptyState title="No matches" subtitle="Try changing the filter." />
+            : <EmptyState title="Nothing here yet" subtitle="Your transactions and deposits will show up here." />
+        ) : (
+          <View style={{ alignItems: 'center', marginTop: 70 }}>
+            <UB3Loader size={96} color={VIOLET} />
+          </View>
+        )}
         renderItem={({ item: section }) => (
           <View style={{ marginBottom: spacing(3) }}>
             <View style={styles.sectionRow}>
