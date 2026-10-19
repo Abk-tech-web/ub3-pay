@@ -80,7 +80,11 @@ export default function SignInScreen({ navigation }) {
   return (
     <View style={styles.safe}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
-        <View style={{ flex: 1, paddingBottom: 24 }}>
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
           <View style={[styles.hero, { paddingTop: insets.top + 36 }]}>
             <View style={styles.heroGlow} />
             <View style={styles.heroGlow2} />
@@ -119,7 +123,7 @@ export default function SignInScreen({ navigation }) {
               </Text>
             </Pressable>
           </Reveal>
-        </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </View>
   );
