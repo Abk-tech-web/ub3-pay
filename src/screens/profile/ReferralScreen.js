@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useLayoutEffect } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, RefreshControl, Share, TextInput, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, RefreshControl, Share, TextInput } from 'react-native';
+import ActivityIndicator from '../../components/UB3Loader';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
@@ -140,7 +141,7 @@ export default function ReferralScreen({ navigation }) {
       </View>
 
       {!data && !loadErr ? (
-        <View style={styles.center}><ActivityIndicator color={colors.violet} /></View>
+        <View style={styles.center}><ActivityIndicator size={96} color={colors.violet} /></View>
       ) : null}
 
       {!data && loadErr ? (

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, Pressable, Dimensions, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Dimensions } from 'react-native';
+import ActivityIndicator from './UB3Loader';
 import { LineChart } from 'react-native-chart-kit';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';

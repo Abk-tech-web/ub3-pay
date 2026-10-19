@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, StyleSheet, Pressable, ScrollView, ActivityIndicator, Animated, Easing } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Pressable, ScrollView, Animated, Easing } from 'react-native';
+import ActivityIndicator from '../../components/UB3Loader';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, Feather } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';

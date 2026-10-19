@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, FlatList, Pressable, Modal, Image, ActivityIndicator, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, TextInput, FlatList, Pressable, Modal, Image, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import ActivityIndicator from '../../components/UB3Loader';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';

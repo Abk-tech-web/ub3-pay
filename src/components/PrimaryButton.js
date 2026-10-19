@@ -1,5 +1,6 @@
 import React from 'react';
-import { Pressable, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { Pressable, Text, StyleSheet } from 'react-native';
+import ActivityIndicator from './UB3Loader';
 import { useTheme } from '../context/ThemeContext';
 import { radii, spacing } from '../config/theme';
 

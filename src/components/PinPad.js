@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Modal, View, Text, Pressable, StyleSheet, ActivityIndicator, Animated, Easing, Vibration } from 'react-native';
+import { Modal, View, Text, Pressable, StyleSheet, Animated, Easing, Vibration } from 'react-native';
+import ActivityIndicator from './UB3Loader';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 

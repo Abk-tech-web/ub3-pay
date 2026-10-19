@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { View, Text, StyleSheet, Pressable, TextInput, ActivityIndicator, Animated } from 'react-native';
+import { View, Text, StyleSheet, Pressable, TextInput, Animated } from 'react-native';
+import ActivityIndicator from '../../components/UB3Loader';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';

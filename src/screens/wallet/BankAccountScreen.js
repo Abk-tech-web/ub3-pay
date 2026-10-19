@@ -1,8 +1,9 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
   View, Text, StyleSheet, TextInput, FlatList, Pressable, Modal, Image,
-  ActivityIndicator, Animated,
+  Animated,
 } from 'react-native';
+import ActivityIndicator from '../../components/UB3Loader';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';

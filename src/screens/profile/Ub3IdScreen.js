@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useLayoutEffect } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, TextInput, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, TextInput } from 'react-native';
+import ActivityIndicator from '../../components/UB3Loader';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { Feather } from '@expo/vector-icons';

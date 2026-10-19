@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Keyboard } from 'react-native';
+import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, Keyboard } from 'react-native';
+import ActivityIndicator from './UB3Loader';
 import PinPad from './PinPad';
 import * as walletService from '../services/walletService';
 
