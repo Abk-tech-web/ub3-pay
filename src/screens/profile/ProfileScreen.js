@@ -1,5 +1,5 @@
-import React, { useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, Animated, Easing } from 'react-native';
+import React, { useRef, useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Pressable, ScrollView, Animated, Easing, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
@@ -42,6 +42,7 @@ export default function ProfileScreen({ navigation }) {
   const { colors } = useTheme();
   const styles = getStyles(colors);
   const { user, signOut } = useAuth();
+  const [confirmOut, setConfirmOut] = useState(false);
   const verified = user?.bvnVerified === true;
 
   return (
@@ -97,8 +98,25 @@ export default function ProfileScreen({ navigation }) {
 
         <View style={{ height: spacing(3) }} />
 
-        <Reveal index={ROWS.length + 1} style={styles.signOutWrap}>
-          <Pressable style={({ pressed }) => [styles.signOutCard, pressed ? styles.rowPressed : null]} onPress={signOut}>
+                <Modal visible={confirmOut} transparent animationType="fade" statusBarTranslucent onRequestClose={() => setConfirmOut(false)}>
+          <Pressable style={{ flex: 1, backgroundColor: 'rgba(20,10,45,0.62)', justifyContent: 'flex-end' }} onPress={() => setConfirmOut(false)}>
+            <Pressable onPress={() => {}} style={{ backgroundColor: colors.bgCard, borderTopLeftRadius: 30, borderTopRightRadius: 30, paddingHorizontal: 24, paddingTop: 28, paddingBottom: 34, alignItems: 'center', shadowColor: SHADOW, shadowOpacity: 0.3, shadowRadius: 20, shadowOffset: { width: 0, height: -8 }, elevation: 20 }}>
+              <View style={{ width: 70, height: 70, borderRadius: 35, backgroundColor: 'rgba(239,68,68,0.14)', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
+                <Feather name="log-out" size={30} color="#ef4444" />
+              </View>
+              <Text style={{ color: colors.textPrimary, fontSize: 22, fontWeight: '800' }}>Sign out?</Text>
+              <Text style={{ color: colors.textSecondary, fontSize: 14, textAlign: 'center', marginTop: 8, lineHeight: 21 }}>You will need to enter your email and password to sign back in.</Text>
+              <Pressable onPress={() => { setConfirmOut(false); signOut(); }} style={({ pressed }) => ({ alignSelf: 'stretch', height: 54, borderRadius: 18, backgroundColor: '#ef4444', alignItems: 'center', justifyContent: 'center', marginTop: 24, opacity: pressed ? 0.85 : 1, shadowColor: '#ef4444', shadowOpacity: 0.35, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 6 })}>
+                <Text style={{ color: '#fff', fontSize: 16, fontWeight: '800' }}>Sign out</Text>
+              </Pressable>
+              <Pressable onPress={() => setConfirmOut(false)} style={({ pressed }) => ({ alignSelf: 'stretch', height: 54, borderRadius: 18, backgroundColor: colors.bg, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center', marginTop: 12, opacity: pressed ? 0.85 : 1 })}>
+                <Text style={{ color: colors.textPrimary, fontSize: 16, fontWeight: '700' }}>Cancel</Text>
+              </Pressable>
+            </Pressable>
+          </Pressable>
+        </Modal>
+<Reveal index={ROWS.length + 1} style={styles.signOutWrap}>
+          <Pressable style={({ pressed }) => [styles.signOutCard, pressed ? styles.rowPressed : null]} onPress={() => setConfirmOut(true)}>
             <View style={[styles.iconChip, { backgroundColor: 'rgba(248,113,113,0.15)', borderColor: 'rgba(248,113,113,0.4)' }]}>
               <Feather name="log-out" size={17} color="#f87171" />
             </View>
