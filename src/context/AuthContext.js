@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { registerForPush } from '../services/pushRegistration';
 import * as authService from '../services/authService';
 import ProcessingOverlay from '../components/ProcessingOverlay';
@@ -10,6 +10,7 @@ export function AuthProvider({ children }) {
   const [authChecked, setAuthChecked] = useState(false);
   const [loading, setLoading] = useState(false);
   const [entering, setEntering] = useState(false);
+  const freshLogin = useRef(false);
   const [creating, setCreating] = useState(false);
 
   // Subscribes to real Firebase auth state on mount — this is what makes
@@ -60,6 +61,7 @@ export function AuthProvider({ children }) {
     try {
       try {
         setEntering(true);
+        freshLogin.current = true;
         await authService.signInWithEmail(email, password);
       } catch (err) {
         setEntering(false);
@@ -106,14 +108,14 @@ export function AuthProvider({ children }) {
 
   const refreshEmailVerified = useCallback(async () => {
     const verified = await authService.refreshEmailVerifiedStatus();
-    if (verified && user && !user.emailVerified) setEntering(true);
+    if (verified && user && !user.emailVerified) { freshLogin.current = true; setEntering(true); }
     setUser((prev) => (prev ? { ...prev, emailVerified: verified } : prev));
     return verified;
   }, [user]);
 
   return (
     <AuthContext.Provider
-      value={{ user, authChecked, loading, signIn, signUp, signOut, refreshKycStatus, refreshEmailVerified, refreshBvnStatus, setUser }}
+      value={{ user, authChecked, loading, signIn, signUp, signOut, refreshKycStatus, refreshEmailVerified, refreshBvnStatus, setUser, freshLogin }}
     >
       {children}
       <ProcessingOverlay visible={entering || creating} title={creating ? "Creating your account" : "Signing you in"} subtitle={creating ? "Setting things up for you" : "Preparing your wallet"} />

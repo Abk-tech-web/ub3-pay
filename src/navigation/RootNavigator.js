@@ -1,9 +1,11 @@
 import React from 'react';
 import { NavigationContainer, DarkTheme, DefaultTheme } from '@react-navigation/native';
-import { View, ActivityIndicator } from 'react-native';
+import { View } from 'react-native';
+import ActivityIndicator from '../components/UB3Loader';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import AuthNavigator from './AuthNavigator';
+import AppLock from '../components/AppLock';
 import MainTabNavigator from './MainTabNavigator';
 import VerifyEmailScreen from '../screens/auth/VerifyEmailScreen';
 
@@ -29,7 +31,7 @@ export default function RootNavigator() {
   if (!authChecked) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator color={colors.violetSoft} size="large" />
+        <ActivityIndicator size={96} color={colors.violet} />
       </View>
     );
   }
@@ -41,7 +43,7 @@ export default function RootNavigator() {
       ) : !user.emailVerified ? (
         <VerifyEmailScreen route={{ params: { email: user.email } }} />
       ) : (
-        <MainTabNavigator />
+        <AppLock><MainTabNavigator /></AppLock>
       )}
     </NavigationContainer>
   );
