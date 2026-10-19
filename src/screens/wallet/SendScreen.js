@@ -130,14 +130,13 @@ export default function SendScreen({ route, navigation }) {
   };
 
   const onConfirm = async () => {
-    setConfirmVisible(false);
     try {
       const s = await walletService.getPinStatus();
       setPinError('');
       setFirstPin('');
       setPinMode(s.hasPin ? 'enter' : 'create');
     } catch (e) {
-      setError('Could not start the PIN check. Please try again.');
+      setConfirmVisible(false); setError('Could not start the PIN check. Please try again.');
     }
   };
 
@@ -186,9 +185,8 @@ export default function SendScreen({ route, navigation }) {
         date: new Date().toISOString(),
       });
     } catch (e) {
-      setConfirmVisible(false);
-      setPhase('idle');
-      if (['PIN_INVALID', 'PIN_LOCKED', 'PIN_NOT_SET', 'PIN_REQUIRED'].includes(e.message)) { handlePinError(e.message); } else { setPinMode(null); setError(e.message || "Send failed"); }
+    setPhase('idle');
+      if (['PIN_INVALID', 'PIN_LOCKED', 'PIN_NOT_SET', 'PIN_REQUIRED'].includes(e.message)) { handlePinError(e.message); } else { setConfirmVisible(false); setPinMode(null); setError(e.message || "Send failed"); }
     } finally {
       setSending(false);
     }
