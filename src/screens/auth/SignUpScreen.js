@@ -95,6 +95,9 @@ export default function SignUpScreen({ navigation }) {
           <View style={[styles.hero, { paddingTop: insets.top + 30 }]}>
             <View style={styles.heroGlow} />
             <View style={styles.heroGlow2} />
+            <Pressable onPress={() => navigation.goBack()} hitSlop={10} style={{ position: 'absolute', left: 16, top: insets.top + 10, width: 38, height: 38, borderRadius: 19, backgroundColor: 'rgba(255,255,255,0.16)', alignItems: 'center', justifyContent: 'center', zIndex: 10, elevation: 10 }}>
+              <Feather name="chevron-left" size={22} color="#FFFFFF" />
+            </Pressable>
             <Animated.View style={[styles.logoPlate, { transform: [{ scale: pop }] }]}>
               <Image source={require('../../../assets/icon.png')} style={styles.logoImg} />
             </Animated.View>

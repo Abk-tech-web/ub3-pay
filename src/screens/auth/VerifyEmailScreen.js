@@ -8,6 +8,7 @@ import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import PrimaryButton from '../../components/PrimaryButton';
 import { useAuth } from '../../context/AuthContext';
+import { BackHandler } from 'react-native';
 
 const API_BASE = 'https://ub3-pay-backend.onrender.com';
 
@@ -26,7 +27,7 @@ export default function VerifyEmailScreen({ route }) {
   const styles = getStyles(colors);
   const insets = useSafeAreaInsets();
   const { email } = route.params ?? {};
-  const { refreshEmailVerified } = useAuth();
+  const { refreshEmailVerified, signOut } = useAuth();
   const [otp, setOtp] = useState('');
   const [sending, setSending] = useState(false);
   const [checking, setChecking] = useState(false);
@@ -36,6 +37,11 @@ export default function VerifyEmailScreen({ route }) {
 
   useEffect(() => {
     Animated.spring(pop, { toValue: 1, friction: 5, tension: 80, useNativeDriver: true }).start();
+  }, []);
+
+  useEffect(() => {
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => { signOut(); return true; });
+    return () => sub.remove();
   }, []);
 
   const onSend = async () => {
@@ -98,6 +104,9 @@ export default function VerifyEmailScreen({ route }) {
           showsVerticalScrollIndicator={false}
         >
           <View style={[styles.hero, { paddingTop: insets.top + 30 }]}>
+            <Pressable onPress={() => signOut()} hitSlop={10} style={{ position: 'absolute', left: 16, top: insets.top + 10, width: 38, height: 38, borderRadius: 19, backgroundColor: 'rgba(255,255,255,0.16)', alignItems: 'center', justifyContent: 'center', zIndex: 10, elevation: 10 }}>
+              <Feather name="chevron-left" size={22} color="#FFFFFF" />
+            </Pressable>
             <View style={styles.heroGlow} />
             <View style={styles.heroGlow2} />
             <Animated.View style={[styles.logoPlate, { transform: [{ scale: pop }] }]}>
