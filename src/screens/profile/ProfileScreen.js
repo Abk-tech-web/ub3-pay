@@ -7,6 +7,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { spacing, radii } from '../../config/theme';
 import { useAuth } from '../../context/AuthContext';
 import Ub3IdRow from './Ub3IdRow';
+import { NotificationBadge } from '../../components/NotificationIndicators';
 
 const SHADOW = '#2a1260';
 
@@ -91,6 +92,7 @@ export default function ProfileScreen({ navigation }) {
                 <Feather name={r.icon} size={17} color={r.color} />
               </View>
               <Text style={styles.rowLabel}>{r.label}</Text>
+              {r.key === 'Notifications' ? <NotificationBadge /> : null}
               <Feather name="chevron-right" size={18} color={colors.textSecondary} />
             </Pressable>
           </Reveal>

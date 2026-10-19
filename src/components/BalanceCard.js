@@ -1,3 +1,4 @@
+import { NotificationDot } from './NotificationIndicators';
 import useUb3Id from '../hooks/useUb3Id';
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, Pressable, StyleSheet, Animated } from 'react-native';
@@ -119,6 +120,7 @@ export default function BalanceCard({ totalUsd, totalNgn, totalPnl24hUsd = 0, st
             </Pressable>
             <Pressable onPress={() => navigation && navigation.navigate('Notifications')} style={styles.cardIconBtn} hitSlop={8}>
               <Feather name="bell" size={16} color="#fff" />
+              <NotificationDot />
             </Pressable>
           </View>
           <View style={styles.rowBetween}>

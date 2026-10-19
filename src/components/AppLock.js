@@ -6,6 +6,7 @@ import * as walletService from '../services/walletService';
 import { getPinCache, setPinCache } from '../services/biometric';
 import UB3Loader from './UB3Loader';
 import LockScreen from './LockScreen';
+import AnnouncementPopup from './AnnouncementPopup';
 
 const LOCK_AFTER_MS = 30000;
 
@@ -76,6 +77,7 @@ export default function AppLock({ children }) {
   return (
     <View style={{ flex: 1 }}>
       {phase === 'open' || everOpen.current ? children : null}
+      {phase === 'open' ? <AnnouncementPopup /> : null}
       {phase === 'locked' ? (
         <View style={StyleSheet.absoluteFill}>
           <LockScreen uid={uid} onUnlocked={open} onSignOut={signOut} />

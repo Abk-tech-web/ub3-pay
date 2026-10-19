@@ -85,10 +85,17 @@ export default function NotificationsScreen({ navigation }) {
       try { prev = Number(await SecureStore.getItemAsync(seenKey)) || 0; } catch (e) {}
       if (alive) setSeenAt(prev);
       await load();
-      try { await SecureStore.setItemAsync(seenKey, String(Date.now())); } catch (e) {}
+      
     })();
     return () => { alive = false; };
   }, [load, seenKey]));
+
+  useEffect(() => {
+    if (loading) return;
+    let newest = 0;
+    items.forEach((i) => { if (i.active !== false && i.createdAt > newest) newest = i.createdAt; });
+    if (newest) SecureStore.setItemAsync(seenKey, String(newest)).catch(() => {});
+  }, [items, loading]);
 
   const onRefresh = async () => {
     setRefreshing(true);
