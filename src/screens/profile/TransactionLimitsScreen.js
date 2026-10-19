@@ -1,40 +1,20 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView, Animated, Easing } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { apiGet } from '../../services/api';
 
 const SHADOW = '#2a1260';
 
-const SECTIONS = [
-  {
-    title: 'Crypto',
-    icon: 'layers',
-    rows: [
-      { label: 'Deposit limit', value: 'Unlimited' },
-      { label: 'Withdraw limit', value: 'Unlimited' },
-    ],
-  },
-  {
-    title: 'Naira',
-    icon: 'credit-card',
-    rows: [
-      { label: 'Daily limit', value: '\u20a610,000,000' },
-      { label: 'Daily deposit', value: 'Unlimited' },
-      { label: 'Daily withdraw', value: '\u20a610,000,000' },
-      { label: 'Per transaction', value: '\u20a65,000,000' },
-    ],
-  },
-  {
-    title: 'Airtime & Bills',
-    icon: 'smartphone',
-    rows: [
-      { label: 'Airtime daily limit', value: '\u20a6200,000' },
-      { label: 'Airtime per transaction', value: '\u20a650,000' },
-      { label: 'Other bills daily limit', value: '\u20a61,000,000' },
-    ],
-  },
-];
+const DEFAULTS = {
+  ngn: { daily: 5000000, dailyWithdraw: 5000000, perTx: 1000000, dailyDeposit: null },
+  airtime: { daily: 50000, perTx: 10000 },
+  bills: { daily: 100000 },
+};
+
+const naira = (n) => '\u20A6' + String(Math.round(Number(n) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
 function Reveal({ index = 0, children, style }) {
   const anim = useRef(new Animated.Value(0)).current;
@@ -51,6 +31,79 @@ export default function TransactionLimitsScreen({ navigation }) {
   const { colors } = useTheme();
   const styles = getStyles(colors);
   const insets = useSafeAreaInsets();
+  const [limits, setLimits] = useState(DEFAULTS);
+  const [used, setUsed] = useState(null);
+
+  const load = useCallback(async () => {
+    try {
+      const r = await apiGet('/limits');
+      if (r && r.limits) setLimits({ ...DEFAULTS, ...r.limits });
+      setUsed((r && r.usedToday) || {});
+    } catch (e) {}
+  }, []);
+  useFocusEffect(useCallback(() => { load(); }, [load]));
+
+  const L = limits;
+  const sections = [
+    {
+      title: 'Crypto',
+      icon: 'layers',
+      rows: [
+        { label: 'Deposit limit', value: null },
+        { label: 'Withdraw limit', value: null },
+      ],
+    },
+    {
+      title: 'Naira',
+      icon: 'credit-card',
+      rows: [
+        { label: 'Daily limit', value: L.ngn.daily, used: used ? used.out : null },
+        { label: 'Daily deposit', value: L.ngn.dailyDeposit },
+        { label: 'Daily withdraw', value: L.ngn.dailyWithdraw, used: used ? used.withdraw : null },
+        { label: 'Per transaction', value: L.ngn.perTx },
+      ],
+    },
+    {
+      title: 'Airtime & Bills',
+      icon: 'smartphone',
+      rows: [
+        { label: 'Airtime daily limit', value: L.airtime.daily, used: used ? used.airtime : null },
+        { label: 'Airtime per transaction', value: L.airtime.perTx },
+        { label: 'Data & other bills daily limit', value: L.bills.daily, used: used ? used.bills : null },
+      ],
+    },
+  ];
+
+  const renderRow = (row, i, arr) => {
+    const unlimited = row.value === null || row.value === undefined;
+    const hasBar = !unlimited && row.used !== null && row.used !== undefined;
+    const pct = hasBar ? Math.min(100, Math.round((row.used / row.value) * 100)) : 0;
+    const barColor = pct >= 100 ? '#ef4444' : pct >= 80 ? '#fbbf24' : colors.violet;
+    return (
+      <View key={row.label} style={[styles.row, i !== arr.length - 1 && styles.rowBorder]}>
+        <View style={styles.rowTop}>
+          <Text style={styles.rowLabel}>{row.label}</Text>
+          {unlimited ? (
+            <View style={styles.unlimited}>
+              <Text style={styles.unlimitedText}>Unlimited</Text>
+            </View>
+          ) : (
+            <Text style={styles.rowValue}>{naira(row.value)}</Text>
+          )}
+        </View>
+        {hasBar ? (
+          <View style={{ marginTop: 10 }}>
+            <View style={styles.track}>
+              <View style={[styles.fill, { width: pct + '%', backgroundColor: barColor }]} />
+            </View>
+            <Text style={styles.usedText}>
+              {naira(row.used)} used today · {naira(Math.max(0, row.value - row.used))} left
+            </Text>
+          </View>
+        ) : null}
+      </View>
+    );
+  };
 
   return (
     <View style={styles.root}>
@@ -68,11 +121,11 @@ export default function TransactionLimitsScreen({ navigation }) {
           <View style={styles.iconCircle}>
             <Feather name="sliders" size={28} color="#FFFFFF" />
           </View>
-          <Text style={styles.heroSub}>Your current limits for crypto, naira, airtime and bills.</Text>
+          <Text style={styles.heroSub}>Your limits for crypto, naira, airtime and bills, and how much you have used today.</Text>
         </View>
 
         <View style={styles.body}>
-          {SECTIONS.map((section, si) => (
+          {sections.map((section, si) => (
             <Reveal key={section.title} index={si} style={[styles.card, si === 0 && { marginTop: -34 }]}>
               <View style={styles.cardHead}>
                 <View style={styles.iconTile}>
@@ -80,20 +133,14 @@ export default function TransactionLimitsScreen({ navigation }) {
                 </View>
                 <Text style={styles.cardTitle}>{section.title}</Text>
               </View>
-              {section.rows.map((row, i) => (
-                <View key={row.label} style={[styles.row, i !== section.rows.length - 1 && styles.rowBorder]}>
-                  <Text style={styles.rowLabel}>{row.label}</Text>
-                  {row.value === 'Unlimited' ? (
-                    <View style={styles.unlimited}>
-                      <Text style={styles.unlimitedText}>Unlimited</Text>
-                    </View>
-                  ) : (
-                    <Text style={styles.rowValue}>{row.value}</Text>
-                  )}
-                </View>
-              ))}
+              {section.rows.map((row, i, arr) => renderRow(row, i, arr))}
             </Reveal>
           ))}
+
+          <Reveal index={3} style={styles.note}>
+            <Feather name="clock" size={15} color={colors.violet} />
+            <Text style={styles.noteText}>Daily limits reset every night at midnight (Lagos time).</Text>
+          </Reveal>
         </View>
       </ScrollView>
     </View>
@@ -125,10 +172,16 @@ const getStyles = (colors) => StyleSheet.create({
   cardHead: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 6 },
   iconTile: { width: 40, height: 40, borderRadius: 13, backgroundColor: 'rgba(124,58,237,0.14)', alignItems: 'center', justifyContent: 'center' },
   cardTitle: { color: colors.textPrimary, fontSize: 17, fontWeight: '800' },
-  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 14 },
+  row: { paddingVertical: 14 },
+  rowTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   rowBorder: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border },
   rowLabel: { color: colors.textSecondary, fontSize: 14, fontWeight: '600', flex: 1, marginRight: 10 },
   rowValue: { color: colors.textPrimary, fontSize: 15, fontWeight: '800' },
   unlimited: { backgroundColor: 'rgba(34,197,94,0.14)', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 5 },
   unlimitedText: { color: '#22C55E', fontSize: 12, fontWeight: '800' },
+  track: { height: 8, borderRadius: 4, backgroundColor: colors.border, overflow: 'hidden' },
+  fill: { height: 8, borderRadius: 4 },
+  usedText: { color: colors.textSecondary, fontSize: 12, marginTop: 6 },
+  note: { flexDirection: 'row', gap: 10, paddingHorizontal: 6, marginTop: 16, alignItems: 'flex-start' },
+  noteText: { color: colors.textSecondary, fontSize: 12, flex: 1, lineHeight: 18 },
 });
