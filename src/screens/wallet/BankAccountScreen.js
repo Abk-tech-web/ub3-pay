@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
   View, Text, StyleSheet, TextInput, FlatList, Pressable, Modal, Image,
   Animated,
+  ScrollView, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import ActivityIndicator from '../../components/UB3Loader';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -23,6 +24,34 @@ function Reveal({ delay = 0, children, style }) {
       style={[style, { opacity: v, transform: [{ translateY: v.interpolate({ inputRange: [0, 1], outputRange: [22, 0] }) }] }]}
     >
       {children}
+    </Animated.View>
+  );
+}
+
+const SHADOW = '#2a1260';
+
+function BankRow({ item, index, on, styles, colors, onPress }) {
+  const a = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.timing(a, { toValue: 1, duration: 260, delay: Math.min(index, 8) * 35, useNativeDriver: true }).start();
+  }, []);
+  return (
+    <Animated.View style={{ opacity: a, transform: [{ translateY: a.interpolate({ inputRange: [0, 1], outputRange: [10, 0] }) }] }}>
+      <Pressable style={({ pressed }) => [styles.bankRow, on && styles.bankRowOn, pressed && { opacity: 0.85 }]} onPress={onPress}>
+        {item.logo ? (
+          <Image source={{ uri: item.logo }} style={styles.bankLogo} />
+        ) : (
+          <View style={styles.bankLogoFallback}>
+            <Ionicons name="business-outline" size={18} color={colors.textSecondary} />
+          </View>
+        )}
+        <Text style={styles.bankRowText} numberOfLines={1}>{item.name}</Text>
+        {on ? (
+          <Ionicons name="checkmark-circle" size={22} color={colors.violet} />
+        ) : (
+          <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+        )}
+      </Pressable>
     </Animated.View>
   );
 }
@@ -69,6 +98,19 @@ export default function BankAccountScreen({ navigation }) {
     setResolvedName(null);
     setResolveError('');
   }, [accountNumber, selectedBank]);
+
+    const popular = useMemo(() => {
+    const keys = [['access', 'Access'], ['guaranty', 'GTBank'], ['zenith', 'Zenith'], ['first bank', 'First Bank'], ['united bank', 'UBA'], ['opay', 'OPay'], ['kuda', 'Kuda'], ['palmpay', 'PalmPay'], ['moniepoint', 'Moniepoint']];
+    const out = [];
+    keys.forEach(([k, label]) => {
+      const b = banks.find((x) => x.name.toLowerCase().includes(k));
+      if (b && !out.some((o) => o.bank.code === b.code && o.bank.name === b.name)) out.push({ label, bank: b });
+    });
+    return out;
+  }, [banks]);
+
+  const closePicker = () => { setPickerVisible(false); setSearch(''); };
+  const pickBank = (item) => { setSelectedBank(item); setPickerVisible(false); setSearch(''); };
 
   const canContinue = selectedBank && accountNumber.length === 10 && resolvedName;
 
@@ -145,57 +187,99 @@ export default function BankAccountScreen({ navigation }) {
         <PrimaryButton title="Continue" onPress={onContinue} disabled={!canContinue} />
       </View>
 
-      <Modal visible={pickerVisible} animationType="slide" transparent onRequestClose={() => setPickerVisible(false)}>
-        <Pressable style={styles.modalBackdrop} onPress={() => setPickerVisible(false)} />
-        <View style={styles.modalSheet}>
-          <View style={styles.handle} />
-          <Text style={styles.modalTitle}>Select Bank</Text>
+      <Modal
+        visible={pickerVisible}
+        animationType="slide"
+        transparent
+        statusBarTranslucent
+        onRequestClose={closePicker}
+      >
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <Pressable style={styles.modalBackdrop} onPress={closePicker} />
+          <View style={styles.modalSheet}>
+            <View style={styles.handle} />
+            <View style={styles.sheetHead}>
+              <View style={styles.sheetBadge}>
+                <Ionicons name="business" size={20} color="#FFFFFF" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.modalTitle}>Select your bank</Text>
+                <Text style={styles.modalSub}>{loadingBanks ? 'Loading banks...' : filteredBanks.length + ' banks'}</Text>
+              </View>
+              <Pressable onPress={closePicker} hitSlop={10} style={styles.closeBtn}>
+                <Ionicons name="close" size={20} color={colors.textPrimary} />
+              </Pressable>
+            </View>
 
-          <View style={styles.searchBox}>
-            <Ionicons name="search" size={18} color={colors.textSecondary} />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search banks"
-              placeholderTextColor={colors.textSecondary}
-              value={search}
-              onChangeText={setSearch}
-            />
+            <View style={styles.searchWrap}>
+              <Ionicons name="search" size={18} color={colors.textSecondary} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search banks"
+                placeholderTextColor={colors.textSecondary}
+                value={search}
+                onChangeText={setSearch}
+                autoCorrect={false}
+              />
+              {search.length > 0 ? (
+                <Pressable onPress={() => setSearch('')} hitSlop={10}>
+                  <Ionicons name="close-circle" size={18} color={colors.textSecondary} />
+                </Pressable>
+              ) : null}
+            </View>
+
+            {!search.trim() && popular.length > 0 && !loadingBanks ? (
+              <View>
+                <Text style={styles.popTitle}>POPULAR</Text>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  keyboardShouldPersistTaps="handled"
+                  style={{ flexGrow: 0, marginBottom: 14 }}
+                  contentContainerStyle={{ paddingRight: 8 }}
+                >
+                  {popular.map((p) => (
+                    <Pressable key={p.bank.code + p.bank.name} style={styles.popChip} onPress={() => pickBank(p.bank)}>
+                      {p.bank.logo ? <Image source={{ uri: p.bank.logo }} style={styles.popLogo} /> : null}
+                      <Text style={styles.popText}>{p.label}</Text>
+                    </Pressable>
+                  ))}
+                </ScrollView>
+              </View>
+            ) : null}
+
+            {loadingBanks ? (
+              <View style={{ alignItems: 'center', marginTop: 40 }}>
+                <ActivityIndicator size={72} color={colors.violet} />
+              </View>
+            ) : (
+              <FlatList
+                style={{ flex: 1 }}
+                data={filteredBanks}
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 30 }}
+                keyExtractor={(item) => item.code + item.slug}
+                ListEmptyComponent={(
+                  <View style={styles.emptyBox}>
+                    <Ionicons name="search-outline" size={34} color={colors.textSecondary} />
+                    <Text style={styles.emptyText}>No banks found</Text>
+                  </View>
+                )}
+                renderItem={({ item, index }) => (
+                  <BankRow
+                    item={item}
+                    index={index}
+                    styles={styles}
+                    colors={colors}
+                    on={!!selectedBank && selectedBank.code === item.code && selectedBank.slug === item.slug}
+                    onPress={() => pickBank(item)}
+                  />
+                )}
+              />
+            )}
           </View>
-
-          {loadingBanks ? (
-            <ActivityIndicator color={colors.violet} style={{ marginTop: spacing(6) }} />
-          ) : (
-            <FlatList
-              data={filteredBanks}
-              keyExtractor={(item) => item.code + item.slug}
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ paddingBottom: spacing(6) }}
-              renderItem={({ item }) => {
-                const active = selectedBank && selectedBank.code === item.code && selectedBank.slug === item.slug;
-                return (
-                  <Pressable
-                    style={[styles.bankRow, active && styles.bankRowActive]}
-                    onPress={() => {
-                      setSelectedBank(item);
-                      setPickerVisible(false);
-                      setSearch('');
-                    }}
-                  >
-                    {item.logo ? (
-                      <Image source={{ uri: item.logo }} style={styles.bankLogo} />
-                    ) : (
-                      <View style={styles.bankLogoFallback}>
-                        <Ionicons name="business-outline" size={16} color={colors.textSecondary} />
-                      </View>
-                    )}
-                    <Text style={styles.bankRowText}>{item.name}</Text>
-                    {active ? <Ionicons name="checkmark-circle" size={20} color={colors.violet} /> : null}
-                  </Pressable>
-                );
-              }}
-            />
-          )}
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </SafeAreaView>
   );
@@ -250,34 +334,49 @@ const getStyles = (colors) => StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', marginRight: spacing(3),
   },
   resolvedText: { fontSize: 15, fontWeight: '800', color: '#0a5c2e', flexShrink: 1 },
-  modalBackdrop: { flex: 1, backgroundColor: 'rgba(10,4,30,0.7)' },
+  modalBackdrop: { flex: 1, backgroundColor: 'rgba(20,10,45,0.62)' },
   modalSheet: {
-    backgroundColor: colors.bg, borderTopLeftRadius: 32, borderTopRightRadius: 32,
-    height: '72%', padding: spacing(5),
+    backgroundColor: colors.bg, borderTopLeftRadius: 32, borderTopRightRadius: 32, paddingHorizontal: 18, paddingTop: 12, height: '84%',
+    shadowColor: SHADOW, shadowOpacity: 0.3, shadowRadius: 20, shadowOffset: { width: 0, height: -8 }, elevation: 20,
   },
-  handle: {
-    width: 44, height: 5, borderRadius: 3, backgroundColor: colors.border,
-    alignSelf: 'center', marginBottom: spacing(4),
+  handle: { alignSelf: 'center', width: 44, height: 5, borderRadius: 3, backgroundColor: colors.border, marginBottom: 14 },
+  sheetHead: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 14 },
+  sheetBadge: {
+    width: 44, height: 44, borderRadius: 14, backgroundColor: colors.violet, alignItems: 'center', justifyContent: 'center',
+    shadowColor: colors.violet, shadowOpacity: 0.45, shadowRadius: 10, shadowOffset: { width: 0, height: 5 }, elevation: 6,
   },
-  modalTitle: { fontSize: 20, fontWeight: '800', color: colors.textPrimary, marginBottom: spacing(3) },
-  searchBox: {
-    flexDirection: 'row', alignItems: 'center', backgroundColor: colors.bgCard,
-    borderRadius: 18, paddingHorizontal: spacing(4), height: 48, marginBottom: spacing(3),
+  modalTitle: { color: colors.textPrimary, fontSize: 18, fontWeight: '800' },
+  modalSub: { color: colors.textSecondary, fontSize: 12, marginTop: 2 },
+  closeBtn: {
+    width: 36, height: 36, borderRadius: 18, backgroundColor: colors.bgCard, alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: colors.border,
   },
-  searchInput: { flex: 1, color: colors.textPrimary, fontSize: 15, marginLeft: spacing(2) },
+  searchWrap: {
+    flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: colors.bgCard, borderRadius: 18, paddingHorizontal: 14,
+    height: 50, marginBottom: 14, borderWidth: 1, borderColor: colors.border,
+    shadowColor: SHADOW, shadowOpacity: 0.12, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 3,
+  },
+  searchInput: { flex: 1, color: colors.textPrimary, fontSize: 15, height: 50 },
+  popTitle: { color: colors.textSecondary, fontSize: 11, fontWeight: '800', letterSpacing: 1.5, marginBottom: 10, marginLeft: 4 },
+  popChip: {
+    flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, height: 42, borderRadius: 21, backgroundColor: colors.bgCard,
+    borderWidth: 1, borderColor: colors.border, marginRight: 8,
+    shadowColor: SHADOW, shadowOpacity: 0.12, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 3,
+  },
+  popLogo: { width: 24, height: 24, borderRadius: 12 },
+  popText: { color: colors.textPrimary, fontSize: 13, fontWeight: '700' },
   bankRow: {
-    flexDirection: 'row', alignItems: 'center', backgroundColor: colors.bgCard,
-    borderRadius: 18, padding: spacing(3), marginBottom: spacing(2),
-    borderWidth: 1, borderColor: colors.border,
-    shadowColor: '#2a1260', shadowOpacity: 0.12, shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 }, elevation: 3,
+    flexDirection: 'row', alignItems: 'center', backgroundColor: colors.bgCard, borderRadius: 20, padding: 12, marginBottom: 10,
+    borderWidth: 1.5, borderColor: 'transparent',
+    shadowColor: SHADOW, shadowOpacity: 0.14, shadowRadius: 10, shadowOffset: { width: 0, height: 5 }, elevation: 4,
   },
-  bankRowActive: { borderColor: colors.violet, borderWidth: 1.5 },
-  bankLogo: { width: 36, height: 36, borderRadius: 18, marginRight: spacing(3) },
+  bankRowOn: { borderColor: colors.violet, backgroundColor: 'rgba(124,58,237,0.10)' },
+  bankLogo: { width: 42, height: 42, borderRadius: 21, marginRight: 14, borderWidth: 1, borderColor: colors.border, backgroundColor: '#FFFFFF' },
   bankLogoFallback: {
-    width: 36, height: 36, borderRadius: 18, marginRight: spacing(3),
-    backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center',
+    width: 42, height: 42, borderRadius: 21, marginRight: 14, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: colors.border,
   },
-  bankRowText: { fontSize: 15, fontWeight: '600', color: colors.textPrimary, flex: 1 },
+  bankRowText: { color: colors.textPrimary, fontSize: 15, fontWeight: '600', flex: 1, marginRight: 8 },
+  emptyBox: { alignItems: 'center', paddingTop: 40, gap: 10 },
+  emptyText: { color: colors.textSecondary, fontSize: 14, fontWeight: '600' },
 });
