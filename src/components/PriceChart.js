@@ -10,7 +10,7 @@ import { formatUsd } from '../utils/formatters';
 const TIMEFRAMES = ['1H', '1D', '1W', '1M', '1Y', 'ALL'];
 const screenWidth = Dimensions.get('window').width;
 
-export default function PriceChart({ symbol }) {
+export default function PriceChart({ symbol, height = 180 }) {
   const { colors } = useTheme();
   const styles = getStyles(colors);
   const [timeframe, setTimeframe] = useState('1D');
@@ -61,14 +61,14 @@ export default function PriceChart({ symbol }) {
       </View>
 
       {loading ? (
-        <View style={styles.loadingBox}>
+        <View style={[styles.loadingBox, { height }]}>
           <ActivityIndicator color={colors.violet} />
         </View>
       ) : prices.length > 1 ? (
         <LineChart
           data={{ datasets: [{ data: prices }] }}
           width={chartWidth}
-          height={180}
+          height={height}
           withDots={false}
           withInnerLines={false}
           withOuterLines={false}
@@ -88,7 +88,7 @@ export default function PriceChart({ symbol }) {
           style={styles.chart}
         />
       ) : (
-        <View style={styles.loadingBox}>
+        <View style={[styles.loadingBox, { height }]}>
           <Text style={styles.noData}>No chart data</Text>
         </View>
       )}
