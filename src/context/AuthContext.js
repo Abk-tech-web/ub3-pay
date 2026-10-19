@@ -10,6 +10,7 @@ export function AuthProvider({ children }) {
   const [authChecked, setAuthChecked] = useState(false);
   const [loading, setLoading] = useState(false);
   const [entering, setEntering] = useState(false);
+  const [creating, setCreating] = useState(false);
 
   // Subscribes to real Firebase auth state on mount — this is what makes
   // "stay signed in after closing the app" actually work.
@@ -47,6 +48,13 @@ export function AuthProvider({ children }) {
     return () => clearTimeout(t);
   }, [entering, user && user.uid]);
 
+  useEffect(() => {
+    if (!creating) return undefined;
+    const ms = user && user.uid ? 1200 : 15000;
+    const t = setTimeout(() => setCreating(false), ms);
+    return () => clearTimeout(t);
+  }, [creating, user && user.uid]);
+
   const signIn = useCallback(async (email, password) => {
     setLoading(true);
     try {
@@ -66,7 +74,13 @@ export function AuthProvider({ children }) {
   const signUp = useCallback(async (email, password) => {
     setLoading(true);
     try {
-      await authService.signUpWithEmail(email, password);
+      try {
+        setCreating(true);
+        await authService.signUpWithEmail(email, password);
+      } catch (err) {
+        setCreating(false);
+        throw err;
+      }
     } finally {
       setLoading(false);
     }
@@ -102,7 +116,7 @@ export function AuthProvider({ children }) {
       value={{ user, authChecked, loading, signIn, signUp, signOut, refreshKycStatus, refreshEmailVerified, refreshBvnStatus, setUser }}
     >
       {children}
-      <ProcessingOverlay visible={entering} title="Signing you in" subtitle="Preparing your wallet" />
+      <ProcessingOverlay visible={entering || creating} title={creating ? "Creating your account" : "Signing you in"} subtitle={creating ? "Setting things up for you" : "Preparing your wallet"} />
     </AuthContext.Provider>
   );
 }
