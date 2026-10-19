@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { registerForPush } from '../services/pushRegistration';
 import * as authService from '../services/authService';
+import ProcessingOverlay from '../components/ProcessingOverlay';
 
 const AuthContext = createContext(null);
 
@@ -8,6 +9,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null); // null = signed out, undefined = still checking
   const [authChecked, setAuthChecked] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [entering, setEntering] = useState(false);
 
   // Subscribes to real Firebase auth state on mount — this is what makes
   // "stay signed in after closing the app" actually work.
@@ -38,10 +40,23 @@ export function AuthProvider({ children }) {
     if (user && user.uid) registerForPush();
   }, [user && user.uid]);
 
+  useEffect(() => {
+    if (!entering) return undefined;
+    const ms = user && user.uid ? 1600 : 15000;
+    const t = setTimeout(() => setEntering(false), ms);
+    return () => clearTimeout(t);
+  }, [entering, user && user.uid]);
+
   const signIn = useCallback(async (email, password) => {
     setLoading(true);
     try {
-      await authService.signInWithEmail(email, password);
+      try {
+        setEntering(true);
+        await authService.signInWithEmail(email, password);
+      } catch (err) {
+        setEntering(false);
+        throw err;
+      }
       // onAuthStateChanged above picks up the resulting user — no need to setUser here.
     } finally {
       setLoading(false);
@@ -77,15 +92,17 @@ export function AuthProvider({ children }) {
 
   const refreshEmailVerified = useCallback(async () => {
     const verified = await authService.refreshEmailVerifiedStatus();
+    if (verified && user && !user.emailVerified) setEntering(true);
     setUser((prev) => (prev ? { ...prev, emailVerified: verified } : prev));
     return verified;
-  }, []);
+  }, [user]);
 
   return (
     <AuthContext.Provider
       value={{ user, authChecked, loading, signIn, signUp, signOut, refreshKycStatus, refreshEmailVerified, refreshBvnStatus, setUser }}
     >
       {children}
+      <ProcessingOverlay visible={entering} title="Signing you in" subtitle="Preparing your wallet" />
     </AuthContext.Provider>
   );
 }
