@@ -19,7 +19,7 @@ export function getReceiptParams(item) {
     return {
       amountPrefix: sentOut ? '- ' : '+ ',
       amount: 'NGN ' + Number(item.amount).toLocaleString('en-NG', { minimumFractionDigits: 2 }),
-      topRightLabel: 'UB3 ID transfer',
+      topRightLabel: sentOut ? 'Sent' : 'Received',
       topRightIcon: 'swap-horizontal-outline',
       rows,
       explorerUrl: undefined,

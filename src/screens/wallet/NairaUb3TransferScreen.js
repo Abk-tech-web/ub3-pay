@@ -129,7 +129,7 @@ export default function NairaUb3TransferScreen({ navigation, route }) {
       const params = {
         amountPrefix: '- ',
         amount: 'NGN ' + amt.toLocaleString('en-NG', { minimumFractionDigits: 2 }),
-        topRightLabel: 'UB3 ID transfer',
+        topRightLabel: 'Sent',
         topRightIcon: 'swap-horizontal-outline',
         rows,
         date: new Date().toISOString(),
