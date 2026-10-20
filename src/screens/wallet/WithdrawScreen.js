@@ -46,7 +46,7 @@ export default function WithdrawScreen({ navigation }) {
   const bal = portfolio && portfolio.ngnBalance != null ? portfolio.ngnBalance : null;
 
   const onSendToUid = () => {
-    Alert.alert('Coming soon', 'Sending to a UB3 Pay UID is not available yet.');
+    navigation.navigate('NairaUb3Transfer', { toUb3Id: uid.trim() });
   };
 
   return (
@@ -112,7 +112,7 @@ export default function WithdrawScreen({ navigation }) {
                 <Text style={styles.optSub}>Send directly with their UB3 ID</Text>
               </View>
               <View style={styles.soon}>
-                <Text style={styles.soonText}>COMING SOON</Text>
+                <Text style={styles.soonText}>FREE</Text>
               </View>
             </View>
 
@@ -178,8 +178,8 @@ const getStyles = (colors) => StyleSheet.create({
   tag: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(124,58,237,0.12)', borderRadius: 12, paddingHorizontal: 10, paddingVertical: 6 },
   tagText: { color: colors.violet, fontSize: 12, fontWeight: '800' },
   uidHead: { flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 16 },
-  soon: { backgroundColor: 'rgba(245,158,11,0.16)', borderRadius: 10, paddingHorizontal: 8, paddingVertical: 4 },
-  soonText: { color: '#f59e0b', fontSize: 10, fontWeight: '800', letterSpacing: 0.6 },
+  soon: { backgroundColor: 'rgba(34,197,94,0.16)', borderRadius: 10, paddingHorizontal: 8, paddingVertical: 4 },
+  soonText: { color: '#22C55E', fontSize: 10, fontWeight: '800', letterSpacing: 0.6 },
   inputWrap: {
     flexDirection: 'row', alignItems: 'center', backgroundColor: colors.bg, borderRadius: 16, paddingHorizontal: 16, height: 54,
     borderWidth: 1, borderColor: colors.border,

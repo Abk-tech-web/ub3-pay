@@ -10,6 +10,23 @@ export function getReceiptParams(item) {
     : `${item.amount} ${item.symbol || ''}`.trim();
 
   const rows = [{ label: 'Type', value: item.label }];
+  if (item.symbol === 'NGN' && (item.toUb3Id || item.fromUb3Id)) {
+    const sentOut = item.direction === 'out';
+    const idv = String(sentOut ? item.toUb3Id : item.fromUb3Id);
+    const idPretty = /^[0-9]{8}$/.test(idv) ? idv.slice(0, 4) + ' ' + idv.slice(4) : '@' + idv;
+    rows.push({ label: sentOut ? 'To' : 'From', value: (item.counterpartyName ? item.counterpartyName + ' ' : '') + '(UB3 ID ' + idPretty + ')', copyValue: idv });
+    rows.push({ label: 'Fee', value: 'Free' });
+    return {
+      amountPrefix: sentOut ? '- ' : '+ ',
+      amount: 'NGN ' + Number(item.amount).toLocaleString('en-NG', { minimumFractionDigits: 2 }),
+      topRightLabel: 'UB3 ID transfer',
+      topRightIcon: 'swap-horizontal-outline',
+      rows,
+      explorerUrl: undefined,
+      date: item.at,
+      status: item.status,
+    };
+  }
   let explorerUrl;
 
   if (isBill) {

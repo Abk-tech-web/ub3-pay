@@ -12,6 +12,7 @@ import AssetDetailScreen from '../screens/home/AssetDetailScreen';
 import NairaDetailScreen from '../screens/wallet/NairaDetailScreen';
 import NairaWithdrawScreen from '../screens/wallet/WithdrawScreen';
 import BankAccountScreen from '../screens/wallet/BankAccountScreen';
+import NairaUb3TransferScreen from '../screens/wallet/NairaUb3TransferScreen';
 import VerifyBvnScreen from '../screens/wallet/VerifyBvnScreen';
 import WithdrawAmountScreen from '../screens/wallet/WithdrawAmountScreen';
 import ConfirmPinScreen from '../screens/wallet/ConfirmPinScreen';
@@ -66,6 +67,7 @@ function HomeStackScreen() {
       <HomeStack.Screen name="NairaDetail" component={NairaDetailScreen} />
       <HomeStack.Screen name="NairaWithdraw" component={NairaWithdrawScreen} />
       <HomeStack.Screen name="BankAccount" component={BankAccountScreen} />
+      <HomeStack.Screen name="NairaUb3Transfer" component={NairaUb3TransferScreen} />
         <HomeStack.Screen name="VerifyBvn" component={VerifyBvnScreen} />
       <HomeStack.Screen name="WithdrawAmount" component={WithdrawAmountScreen} />
       <HomeStack.Screen name="ConfirmPin" component={ConfirmPinScreen} />

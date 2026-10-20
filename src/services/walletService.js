@@ -146,9 +146,9 @@ export async function getTransactionHistory(uid) {
     amount: t.amount,
     symbol: t.symbol,
     chainId: t.chainId,
-    toAddress: t.toAddress, toUb3Id: t.toUb3Id, fromAddress: t.fromAddress,
+    toAddress: t.toAddress, toUb3Id: t.toUb3Id, fromAddress: t.fromAddress, fromUb3Id: t.fromUb3Id, counterpartyName: t.counterpartyName,
     txHash: t.txHash,
-    direction: t.type === 'send' ? 'out' : 'in',
+    direction: t.direction || (t.type === 'send' ? 'out' : 'in'),
   }));
 }
 
