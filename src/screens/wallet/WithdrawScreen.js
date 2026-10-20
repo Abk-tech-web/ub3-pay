@@ -93,7 +93,7 @@ export default function WithdrawScreen({ navigation }) {
             <View style={styles.tagRow}>
               <View style={styles.tag}>
                 <Feather name="zap" size={12} color={colors.violet} />
-                <Text style={styles.tagText}>Fee from {'\u20A6'}25</Text>
+                <Text style={styles.tagText}>Fee from {'\u20A6'}20</Text>
               </View>
               <View style={styles.tag}>
                 <Feather name="shield" size={12} color={colors.violet} />
