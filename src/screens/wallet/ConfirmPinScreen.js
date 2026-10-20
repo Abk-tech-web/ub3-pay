@@ -19,7 +19,7 @@ function genSessionId() {
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const withdrawFee = (n) => (n < 20000 ? 25 : 10 * Math.floor(n / 10000) + 10);
+const withdrawFee = (n) => (n < 20000 ? 20 : 10 * Math.floor(n / 10000) + 10);
 
 const money = (n) => Number(n).toLocaleString('en-NG', { minimumFractionDigits: 2 });
 
@@ -56,7 +56,8 @@ export default function ConfirmPinScreen({ navigation, route }) {
   const [phase, setPhase] = useState('idle');
 
   const fee = withdrawFee(Number(amount));
-  const receive = Number(amount) - fee;
+  const receive = Number(amount);
+  const total = Number(amount) + fee;
 
   const onConfirm = async (pinValue) => {
     setPinErrCode('');
@@ -109,16 +110,16 @@ export default function ConfirmPinScreen({ navigation, route }) {
     await wait(1300);
     navigation.replace('TransactionReceipt', {
       amountPrefix: '- NGN ',
-      amount: money(amount),
+      amount: money(total),
       topRightLabel: 'Bank',
       topRightIcon: 'business-outline',
       rows: [
         { label: 'Type', value: 'Bank Withdrawal' },
         { label: 'Sent to', value: accountName },
         { label: 'Receiver\u2019s Account', value: bank.name + ' (' + accountNumber + ')' },
-        { label: 'Amount', value: 'NGN ' + money(amount) },
+        { label: 'Receiver gets', value: 'NGN ' + money(receive) },
         { label: 'Fee', value: 'NGN ' + money(fee) },
-        { label: 'You receive', value: 'NGN ' + money(receive) },
+        { label: 'Total debited', value: 'NGN ' + money(total) },
         { label: 'Session ID', value: sessionId },
       ],
       date: new Date().toISOString(),
@@ -161,6 +162,11 @@ export default function ConfirmPinScreen({ navigation, route }) {
           <View style={styles.row}>
             <Text style={styles.label}>Fee</Text>
             <Text style={styles.value}>NGN {money(fee)}</Text>
+            </View>
+            <View style={styles.divider} />
+            <View style={styles.row}>
+              <Text style={styles.label}>Total from your balance</Text>
+              <Text style={[styles.value, { color: VIOLET }]}>NGN {money(total)}</Text>
           </View>
         </Reveal>
 

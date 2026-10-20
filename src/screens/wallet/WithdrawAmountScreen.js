@@ -7,6 +7,19 @@ import { spacing } from '../../config/theme';
 import PrimaryButton from '../../components/PrimaryButton';
 import { useWallet } from '../../context/WalletContext';
 
+const withdrawFee = (n) => (n < 20000 ? 20 : 10 * Math.floor(n / 10000) + 10);
+function maxWithdrawable(bal) {
+  const b = Number(bal) || 0;
+  let best = 0;
+  const first = b - withdrawFee(b);
+  const cands = [first, b - withdrawFee(Math.max(0, first))];
+  cands.forEach((c) => {
+    const a = Math.floor(c * 100) / 100;
+    if (a > best && a + withdrawFee(a) <= b + 1e-9) best = a;
+  });
+  return best;
+}
+
 function Reveal({ delay = 0, children, style }) {
   const v = useRef(new Animated.Value(0)).current;
   useEffect(() => {
@@ -30,11 +43,13 @@ export default function WithdrawAmountScreen({ navigation, route }) {
   const [amount, setAmount] = useState('');
 
   const numericAmount = parseFloat(amount) || 0;
-  const overBalance = numericAmount > (ngnBalance ?? 0);
-  const canContinue = numericAmount > 0 && numericAmount <= (ngnBalance ?? 0);
+  const fee = numericAmount > 0 ? withdrawFee(numericAmount) : 0;
+  const total = numericAmount + fee;
+  const overBalance = total > (ngnBalance ?? 0);
+  const canContinue = numericAmount > 0 && total <= (ngnBalance ?? 0);
 
   const onMax = () => {
-    setAmount(String(ngnBalance ?? 0));
+    setAmount(String(maxWithdrawable(ngnBalance ?? 0)));
   };
 
   const onContinue = () => {
@@ -97,9 +112,14 @@ export default function WithdrawAmountScreen({ navigation, route }) {
               <Text style={styles.maxButtonText}>MAX</Text>
             </Pressable>
           </View>
+          {numericAmount > 0 ? (
+            <Text style={styles.balanceHint}>
+              {'Fee: \u20A6' + fee + '   \u2022   Total from balance: \u20A6' + total.toLocaleString('en-NG', { minimumFractionDigits: 2 })}
+            </Text>
+          ) : null}
           <Text style={[styles.balanceHint, overBalance && { color: colors.danger, fontWeight: '700' }]}>
             {overBalance
-              ? 'Amount is more than your balance'
+              ? 'Amount plus fee is more than your balance'
               : 'Available: ' + '\u20A6' + (ngnBalance ?? 0).toLocaleString('en-NG', { minimumFractionDigits: 2 })}
           </Text>
         </Reveal>
