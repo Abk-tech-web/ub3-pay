@@ -146,14 +146,14 @@ export async function getTransactionHistory(uid) {
     amount: t.amount,
     symbol: t.symbol,
     chainId: t.chainId,
-    toAddress: t.toAddress, toUb3Id: t.toUb3Id, fromAddress: t.fromAddress, fromUb3Id: t.fromUb3Id, counterpartyName: t.counterpartyName,
+    toAddress: t.toAddress, toUb3Id: t.toUb3Id, fromAddress: t.fromAddress, fromUb3Id: t.fromUb3Id, counterpartyName: t.counterpartyName, fee: t.fee, bankName: t.bankName, accountNumber: t.accountNumber, accountName: t.accountName, reference: t.reference,
     txHash: t.txHash,
     direction: t.direction || (t.type === 'send' ? 'out' : 'in'),
   }));
 }
 
-async function withdrawFunds({ uid, amount, account_number, bank_code, name, reason, pin }) {
-  return apiPost('/withdraw', { uid, amount, account_number, bank_code, name, reason, pin });
+async function withdrawFunds({ uid, amount, account_number, bank_code, bank_name, name, reason, pin }) {
+  return apiPost('/withdraw', { uid, amount, account_number, bank_code, bank_name, name, reason, pin });
 }
 
 function delay(ms) {

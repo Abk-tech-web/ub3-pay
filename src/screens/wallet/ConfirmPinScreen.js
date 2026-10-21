@@ -46,7 +46,8 @@ export default function ConfirmPinScreen({ navigation, route }) {
   const { colors } = useTheme();
   const styles = getStyles(colors);
   const { bank, accountNumber, accountName, amount } = route.params;
-  const { adjustNgnBalance, addActivity } = useWallet();
+  const { adjustNgnBalance } = useWallet();
+  const addActivity = () => {};
   const { user } = useAuth();
   const [error, setError] = useState('');
   const [bvnBlocked, setBvnBlocked] = useState(false);
@@ -71,6 +72,7 @@ export default function ConfirmPinScreen({ navigation, route }) {
         amount,
         account_number: accountNumber,
         bank_code: bank.code,
+        bank_name: bank.name,
         name: accountName,
         pin: pinValue,
       });

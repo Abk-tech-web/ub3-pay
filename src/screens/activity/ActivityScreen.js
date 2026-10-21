@@ -188,8 +188,8 @@ export default function ActivityScreen({ navigation }) {
                                 const [txs, deposits] = res;
           const merged = [
             ...txs.map((t) => ({
-              id: t.id, label: t.type === 'ngn_transfer' ? (t.direction === 'in' ? 'naira received' : 'naira sent') : t.type.replace(/_/g, ' '), at: t.at, status: t.status,
-              amount: t.amount, symbol: t.symbol, direction: t.direction, chainId: t.chainId, txHash: t.txHash, toAddress: t.toAddress, toUb3Id: t.toUb3Id, fromAddress: t.fromAddress, fromUb3Id: t.fromUb3Id, counterpartyName: t.counterpartyName,
+              id: t.id, label: t.type === 'ngn_withdrawal' ? 'naira withdrawal' : t.type === 'ngn_transfer' ? (t.direction === 'in' ? 'naira received' : 'naira sent') : t.type.replace(/_/g, ' '), at: t.at, status: t.status,
+              amount: t.amount, symbol: t.symbol, direction: t.direction, chainId: t.chainId, txHash: t.txHash, toAddress: t.toAddress, toUb3Id: t.toUb3Id, fromAddress: t.fromAddress, fromUb3Id: t.fromUb3Id, counterpartyName: t.counterpartyName, fee: t.fee, bankName: t.bankName, accountNumber: t.accountNumber, accountName: t.accountName, reference: t.reference,
             })),
             ...deposits.map((d) => ({
               id: d.id, label: 'naira deposit', at: d.receivedAt, status: d.status,
