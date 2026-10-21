@@ -11,6 +11,14 @@ import { NotificationBadge } from '../../components/NotificationIndicators';
 
 const SHADOW = '#2a1260';
 
+const HELP = {
+  title: 'Help',
+  rows: [
+    { key: 'Support', label: 'Customer service', sub: 'Chat with our team, 9am to 11pm', icon: 'headphones', color: '#06b6d4' },
+    { key: 'Support', params: { report: true }, label: 'Report an issue', sub: 'Tell us what went wrong', icon: 'alert-triangle', color: '#ef4444' },
+  ],
+};
+
 const SECTIONS = [
   {
     title: 'Rewards',
@@ -139,7 +147,7 @@ export default function ProfileScreen({ navigation }) {
             </View>
           </Reveal>
 
-          {SECTIONS.map((sec) => {
+          {SECTIONS.concat([HELP]).map((sec) => {
             const idx = rowIndex++;
             return (
               <Reveal key={sec.title} index={idx}>
@@ -150,10 +158,10 @@ export default function ProfileScreen({ navigation }) {
                       ? (verified ? 'Your BVN is verified' : 'Required for withdrawals, airtime and data')
                       : r.sub;
                     return (
-                      <View key={r.key}>
+                      <View key={r.key + (r.params ? '-r' : '')}>
                         <Pressable
                           style={({ pressed }) => [styles.row, pressed && { opacity: 0.85 }]}
-                          onPress={() => navigation.navigate(r.key)}
+                          onPress={() => navigation.navigate(r.key, r.params)}
                           android_ripple={{ color: 'rgba(124,58,237,0.12)' }}
                         >
                           <View style={[styles.iconTile, { backgroundColor: r.color + '22' }]}>

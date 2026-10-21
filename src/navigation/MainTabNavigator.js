@@ -28,6 +28,8 @@ import ActivityScreen from '../screens/activity/ActivityScreen';
 import TransactionDetailScreen from '../screens/activity/TransactionDetailScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
 import SecuritySettingsScreen from '../screens/profile/SecuritySettingsScreen';
+import SupportScreen from '../screens/support/SupportScreen';
+import SupportAdminChatScreen from '../screens/support/SupportAdminChatScreen';
 import PinSetupScreen from '../screens/profile/PinSetupScreen';
 import ReceiveScreen from '../screens/wallet/ReceiveScreen';
 import ReceiveNetworkScreen from '../screens/wallet/ReceiveNetworkScreen';
@@ -134,6 +136,8 @@ function ProfileStackScreen() {
         <ProfileStack.Screen name="TransactionLimits" component={TransactionLimitsScreen} />
         <ProfileStack.Screen name="Referral" component={ReferralScreen} />
       <ProfileStack.Screen name="Ub3Id" component={Ub3IdScreen} />
+      <ProfileStack.Screen name="Support" component={SupportScreen} />
+      <ProfileStack.Screen name="SupportAdminChat" component={SupportAdminChatScreen} />
     </ProfileStack.Navigator>
   );
 }
