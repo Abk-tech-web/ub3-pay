@@ -4,6 +4,7 @@ import {
   KeyboardAvoidingView, Platform, ScrollView,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import { Keyboard, Dimensions } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import UB3Loader from '../UB3Loader';
@@ -141,6 +142,35 @@ export default function ChatView({ mode, load, send, categories, showBanner, emp
   const lastTs = useRef(0);
   const listRef = useRef(null);
   const myRole = mode === 'admin' ? 'admin' : 'user';
+  const rootRef = useRef(null);
+  const [lift, setLift] = useState(0);
+
+  useEffect(() => {
+    const EXTRA = 12;
+    const fit = (kbHeight) => {
+      if (!rootRef.current) return;
+      rootRef.current.measureInWindow((x, y, w, h) => {
+        const winH = Dimensions.get('window').height;
+        const overlap = y + h - (winH - kbHeight);
+        setLift(overlap > 0 ? Math.round(overlap) + EXTRA : 0);
+      });
+    };
+    const show = Keyboard.addListener('keyboardDidShow', (e) => {
+      const kb = e && e.endCoordinates ? e.endCoordinates.height : 0;
+      if (!kb) return;
+      setTimeout(() => fit(kb), 150);
+      setTimeout(() => fit(kb), 450);
+    });
+    const hide = Keyboard.addListener('keyboardDidHide', () => setLift(0));
+    return () => { show.remove(); hide.remove(); };
+  }, []);
+
+  useEffect(() => {
+    const sub = Keyboard.addListener('keyboardDidShow', () => {
+      setTimeout(() => { if (listRef.current) listRef.current.scrollToEnd({ animated: true }); }, 60);
+    });
+    return () => sub.remove();
+  }, []);
 
   const merge = useCallback((incoming) => {
     if (!incoming || !incoming.length) return;
@@ -247,7 +277,7 @@ export default function ChatView({ mode, load, send, categories, showBanner, emp
   };
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <View ref={rootRef} collapsable={false} style={{ flex: 1, paddingBottom: lift }}>
       {showBanner && meta ? (
         <View style={[styles.banner, meta.open ? styles.bannerOpen : styles.bannerClosed]}>
           <View style={[styles.dot, { backgroundColor: meta.open ? '#22C55E' : '#f59e0b' }]} />
@@ -335,7 +365,7 @@ export default function ChatView({ mode, load, send, categories, showBanner, emp
           </Pressable>
         </View>
       </Modal>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 
