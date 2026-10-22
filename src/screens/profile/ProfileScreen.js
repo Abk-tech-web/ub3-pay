@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, Animated, Easing, Modal } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, Animated, Easing, Modal, Alert, Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
@@ -8,6 +8,8 @@ import { useAuth } from '../../context/AuthContext';
 import useUb3Id from '../../hooks/useUb3Id';
 import { getAvatarColor } from '../../utils/avatarColor';
 import { NotificationBadge } from '../../components/NotificationIndicators';
+import { pickAndUploadPhoto, removePhoto, photoError } from '../../services/profilePhoto';
+import UB3Loader from '../../components/UB3Loader';
 
 const SHADOW = '#2a1260';
 
@@ -60,10 +62,39 @@ export default function ProfileScreen({ navigation }) {
   const { colors } = useTheme();
   const styles = getStyles(colors);
   const insets = useSafeAreaInsets();
-  const { user, signOut } = useAuth();
+  const { user, signOut, setUser } = useAuth();
   const ub3Id = useUb3Id();
   const [confirmOut, setConfirmOut] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const doPick = async () => {
+    setUploading(true);
+    try {
+      const url = await pickAndUploadPhoto();
+      if (url) setUser((p) => (p ? { ...p, photoUrl: url } : p));
+    } catch (e) {
+      Alert.alert('Profile photo', photoError(e));
+    }
+    setUploading(false);
+  };
+  const doRemove = async () => {
+    setUploading(true);
+    try {
+      await removePhoto();
+      setUser((p) => (p ? { ...p, photoUrl: null } : p));
+    } catch (e) {
+      Alert.alert('Profile photo', photoError(e));
+    }
+    setUploading(false);
+  };
+  const changePhoto = () => {
+    if (uploading) return;
+    const buttons = [{ text: 'Choose photo', onPress: doPick }];
+    if (user && user.photoUrl) buttons.push({ text: 'Remove photo', style: 'destructive', onPress: doRemove });
+    buttons.push({ text: 'Cancel', style: 'cancel' });
+    Alert.alert('Profile photo', 'Add a photo so people recognise you.', buttons);
+  };
 
   const verified = !!(user && user.bvnVerified === true);
   const fullName = [user && user.firstName, user && user.lastName].filter(Boolean).join(' ');
@@ -91,9 +122,13 @@ export default function ProfileScreen({ navigation }) {
           <View style={styles.glowB} />
           <Text style={styles.heroTitle}>Profile</Text>
           <View style={styles.avatarRing}>
-            <View style={[styles.avatar, { backgroundColor: avatarColor }]}>
-              <Text style={styles.avatarLetter}>{letter}</Text>
+            <View style={[styles.avatar, { backgroundColor: avatarColor, overflow: 'hidden' }]}>
+              {user && user.photoUrl ? <Image source={{ uri: user.photoUrl }} style={styles.avatarImg} /> : null}
+              {user && user.photoUrl ? null : <Text style={styles.avatarLetter}>{letter}</Text>}
             </View>
+            <Pressable onPress={changePhoto} style={styles.camBtn} hitSlop={8}>
+              {uploading ? <UB3Loader size={18} color="#fff" /> : <Feather name="camera" size={14} color="#fff" />}
+            </Pressable>
             {verified ? (
               <View style={styles.verifiedDot}>
                 <Feather name="check" size={13} color="#fff" />
@@ -227,6 +262,8 @@ const getStyles = (colors) => StyleSheet.create({
   },
   avatar: { width: 90, height: 90, borderRadius: 45, alignItems: 'center', justifyContent: 'center' },
   avatarLetter: { color: '#fff', fontSize: 36, fontWeight: '800' },
+  avatarImg: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' },
+  camBtn: { position: 'absolute', bottom: 2, left: 2, width: 28, height: 28, borderRadius: 14, backgroundColor: colors.violet, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#4C1D95' },
   verifiedDot: {
     position: 'absolute', bottom: 2, right: 2, width: 26, height: 26, borderRadius: 13, backgroundColor: '#22C55E', alignItems: 'center', justifyContent: 'center',
     borderWidth: 2, borderColor: '#4C1D95',

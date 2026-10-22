@@ -29,6 +29,7 @@ export function AuthProvider({ children }) {
             accountBank: profile?.accountBank ?? null,
             firstName: profile?.first_name ?? null,
             lastName: profile?.last_name ?? null,
+        photoUrl: profile?.photoUrl ?? null,
         });
       } else {
         setUser(null);

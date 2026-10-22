@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, Animated, Easing } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, Animated, Easing, Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { Feather } from '@expo/vector-icons';
@@ -96,8 +96,9 @@ export default function AccountSnapshotScreen({ navigation }) {
             <View style={{ width: 38 }} />
           </View>
           <View style={styles.avatarRing}>
-            <View style={[styles.avatar, { backgroundColor: avatarColor }]}>
-              <Text style={styles.avatarLetter}>{initial}</Text>
+            <View style={[styles.avatar, { backgroundColor: avatarColor, overflow: 'hidden' }]}>
+              {user && user.photoUrl ? <Image source={{ uri: user.photoUrl }} style={styles.avatarImg} /> : null}
+              {user && user.photoUrl ? null : <Text style={styles.avatarLetter}>{initial}</Text>}
             </View>
           </View>
           <Text style={styles.name} numberOfLines={1}>{displayName}</Text>
@@ -198,6 +199,7 @@ const getStyles = (colors) => StyleSheet.create({
   },
   avatar: { width: 86, height: 86, borderRadius: 43, alignItems: 'center', justifyContent: 'center' },
   avatarLetter: { color: '#fff', fontSize: 34, fontWeight: '800' },
+  avatarImg: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' },
   name: { color: '#FFFFFF', fontSize: 19, fontWeight: '800', marginTop: 12, paddingHorizontal: 30 },
   email: { color: 'rgba(255,255,255,0.75)', fontSize: 13, marginTop: 3, paddingHorizontal: 30 },
   kycBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 10, paddingHorizontal: 12, paddingVertical: 5, borderRadius: 14 },
