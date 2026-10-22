@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useLayoutEffect } from 'react';
-import { View, Text, Pressable, FlatList, StyleSheet, RefreshControl } from 'react-native';
+import { View, Text, Pressable, FlatList, StyleSheet, RefreshControl, Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { Feather } from '@expo/vector-icons';
@@ -73,8 +73,9 @@ function AdminInbox({ navigation, colors, styles, onUnread }) {
               style={({ pressed }) => [styles.chatCard, pressed && { opacity: 0.88 }]}
               onPress={() => navigation.navigate('SupportAdminChat', { uid: c.uid, name: c.name, email: c.email })}
             >
-              <View style={[styles.avatar, { backgroundColor: getAvatarColor(c.uid) }]}>
-                <Text style={styles.avatarText}>{String(title).slice(0, 1).toUpperCase()}</Text>
+              <View style={[styles.avatar, { backgroundColor: getAvatarColor(c.uid), overflow: 'hidden' }]}>
+                {c.photoUrl ? <Image source={{ uri: c.photoUrl }} style={styles.avatarImg} /> : null}
+                {c.photoUrl ? null : <Text style={styles.avatarText}>{String(title).slice(0, 1).toUpperCase()}</Text>}
               </View>
               <View style={{ flex: 1 }}>
                 <View style={styles.titleRow}>
@@ -201,6 +202,7 @@ const getStyles = (colors) => StyleSheet.create({
   },
   avatar: { width: 46, height: 46, borderRadius: 23, alignItems: 'center', justifyContent: 'center' },
   avatarText: { color: '#fff', fontSize: 18, fontWeight: '800' },
+  avatarImg: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' },
   titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
   chatTitle: { color: colors.textPrimary, fontSize: 15, fontWeight: '800', flex: 1 },
   chatTime: { color: colors.textSecondary, fontSize: 11 },

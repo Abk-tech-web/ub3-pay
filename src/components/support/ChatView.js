@@ -7,6 +7,8 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Keyboard, Dimensions } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
+import { getAvatarColor } from '../../utils/avatarColor';
 import UB3Loader from '../UB3Loader';
 import { getImage, cacheImage } from '../../services/supportService';
 
@@ -100,7 +102,29 @@ function ChatImage({ imageId, local, onOpen, styles, colors }) {
   );
 }
 
-function Bubble({ m, mine, styles, colors, onOpen }) {
+function Avatar({ sender, photo, letter, styles }) {
+  if (sender === 'admin') {
+    return (
+      <View style={styles.avatar}>
+        <Image source={require('../../../assets/icon.png')} style={styles.avatarImg} resizeMode="cover" />
+      </View>
+    );
+  }
+  if (photo) {
+    return (
+      <View style={styles.avatar}>
+        <Image source={{ uri: photo }} style={styles.avatarImg} resizeMode="cover" />
+      </View>
+    );
+  }
+  return (
+    <View style={[styles.avatar, { backgroundColor: getAvatarColor(letter || 'u') }]}>
+      <Text style={styles.avatarLetter}>{String(letter || 'U').slice(0, 1).toUpperCase()}</Text>
+    </View>
+  );
+}
+
+function Bubble({ m, mine, styles, colors, onOpen, renderAvatar }) {
   if (m.sender === 'system') {
     return (
       <View style={styles.sysWrap}>
@@ -111,8 +135,10 @@ function Bubble({ m, mine, styles, colors, onOpen }) {
       </View>
     );
   }
+  const av = renderAvatar ? renderAvatar(m.sender) : null;
   return (
     <View style={[styles.msgRow, mine ? styles.rowMine : styles.rowTheirs]}>
+      {!mine && av ? <View style={styles.avSlotL}>{av}</View> : null}
       <View style={[styles.bubble, mine ? styles.bubbleMine : styles.bubbleTheirs]}>
         {m.category ? <Text style={[styles.catTag, mine && { color: 'rgba(255,255,255,0.8)' }]}>{m.category}</Text> : null}
         {(m.imageId || m.local) ? (
@@ -123,6 +149,7 @@ function Bubble({ m, mine, styles, colors, onOpen }) {
           {m.tmp ? 'Sending...' : timeLabel(m.createdAt)}{(!mine && m.sender === 'admin') ? '  \u00B7  UB3 Support' : ''}
         </Text>
       </View>
+      {mine && av ? <View style={styles.avSlotR}>{av}</View> : null}
     </View>
   );
 }
@@ -144,6 +171,14 @@ export default function ChatView({ mode, load, send, categories, showBanner, emp
   const myRole = mode === 'admin' ? 'admin' : 'user';
   const rootRef = useRef(null);
   const [lift, setLift] = useState(0);
+  const { user: authUser } = useAuth();
+  const personPhoto = mode === 'admin' ? (meta && meta.photoUrl) : (authUser && authUser.photoUrl);
+  const personName = mode === 'admin'
+    ? ((meta && (meta.name || meta.email)) || 'U')
+    : ([authUser && authUser.firstName, authUser && authUser.lastName].filter(Boolean).join(' ') || (authUser && authUser.email) || 'U');
+  const renderAvatar = (sender) => (
+    <Avatar sender={sender} photo={sender === 'user' ? personPhoto : null} letter={personName} styles={styles} />
+  );
 
   useEffect(() => {
     const EXTRA = 12;
@@ -307,7 +342,7 @@ export default function ChatView({ mode, load, send, categories, showBanner, emp
               </View>
             );
           }
-          return <Bubble m={item.m} mine={item.m.sender === myRole} styles={styles} colors={colors} onOpen={setViewer} />;
+          return <Bubble m={item.m} mine={item.m.sender === myRole} styles={styles} colors={colors} onOpen={setViewer} renderAvatar={renderAvatar} />;
         }}
       />
 
@@ -380,10 +415,15 @@ const getStyles = (colors) => StyleSheet.create({
   sysWrap: { alignItems: 'center', marginVertical: 8 },
   sysPill: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(124,58,237,0.12)', borderRadius: 14, paddingHorizontal: 12, paddingVertical: 7, maxWidth: '88%' },
   sysText: { color: colors.violet, fontSize: 12, fontWeight: '700', flexShrink: 1, lineHeight: 17 },
-  msgRow: { flexDirection: 'row', marginVertical: 4 },
+  msgRow: { flexDirection: 'row', alignItems: 'flex-end', marginVertical: 4 },
+  avSlotL: { marginRight: 8 },
+  avSlotR: { marginLeft: 8 },
+  avatar: { width: 30, height: 30, borderRadius: 15, overflow: 'hidden', alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFFFFF' },
+  avatarImg: { width: 30, height: 30 },
+  avatarLetter: { color: '#fff', fontSize: 13, fontWeight: '800' },
   rowMine: { justifyContent: 'flex-end' },
   rowTheirs: { justifyContent: 'flex-start' },
-  bubble: { maxWidth: '82%', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 10 },
+  bubble: { maxWidth: '74%', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 10 },
   bubbleMine: { backgroundColor: colors.violet, borderBottomRightRadius: 6 },
   bubbleTheirs: {
     backgroundColor: colors.bgCard, borderBottomLeftRadius: 6,
