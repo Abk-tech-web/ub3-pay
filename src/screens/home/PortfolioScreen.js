@@ -6,7 +6,7 @@ import { Feather } from '@expo/vector-icons';
 import ActionButton from '../../components/ActionButton';
 import { spacing } from '../../config/theme';
 import { useTheme } from '../../context/ThemeContext';
-import Logo from '../../components/Logo';
+import HomeHeader from '../../components/HomeHeader';
 import BalanceCard from '../../components/BalanceCard';
 import AssetListItem from '../../components/AssetListItem';
 import NgnListItem from '../../components/NgnListItem';
@@ -44,7 +44,7 @@ export default function PortfolioScreen({ navigation }) {
         ListHeaderComponent={
           <>
           <View style={styles.topRow}>
-            <Logo size={20} />
+            <HomeHeader navigation={navigation} />
             <Pressable onPress={toggleTheme} style={styles.themeToggle} hitSlop={10}>
               <Feather name={isDark ? 'moon' : 'sun'} size={18} color={colors.textPrimary} />
             </Pressable>
