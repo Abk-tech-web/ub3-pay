@@ -16,6 +16,17 @@ import AssetPickerModal from '../../components/AssetPickerModal';
 
 const SHADOW = '#2a1260';
 
+function quoteMessage(e) {
+  const c = (e && (e.code || e.message)) || '';
+  if (c === 'insufficient_balance') return 'Not enough balance. Keep a little extra for network fees.';
+  if (c === 'no_liquidity') return 'Not enough liquidity right now. Try a smaller amount or try again later.';
+  if (c === 'below_minimum') return 'The minimum swap is about $1.';
+  if (c === 'above_maximum') return 'The maximum swap is $2,000.';
+  if (c === 'price_unavailable' || c === 'balance_unavailable') return 'Could not get a live price. Please try again.';
+  if (c === 'unsupported_pair') return 'This pair is not available yet.';
+  return 'Could not get a quote. Please try again.';
+}
+
 function Reveal({ index = 0, children, style }) {
   const anim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
@@ -85,6 +96,7 @@ export default function SwapScreen({ navigation, route }) {
   const [amount, setAmount] = useState('');
   const [quote, setQuote] = useState(null);
   const [quoting, setQuoting] = useState(false);
+  const [quoteErr, setQuoteErr] = useState('');
   const [pickerFor, setPickerFor] = useState(null); // 'sell' | 'buy' | null
 
   useFocusEffect(useCallback(() => {
@@ -94,17 +106,23 @@ export default function SwapScreen({ navigation, route }) {
 
   const isCryptoToCrypto = sellSymbol !== 'NGN' && buySymbol !== 'NGN';
   const isNgnToCrypto = sellSymbol === 'NGN' && buySymbol !== 'NGN';
+  const C2C = ['SOL', 'BNB', 'ETH'];
+  const c2cOk = isCryptoToCrypto && C2C.indexOf(sellSymbol) >= 0 && C2C.indexOf(buySymbol) >= 0 && sellSymbol !== buySymbol;
 
   useEffect(() => {
-    if (!isPositiveAmount(amount) || isCryptoToCrypto) return setQuote(null);
+    setQuoteErr('');
+    if (!isPositiveAmount(amount) || (isCryptoToCrypto && !c2cOk)) return setQuote(null);
     setQuoting(true);
     const t = setTimeout(() => {
-      (sellSymbol === 'NGN' ? swapService.quoteNgnToCrypto(buySymbol, parseFloat(amount)) : swapService.quoteCryptoToNgn(sellSymbol, parseFloat(amount))).then(setQuote).finally(() => setQuoting(false));
+      (c2cOk ? swapService.quoteCryptoToCrypto(sellSymbol, buySymbol, parseFloat(amount)) : sellSymbol === 'NGN' ? swapService.quoteNgnToCrypto(buySymbol, parseFloat(amount)) : swapService.quoteCryptoToNgn(sellSymbol, parseFloat(amount))).then(setQuote).catch((e) => { setQuote(null); setQuoteErr(quoteMessage(e)); }).finally(() => setQuoting(false));
     }, 350);
     return () => clearTimeout(t);
   }, [amount, sellSymbol, buySymbol]);
 
-  const sellAsset = assets.find((a) => a.symbol === sellSymbol);
+  const SWAP_CHAIN = { SOL: 'solana', BNB: 'bsc', ETH: 'base' };
+  const sellAsset = c2cOk
+    ? assets.find((a) => a.symbol === sellSymbol && a.chainId === SWAP_CHAIN[sellSymbol])
+    : assets.find((a) => a.symbol === sellSymbol);
   const sellBal = sellAsset ? parseFloat(sellAsset.balance) || 0 : 0;
   const setPct = (p) => {
     if (!sellAsset) return;
@@ -113,11 +131,11 @@ export default function SwapScreen({ navigation, route }) {
   };
   const overBalance = isPositiveAmount(amount) && parseFloat(amount) > sellBal + 1e-9;
 
-  const receiveText = isCryptoToCrypto ? '-' : quote ? (isNgnToCrypto ? formatCrypto(quote.amountCrypto, buySymbol) : formatNgn(quote.amountNgn)) : '0.00';
-  const rateText = quote && !isCryptoToCrypto
+  const receiveText = isCryptoToCrypto ? (c2cOk && quote ? formatCrypto(quote.toAmount, buySymbol) : '-') : quote ? (isNgnToCrypto ? formatCrypto(quote.amountCrypto, buySymbol) : formatNgn(quote.amountNgn)) : '0.00';
+  const rateText = quote && c2cOk ? ('1 ' + sellSymbol + ' \u2248 ' + formatCrypto(quote.rate, buySymbol) + ' ' + buySymbol + ' \u00B7 1% fee included') : quote && !isCryptoToCrypto
     ? '1 ' + (isNgnToCrypto ? buySymbol : sellSymbol) + ' \u2248 ' + formatNgn(quote.rate) + ' \u00B7 1% fee included'
     : 'Live P2P rate \u00B7 1% fee included';
-  const canContinue = !!quote && !isCryptoToCrypto;
+  const canContinue = !!quote && (!isCryptoToCrypto || c2cOk);
 
   return (
     <View style={styles.root}>
@@ -196,13 +214,40 @@ export default function SwapScreen({ navigation, route }) {
             </View>
           </Reveal>
 
-          {isCryptoToCrypto ? (
+          {isCryptoToCrypto && !c2cOk ? (
             <View style={styles.comingSoon}>
               <Feather name="alert-circle" size={16} color="#f59e0b" />
-              <Text style={styles.comingSoonText}>Crypto-to-crypto swaps are coming soon. Try swapping to NGN for now.</Text>
+              <Text style={styles.comingSoonText}>Only SOL, BNB and ETH (on Base) can be swapped with each other for now. More coins are coming soon.</Text>
             </View>
           ) : null}
 
+          {quote && c2cOk ? (
+            <View style={styles.summary}>
+              <View style={styles.sumRow}>
+                <Text style={styles.sumLabel}>Rate</Text>
+                <Text style={styles.sumValue}>1 {sellSymbol} {'\u2248'} {formatCrypto(quote.rate, buySymbol)} {buySymbol}</Text>
+              </View>
+              <View style={styles.sumDivider} />
+              <View style={styles.sumRow}>
+                <Text style={styles.sumLabel}>Fee</Text>
+                <Text style={styles.sumValue}>{quote.feePct}% (included)</Text>
+              </View>
+              <View style={styles.sumDivider} />
+              <View style={styles.sumRow}>
+                <Text style={styles.sumLabel}>You get</Text>
+                <Text style={[styles.sumValue, { color: colors.violet }]}>{receiveText} {buySymbol}</Text>
+              </View>
+            </View>
+          ) : null}
+          {c2cOk && (sellSymbol === 'ETH' || buySymbol === 'ETH') ? (
+            <Text style={styles.baseNote}>ETH swaps use the Base network. Your ETH on Base is used, and ETH you receive arrives on Base.</Text>
+          ) : null}
+          {quoteErr ? (
+            <View style={styles.comingSoon}>
+              <Feather name="alert-circle" size={16} color="#f59e0b" />
+              <Text style={styles.comingSoonText}>{quoteErr}</Text>
+            </View>
+          ) : null}
           {quoting ? (
             <View style={styles.loadingRow}>
               <ActivityIndicator size={36} color={colors.violet} />
@@ -231,7 +276,7 @@ export default function SwapScreen({ navigation, route }) {
 
           <Pressable
             disabled={!canContinue}
-            onPress={() => navigation.navigate('SwapConfirmation', { direction: isNgnToCrypto ? 'ngn_to_crypto' : 'crypto_to_ngn', symbol: isNgnToCrypto ? buySymbol : sellSymbol, amount, quote })}
+            onPress={() => navigation.navigate('SwapConfirmation', { direction: c2cOk ? 'crypto_to_crypto' : isNgnToCrypto ? 'ngn_to_crypto' : 'crypto_to_ngn', symbol: c2cOk ? sellSymbol : isNgnToCrypto ? buySymbol : sellSymbol, amount, quote })}
             style={({ pressed }) => [styles.bigBtn, !canContinue && { opacity: 0.45 }, pressed && { opacity: 0.88 }]}
           >
             <Text style={styles.bigBtnText}>Continue</Text>
@@ -311,6 +356,7 @@ const getStyles = (colors) => StyleSheet.create({
   comingSoonText: { color: colors.textPrimary, fontSize: 12, fontWeight: '600', flex: 1, lineHeight: 18 },
   loadingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginTop: 18 },
   loadingText: { color: colors.textSecondary, fontSize: 13, fontWeight: '600' },
+  baseNote: { color: colors.textSecondary, fontSize: 12, textAlign: 'center', marginTop: 12, lineHeight: 18 },
   summary: {
     marginTop: 18, backgroundColor: colors.bgCard, borderRadius: 22, paddingHorizontal: 18, paddingVertical: 6,
     shadowColor: SHADOW, shadowOpacity: 0.16, shadowRadius: 14, shadowOffset: { width: 0, height: 7 }, elevation: 5,
