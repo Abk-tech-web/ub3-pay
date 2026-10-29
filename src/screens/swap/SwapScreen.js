@@ -110,8 +110,8 @@ export default function SwapScreen({ navigation, route }) {
   const C2C = ['SOL', 'BNB', 'ETH', 'USDC', 'USDT'];
   const [sellNet, setSellNet] = useState('');
   const [buyNet, setBuyNet] = useState('');
-  const NETS = { USDC: ['solana', 'base'] };
-  const NET_LABEL = { solana: 'Solana', base: 'Base' };
+  const NETS = { USDC: ['solana', 'base'], ETH: ['base', 'arbitrum', 'optimism'] };
+  const NET_LABEL = { solana: 'Solana', base: 'Base', arbitrum: 'Arbitrum', optimism: 'Optimism' };
   const sellNets = NETS[sellSymbol] || null;
   const buyNets = NETS[buySymbol] || null;
   const sellChain = sellNets ? (sellNets.indexOf(sellNet) >= 0 ? sellNet : sellNets[0]) : '';
@@ -247,7 +247,7 @@ export default function SwapScreen({ navigation, route }) {
           {isCryptoToCrypto && !c2cOk ? (
             <View style={styles.comingSoon}>
               <Feather name="alert-circle" size={16} color="#f59e0b" />
-              <Text style={styles.comingSoonText}>Only SOL, BNB, ETH (on Base), USDC (Solana or Base) and USDT (on Solana) can be swapped with each other for now. More coins are coming soon.</Text>
+              <Text style={styles.comingSoonText}>Only SOL, BNB, ETH (Base, Arbitrum or Optimism), USDC (Solana or Base) and USDT (on Solana) can be swapped with each other for now. More coins are coming soon.</Text>
             </View>
           ) : null}
 
@@ -270,7 +270,7 @@ export default function SwapScreen({ navigation, route }) {
             </View>
           ) : null}
           {c2cOk && (sellSymbol === 'ETH' || buySymbol === 'ETH') ? (
-            <Text style={styles.baseNote}>ETH swaps use the Base network. Your ETH on Base is used, and ETH you receive arrives on Base.</Text>
+            <Text style={styles.baseNote}>ETH swaps use the network you select. Your ETH on that network is used, and ETH you receive arrives on it.</Text>
           ) : null}
           {quoteErr ? (
             <View style={styles.comingSoon}>
