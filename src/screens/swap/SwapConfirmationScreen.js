@@ -22,7 +22,7 @@ function c2cMessage(c) {
   if (c === 'quote_used') return 'This quote was already used. Go back and get a new quote.';
   if (c === 'insufficient_balance') return 'Not enough balance. Keep a little extra for network fees.';
   if (c === 'no_liquidity') return 'Not enough liquidity right now. Please try a smaller amount or try again later.';
-  if (c === 'insufficient_gas') return 'You need a little SOL in your Solana wallet to pay the network fee for this swap.';
+  if (c === 'insufficient_gas') return 'You need a little SOL (Solana) or ETH (Base) in your wallet to pay the network fee for this swap.';
   if (c === 'swap_in_progress') return 'A swap is already in progress. Please wait a moment.';
   return 'The swap could not be completed. Please try again.';
 }

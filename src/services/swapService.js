@@ -48,8 +48,8 @@ export async function executeNgnToCrypto(uid, symbol, chainId, amountNgn, quote,
   return { id: data.txHash || 'swap_' + Date.now(), status: 'completed', txHash: data.txHash };
 }
 
-export async function quoteCryptoToCrypto(fromSymbol, toSymbol, amount) {
-  return apiPost('/swap-crypto/quote', { fromSymbol, toSymbol, amount });
+export async function quoteCryptoToCrypto(fromSymbol, toSymbol, amount, fromNetwork, toNetwork) {
+  return apiPost('/swap-crypto/quote', { fromSymbol, toSymbol, amount, fromNetwork, toNetwork });
 }
 
 export async function executeCryptoToCrypto(quoteId, pin) {

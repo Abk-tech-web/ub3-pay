@@ -20,7 +20,7 @@ function quoteMessage(e) {
   const c = (e && (e.code || e.message)) || '';
   if (c === 'insufficient_balance') return 'Not enough balance. Keep a little extra for network fees.';
   if (c === 'no_liquidity') return 'Not enough liquidity right now. Try a smaller amount or try again later.';
-  if (c === 'insufficient_gas') return 'You need a little SOL in your Solana wallet to pay the network fee for this swap.';
+  if (c === 'insufficient_gas') return 'You need a little SOL (Solana) or ETH (Base) in your wallet to pay the network fee for this swap.';
   if (c === 'below_minimum') return 'The minimum swap is about $1.';
   if (c === 'above_maximum') return 'The maximum swap is $2,000.';
   if (c === 'price_unavailable' || c === 'balance_unavailable') return 'Could not get a live price. Please try again.';
@@ -108,6 +108,15 @@ export default function SwapScreen({ navigation, route }) {
   const isCryptoToCrypto = sellSymbol !== 'NGN' && buySymbol !== 'NGN';
   const isNgnToCrypto = sellSymbol === 'NGN' && buySymbol !== 'NGN';
   const C2C = ['SOL', 'BNB', 'ETH', 'USDC', 'USDT'];
+  const [sellNet, setSellNet] = useState('');
+  const [buyNet, setBuyNet] = useState('');
+  const NETS = { USDC: ['solana', 'base'] };
+  const NET_LABEL = { solana: 'Solana', base: 'Base' };
+  const sellNets = NETS[sellSymbol] || null;
+  const buyNets = NETS[buySymbol] || null;
+  const sellChain = sellNets ? (sellNets.indexOf(sellNet) >= 0 ? sellNet : sellNets[0]) : '';
+  const buyChain = buyNets ? (buyNets.indexOf(buyNet) >= 0 ? buyNet : buyNets[0]) : '';
+  const netPill = (on) => ({ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 14, borderWidth: 1, borderColor: colors.violet, marginRight: 8, backgroundColor: on ? colors.violet : 'transparent' });
   const c2cOk = isCryptoToCrypto && C2C.indexOf(sellSymbol) >= 0 && C2C.indexOf(buySymbol) >= 0 && sellSymbol !== buySymbol;
 
   useEffect(() => {
@@ -115,14 +124,14 @@ export default function SwapScreen({ navigation, route }) {
     if (!isPositiveAmount(amount) || (isCryptoToCrypto && !c2cOk)) return setQuote(null);
     setQuoting(true);
     const t = setTimeout(() => {
-      (c2cOk ? swapService.quoteCryptoToCrypto(sellSymbol, buySymbol, parseFloat(amount)) : sellSymbol === 'NGN' ? swapService.quoteNgnToCrypto(buySymbol, parseFloat(amount)) : swapService.quoteCryptoToNgn(sellSymbol, parseFloat(amount))).then(setQuote).catch((e) => { setQuote(null); setQuoteErr(quoteMessage(e)); }).finally(() => setQuoting(false));
+      (c2cOk ? swapService.quoteCryptoToCrypto(sellSymbol, buySymbol, parseFloat(amount), sellChain, buyChain) : sellSymbol === 'NGN' ? swapService.quoteNgnToCrypto(buySymbol, parseFloat(amount)) : swapService.quoteCryptoToNgn(sellSymbol, parseFloat(amount))).then(setQuote).catch((e) => { setQuote(null); setQuoteErr(quoteMessage(e)); }).finally(() => setQuoting(false));
     }, 350);
     return () => clearTimeout(t);
-  }, [amount, sellSymbol, buySymbol]);
+  }, [amount, sellSymbol, buySymbol, sellChain, buyChain]);
 
   const SWAP_CHAIN = { SOL: 'solana', BNB: 'bsc', ETH: 'base', USDC: 'solana', USDT: 'solana' };
   const sellAsset = c2cOk
-    ? assets.find((a) => a.symbol === sellSymbol && a.chainId === SWAP_CHAIN[sellSymbol])
+    ? assets.find((a) => a.symbol === sellSymbol && a.chainId === (sellChain || SWAP_CHAIN[sellSymbol]))
     : assets.find((a) => a.symbol === sellSymbol);
   const sellBal = sellAsset ? parseFloat(sellAsset.balance) || 0 : 0;
   const setPct = (p) => {
@@ -191,6 +200,16 @@ export default function SwapScreen({ navigation, route }) {
               <Pressable style={styles.pctChip} onPress={() => setPct(0.5)}><Text style={styles.pctText}>50%</Text></Pressable>
               <Pressable style={[styles.pctChip, styles.maxChip]} onPress={() => setPct(1)}><Text style={[styles.pctText, { color: '#fff' }]}>MAX</Text></Pressable>
             </View>
+            {isCryptoToCrypto && sellNets ? (
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10 }}>
+                <Text style={{ color: colors.textSecondary, marginRight: 10, fontSize: 12 }}>Pay from</Text>
+                {sellNets.map((n) => (
+                  <Pressable key={n} onPress={() => setSellNet(n)} style={netPill(sellChain === n)}>
+                    <Text style={{ fontSize: 12, color: sellChain === n ? '#fff' : colors.violet }}>{NET_LABEL[n]}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            ) : null}
             {overBalance ? <Text style={styles.overText}>Insufficient balance</Text> : null}
           </Reveal>
 
@@ -215,10 +234,20 @@ export default function SwapScreen({ navigation, route }) {
             </View>
           </Reveal>
 
+          {isCryptoToCrypto && buyNets ? (
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10, marginBottom: 4 }}>
+              <Text style={{ color: colors.textSecondary, marginRight: 10, fontSize: 12 }}>Receive on</Text>
+              {buyNets.map((n) => (
+                <Pressable key={n} onPress={() => setBuyNet(n)} style={netPill(buyChain === n)}>
+                  <Text style={{ fontSize: 12, color: buyChain === n ? '#fff' : colors.violet }}>{NET_LABEL[n]}</Text>
+                </Pressable>
+              ))}
+            </View>
+          ) : null}
           {isCryptoToCrypto && !c2cOk ? (
             <View style={styles.comingSoon}>
               <Feather name="alert-circle" size={16} color="#f59e0b" />
-              <Text style={styles.comingSoonText}>Only SOL, BNB, ETH (on Base), USDC and USDT (on Solana) can be swapped with each other for now. More coins are coming soon.</Text>
+              <Text style={styles.comingSoonText}>Only SOL, BNB, ETH (on Base), USDC (Solana or Base) and USDT (on Solana) can be swapped with each other for now. More coins are coming soon.</Text>
             </View>
           ) : null}
 
