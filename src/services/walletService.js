@@ -146,7 +146,7 @@ export async function getTransactionHistory(uid) {
     amount: t.amount,
     symbol: t.symbol,
     chainId: t.chainId,
-    toAddress: t.toAddress, toUb3Id: t.toUb3Id, fromAddress: t.fromAddress, fromUb3Id: t.fromUb3Id, counterpartyName: t.counterpartyName, fee: t.fee, bankName: t.bankName, accountNumber: t.accountNumber, accountName: t.accountName, reference: t.reference,
+    toAddress: t.toAddress, toUb3Id: t.toUb3Id, fromAddress: t.fromAddress, fromUb3Id: t.fromUb3Id, counterpartyName: t.counterpartyName, fee: t.fee, bankName: t.bankName, accountNumber: t.accountNumber, accountName: t.accountName, reference: t.reference, kind: t.kind, fromSymbol: t.fromSymbol, fromAmount: t.fromAmount, toSymbol: t.toSymbol, toAmount: t.toAmount,
     txHash: t.txHash,
     direction: t.direction || (t.type === 'send' ? 'out' : 'in'),
   }));

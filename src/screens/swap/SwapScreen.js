@@ -20,6 +20,7 @@ function quoteMessage(e) {
   const c = (e && (e.code || e.message)) || '';
   if (c === 'insufficient_balance') return 'Not enough balance. Keep a little extra for network fees.';
   if (c === 'no_liquidity') return 'Not enough liquidity right now. Try a smaller amount or try again later.';
+  if (c === 'insufficient_gas') return 'You need a little SOL in your Solana wallet to pay the network fee for this swap.';
   if (c === 'below_minimum') return 'The minimum swap is about $1.';
   if (c === 'above_maximum') return 'The maximum swap is $2,000.';
   if (c === 'price_unavailable' || c === 'balance_unavailable') return 'Could not get a live price. Please try again.';
@@ -106,7 +107,7 @@ export default function SwapScreen({ navigation, route }) {
 
   const isCryptoToCrypto = sellSymbol !== 'NGN' && buySymbol !== 'NGN';
   const isNgnToCrypto = sellSymbol === 'NGN' && buySymbol !== 'NGN';
-  const C2C = ['SOL', 'BNB', 'ETH'];
+  const C2C = ['SOL', 'BNB', 'ETH', 'USDC', 'USDT'];
   const c2cOk = isCryptoToCrypto && C2C.indexOf(sellSymbol) >= 0 && C2C.indexOf(buySymbol) >= 0 && sellSymbol !== buySymbol;
 
   useEffect(() => {
@@ -119,7 +120,7 @@ export default function SwapScreen({ navigation, route }) {
     return () => clearTimeout(t);
   }, [amount, sellSymbol, buySymbol]);
 
-  const SWAP_CHAIN = { SOL: 'solana', BNB: 'bsc', ETH: 'base' };
+  const SWAP_CHAIN = { SOL: 'solana', BNB: 'bsc', ETH: 'base', USDC: 'solana', USDT: 'solana' };
   const sellAsset = c2cOk
     ? assets.find((a) => a.symbol === sellSymbol && a.chainId === SWAP_CHAIN[sellSymbol])
     : assets.find((a) => a.symbol === sellSymbol);
@@ -217,7 +218,7 @@ export default function SwapScreen({ navigation, route }) {
           {isCryptoToCrypto && !c2cOk ? (
             <View style={styles.comingSoon}>
               <Feather name="alert-circle" size={16} color="#f59e0b" />
-              <Text style={styles.comingSoonText}>Only SOL, BNB and ETH (on Base) can be swapped with each other for now. More coins are coming soon.</Text>
+              <Text style={styles.comingSoonText}>Only SOL, BNB, ETH (on Base), USDC and USDT (on Solana) can be swapped with each other for now. More coins are coming soon.</Text>
             </View>
           ) : null}
 

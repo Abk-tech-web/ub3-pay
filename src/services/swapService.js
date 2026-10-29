@@ -48,6 +48,14 @@ export async function executeNgnToCrypto(uid, symbol, chainId, amountNgn, quote,
   return { id: data.txHash || 'swap_' + Date.now(), status: 'completed', txHash: data.txHash };
 }
 
+export async function quoteCryptoToCrypto(fromSymbol, toSymbol, amount) {
+  return apiPost('/swap-crypto/quote', { fromSymbol, toSymbol, amount });
+}
+
+export async function executeCryptoToCrypto(quoteId, pin) {
+  return apiPost('/swap-crypto/execute', { quoteId, pin });
+}
+
 function delay(ms) {
   return new Promise((res) => setTimeout(res, ms));
 }
