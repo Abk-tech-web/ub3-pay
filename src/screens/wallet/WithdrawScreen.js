@@ -7,6 +7,7 @@ import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useWallet } from '../../context/WalletContext';
 import { apiGet } from '../../services/api';
+import { getNgnRecents, getNgnFavourites, addNgnFavourite, removeNgnFavourite } from '../../services/ngnBeneficiariesService';
 
 const SHADOW = '#2a1260';
 const naira = (n) => '\u20A6' + Math.round(Number(n) || 0).toLocaleString('en-NG');
@@ -42,6 +43,42 @@ export default function WithdrawScreen({ navigation }) {
       .catch(() => {});
     return () => { alive = false; };
   }, []));
+
+    const [favs, setFavs] = useState([]);
+  const [recents, setRecents] = useState([]);
+  const loadSaved = useCallback(() => {
+    getNgnFavourites().then(setFavs).catch(() => {});
+    getNgnRecents().then(setRecents).catch(() => {});
+  }, []);
+  useFocusEffect(useCallback(() => { loadSaved(); }, [loadSaved]));
+  const itemKey = (x) => (x.kind === 'ub3' ? 'ub3:' + String(x.ub3Id).toLowerCase() : 'bank:' + x.bankCode + ':' + x.accountNumber);
+  const favKeys = new Set(favs.map(itemKey));
+  const savedItems = favs.map((f) => ({ ...f, fav: true })).concat(recents.filter((r) => !favKeys.has(itemKey(r))).slice(0, 6));
+  const openItem = (x) => {
+    if (x.kind === 'ub3') {
+      navigation.navigate('NairaUb3Transfer', { toUb3Id: x.ub3Id });
+    } else {
+      navigation.navigate('WithdrawAmount', {
+        bank: { name: x.bankName, code: x.bankCode, slug: x.bankSlug },
+        accountNumber: x.accountNumber,
+        accountName: x.accountName,
+      });
+    }
+  };
+  const toggleStar = async (x) => {
+    try {
+      if (x.fav) {
+        await removeNgnFavourite(x.id);
+      } else if (x.kind === 'ub3') {
+        await addNgnFavourite({ kind: 'ub3', ub3Id: x.ub3Id, name: x.name });
+      } else {
+        await addNgnFavourite({ kind: 'bank', bankName: x.bankName, bankCode: x.bankCode, accountNumber: x.accountNumber, accountName: x.accountName });
+      }
+      loadSaved();
+    } catch (e) {
+      Alert.alert('Could not update', e && e.message ? e.message : 'Please try again.');
+    }
+  };
 
   const bal = portfolio && portfolio.ngnBalance != null ? portfolio.ngnBalance : null;
 
@@ -137,7 +174,36 @@ export default function WithdrawScreen({ navigation }) {
             </Pressable>
           </Reveal>
 
-          <Reveal index={2} style={styles.note}>
+                    {savedItems.length > 0 ? (
+            <Reveal index={2} style={styles.card}>
+              <Text style={styles.savedTitle}>Saved and recent</Text>
+              <Text style={styles.savedHint}>Tap a person to send again. Tap the star to save or remove a favourite.</Text>
+              {savedItems.map((x) => (
+                <Pressable
+                  key={(x.fav ? 'f' : 'r') + (x.id || itemKey(x))}
+                  onPress={() => openItem(x)}
+                  style={({ pressed }) => [styles.savedRow, pressed && { opacity: 0.85 }]}
+                >
+                  <View style={styles.savedIcon}>
+                    <Feather name={x.kind === 'ub3' ? 'at-sign' : 'briefcase'} size={18} color={colors.violet} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.savedName} numberOfLines={1}>
+                      {x.nickname || (x.kind === 'ub3' ? (x.name || '@' + x.ub3Id) : x.accountName)}
+                    </Text>
+                    <Text style={styles.savedSub} numberOfLines={1}>
+                      {x.kind === 'ub3' ? '@' + x.ub3Id : x.bankName + ' - ' + x.accountNumber}
+                    </Text>
+                  </View>
+                  <Pressable onPress={() => toggleStar(x)} hitSlop={10} style={[styles.starBtn, x.fav && styles.starOn]}>
+                    <Feather name="star" size={16} color={x.fav ? '#fff' : colors.textSecondary} />
+                  </Pressable>
+                </Pressable>
+              ))}
+            </Reveal>
+          ) : null}
+
+          <Reveal index={3} style={styles.note}>
             <Feather name="lock" size={15} color={colors.violet} />
             <Text style={styles.noteText}>Every withdrawal is approved with your 4-digit transaction PIN.</Text>
           </Reveal>
@@ -192,5 +258,14 @@ const getStyles = (colors) => StyleSheet.create({
   },
   bigBtnText: { color: '#fff', fontSize: 16, fontWeight: '800' },
   note: { flexDirection: 'row', gap: 10, paddingHorizontal: 6, marginTop: 18, alignItems: 'flex-start' },
+  savedTitle: { color: colors.textPrimary, fontSize: 16, fontWeight: '800' },
+  savedHint: { color: colors.textSecondary, fontSize: 12, marginTop: 3, marginBottom: 8 },
+  savedRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10 },
+  savedIcon: { width: 38, height: 38, borderRadius: 12, backgroundColor: 'rgba(124,58,237,0.12)', alignItems: 'center', justifyContent: 'center' },
+  savedName: { color: colors.textPrimary, fontSize: 14, fontWeight: '700' },
+  savedSub: { color: colors.textSecondary, fontSize: 12, marginTop: 2 },
+  starBtn: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(124,58,237,0.08)' },
+  starOn: { backgroundColor: colors.violet },
+
   noteText: { color: colors.textSecondary, fontSize: 12, flex: 1, lineHeight: 18 },
 });
