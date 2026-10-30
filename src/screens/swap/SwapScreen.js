@@ -110,8 +110,8 @@ export default function SwapScreen({ navigation, route }) {
   const C2C = ['SOL', 'BNB', 'ETH', 'USDC', 'USDT'];
   const [sellNet, setSellNet] = useState('');
   const [buyNet, setBuyNet] = useState('');
-  const NETS = { USDC: ['solana', 'base'], ETH: ['base', 'arbitrum', 'optimism'] };
-  const NET_LABEL = { solana: 'Solana', base: 'Base', arbitrum: 'Arbitrum', optimism: 'Optimism' };
+  const NETS = { USDC: ['solana', 'base'], USDT: ['bsc', 'base'], ETH: ['base', 'arbitrum', 'optimism'] };
+  const NET_LABEL = { solana: 'Solana', base: 'Base', arbitrum: 'Arbitrum', optimism: 'Optimism', bsc: 'BNB Chain' };
   const sellNets = NETS[sellSymbol] || null;
   const buyNets = NETS[buySymbol] || null;
   const sellChain = sellNets ? (sellNets.indexOf(sellNet) >= 0 ? sellNet : sellNets[0]) : '';
@@ -247,7 +247,7 @@ export default function SwapScreen({ navigation, route }) {
           {isCryptoToCrypto && !c2cOk ? (
             <View style={styles.comingSoon}>
               <Feather name="alert-circle" size={16} color="#f59e0b" />
-              <Text style={styles.comingSoonText}>Only SOL, BNB, ETH (Base, Arbitrum or Optimism), USDC (Solana or Base) and USDT (on Solana) can be swapped with each other for now. More coins are coming soon.</Text>
+              <Text style={styles.comingSoonText}>Only SOL, BNB, ETH (Base, Arbitrum or Optimism), USDC (Solana or Base) and USDT (BNB Chain or Base) can be swapped with each other for now. More coins are coming soon.</Text>
             </View>
           ) : null}
 
